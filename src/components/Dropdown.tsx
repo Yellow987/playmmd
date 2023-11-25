@@ -30,7 +30,7 @@ function Dropdown(props: Props) {
   }, [selectedItem]);
 
   return (
-    <Box mb={2}>
+    <Box mb={4}>
       <Box as="label" display="block" mb={1}>
         {props.menuLabel}
       </Box>

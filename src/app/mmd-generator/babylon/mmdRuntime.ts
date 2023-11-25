@@ -3,7 +3,7 @@ import { ShadowGenerator, DirectionalLight, Camera } from "@babylonjs/core";
 
 let shadowGenerator: ShadowGenerator | null = null;
 
-function createShadowGenerator(
+export function createShadowGenerator(
   directionalLight: DirectionalLight,
   camera: Camera | null
 ): ShadowGenerator {
@@ -22,5 +22,3 @@ export function getShadowGenerator(): ShadowGenerator {
   }
   return shadowGenerator;
 }
-
-export default createShadowGenerator;

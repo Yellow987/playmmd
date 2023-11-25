@@ -1,20 +1,22 @@
 "use client";
 import {
+  DISCORD_INVITE_URL,
   GITHUB_URL,
   WEBSITE_NAME,
   YOUTUBE_URL,
-  EMAIL_ADDRESS,
 } from "@/config/constants";
 import { Flex, chakra, Link, Box } from "@chakra-ui/react";
 import React from "react";
 import NextLink from "next/link";
-import { FaYoutube, FaGithub, FaEnvelope } from "react-icons/fa";
+import { FaYoutube, FaGithub } from "react-icons/fa";
+import discordIcon from "@/../public/websiteAssets/discord.svg";
+import Image from "next/image";
 
 function Footer() {
-  const GithubIcon = () => (
+  const Icon = ({ href, icon }: { href: string; icon: React.ReactNode }) => (
     <Link
       as={NextLink}
-      href={GITHUB_URL}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       mx="2"
@@ -28,56 +30,19 @@ function Footer() {
       _hover={{
         color: "gray.500",
       }}
-      aria-label="Github"
     >
-      <FaGithub />
+      {icon}
     </Link>
   );
 
-  const YoutubeIcon = () => (
-    <Link
-      as={NextLink}
-      href={YOUTUBE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      mx="2"
-      color="gray.600"
-      _dark={{
-        color: "gray.300",
-        _hover: {
-          color: "gray.400",
-        },
-      }}
-      _hover={{
-        color: "gray.500",
-      }}
-      aria-label="Youtube"
-    >
-      <FaYoutube />
-    </Link>
-  );
-
-  const EmailIcon = () => (
-    <Link
-      as={NextLink}
-      href={"mailto:" + EMAIL_ADDRESS}
-      target="_blank"
-      rel="noopener noreferrer"
-      mx="2"
-      color="gray.600"
-      _dark={{
-        color: "gray.300",
-        _hover: {
-          color: "gray.400",
-        },
-      }}
-      _hover={{
-        color: "gray.500",
-      }}
-      aria-label="Email"
-    >
-      <FaEnvelope />
-    </Link>
+  const GithubIcon = () => <Icon href={GITHUB_URL} icon={<FaGithub />} />;
+  const YoutubeIcon = () => <Icon href={YOUTUBE_URL} icon={<FaYoutube />} />;
+  const DiscordIcon = () => (
+      <Icon
+        href={DISCORD_INVITE_URL}
+        icon={<Image src={discordIcon} alt="Discord" width={16} height={16} />}
+        style={{ paddingTop: '1.6px' }}
+      />
   );
 
   return (
@@ -137,7 +102,7 @@ function Footer() {
         </chakra.p>
 
         <Flex mx="-2">
-          <EmailIcon />
+          <DiscordIcon />
           <GithubIcon />
           <YoutubeIcon />
         </Flex>

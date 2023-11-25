@@ -46,7 +46,7 @@ import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import type { ISceneBuilder } from "./baseRuntime";
-import createShadowGenerator from "./shadowGenerator";
+import { createShadowGenerator } from "./mmdRuntime";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(
