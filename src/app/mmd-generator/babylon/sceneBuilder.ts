@@ -51,14 +51,6 @@ import "@babylonjs/core/Rendering/depthRendererSceneComponent";
 
 import type { ISceneBuilder } from "./baseRuntime";
 import {
-  addMmdMotion,
-  createAndSetMmdModel,
-  createAudioPlayer,
-  createMmdRuntime,
-  createScene,
-  createShadowGenerator,
-} from "./mmdScene";
-import {
   CHARACTER_MODELS_DATA,
   CharacterModel,
   ANIMATION_PRESETS_DATA,
@@ -69,9 +61,12 @@ import {
   ImageProcessingConfiguration,
   Material,
 } from "@babylonjs/core/Materials";
-import { SSRRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/ssrRenderingPipeline";
 import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
-
+import { createScene } from "./mmdComponents/scene";
+import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
+import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
+import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
+import { createAudioPlayer } from "./mmdComponents/audioPlayer";
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,

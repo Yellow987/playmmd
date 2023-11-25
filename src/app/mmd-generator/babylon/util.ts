@@ -1,7 +1,7 @@
 import { ArcRotateCamera, Vector3 } from "@babylonjs/core";
 import { Scene } from "@babylonjs/core/scene";
-import { getScene } from "./mmdScene";
 import { BaseRuntime } from "./baseRuntime";
+import { getScene } from "./mmdComponents/scene";
 
 export function createArcCamera(
   scene: Scene,
