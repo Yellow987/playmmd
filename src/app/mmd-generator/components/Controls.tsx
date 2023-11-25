@@ -1,8 +1,7 @@
 "use client";
-import { Button } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { createArcCamera } from "../babylon/util";
 import { BaseRuntime } from "../babylon/baseRuntime";
+import Dropdown from "@/components/Dropdown";
+import { enableUserControlCamera } from "../babylon/util";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -10,23 +9,38 @@ interface Props {
 
 function Controls(props: Props) {
   const { runtimeRef } = props;
-  const [doSomething, setDoSomething] = useState(false);
 
-  useEffect(() => {
-    if (runtimeRef?.current && doSomething) {
-      const scene = runtimeRef.current._scene;
-      const arcRotateCamera = createArcCamera(
-        scene,
-        runtimeRef.current._canvas,
-      );
-      scene.activeCamera = arcRotateCamera;
-    }
-  }, [doSomething]);
+  enum CameraControl {
+    MMD_CAMERA = "MMD Camera",
+    USER_CONTROL_CAMERA = "USER_CONTROL_CAMERA",
+  }
+
+  const cameraControlMenuItems = {
+    [CameraControl.MMD_CAMERA]: {
+      name: "MMD Camera",
+      function: () => {},
+    },
+    [CameraControl.USER_CONTROL_CAMERA]: {
+      name: "User Control Camera",
+      function: () => {
+        enableUserControlCamera(runtimeRef);
+      },
+    },
+  };
+
+  function onCameraControlSelect(item: any) {
+    item.function();
+  }
 
   return (
-    <Button onClick={() => setDoSomething(!doSomething)}>
-      Do something {doSomething ? "true" : "false"}
-    </Button>
+    <>
+      <Dropdown
+        menuLabel="Camera Control"
+        onMenuItemSelect={onCameraControlSelect}
+        menuItems={cameraControlMenuItems}
+        defaultItem="MMD Camera"
+      />
+    </>
   );
 }
 

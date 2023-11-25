@@ -1,5 +1,7 @@
 import { ArcRotateCamera, Vector3 } from "@babylonjs/core";
 import { Scene } from "@babylonjs/core/scene";
+import { getScene } from "./mmdScene";
+import { BaseRuntime } from "./baseRuntime";
 
 export function createArcCamera(
   scene: Scene,
@@ -20,3 +22,13 @@ export function createArcCamera(
   arcRotateCamera.speed = 10;
   return arcRotateCamera;
 }
+
+export const enableUserControlCamera = (
+  runtimeRef: React.MutableRefObject<BaseRuntime | null>,
+) => {
+  const scene = getScene();
+  if (runtimeRef?.current) {
+    const arcRotateCamera = createArcCamera(scene, runtimeRef.current._canvas);
+    scene.activeCamera = arcRotateCamera;
+  }
+};

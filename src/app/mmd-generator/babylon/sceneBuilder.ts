@@ -46,7 +46,20 @@ import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import type { ISceneBuilder } from "./baseRuntime";
-import { createShadowGenerator } from "./mmdRuntime";
+import {
+  addMmdMotion,
+  createAndSetMmdModel,
+  createAudioPlayer,
+  createMmdRuntime,
+  createScene,
+  createShadowGenerator,
+} from "./mmdScene";
+import {
+  CHARACTER_MODELS_DATA,
+  CharacterModel,
+  ANIMATION_PRESETS_DATA,
+  AnimationPreset,
+} from "../constants";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(
@@ -54,24 +67,9 @@ export class SceneBuilder implements ISceneBuilder {
     engine: Engine,
   ): Promise<Scene> {
     SdefInjector.OverrideEngineCreateEffect(engine);
-    const scene = new Scene(engine);
-    scene.enablePhysics(
-      new Vector3(0, -9.8 * 10, 0),
-      new HavokPlugin(true, await HavokPhysics()),
-    );
-
-    scene.ambientColor = new Color3(1, 1, 1);
+    const scene = await createScene(engine);
 
     const camera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
-
-    const hemisphericLight = new HemisphericLight(
-      "HemisphericLight",
-      new Vector3(0, 1, 0),
-      scene,
-    );
-    hemisphericLight.intensity = 0.3;
-    hemisphericLight.specular.set(0, 0, 0);
-    hemisphericLight.groundColor.set(1, 1, 1);
 
     const directionalLight = new DirectionalLight(
       "DirectionalLight",
@@ -91,39 +89,31 @@ export class SceneBuilder implements ISceneBuilder {
     ground.receiveShadows = true;
     shadowGenerator.addShadowCaster(ground);
 
-    const mmdMesh = await SceneLoader.ImportMeshAsync(
-      "",
-      "/mmd/YYB Hatsune Miku_10th/",
-      "YYB Hatsune Miku_10th_v1.02.pmx",
-      scene,
-    ).then((result) => result.meshes[0] as Mesh);
-    mmdMesh.receiveShadows = true;
-    shadowGenerator.addShadowCaster(mmdMesh);
-
-    const mmdRuntime = new MmdRuntime(new MmdPhysics(scene));
-    mmdRuntime.register(scene);
-
+    const mmdRuntime = createMmdRuntime(scene);
     mmdRuntime.setCamera(camera);
-    const mmdModel = mmdRuntime.createMmdModel(mmdMesh);
+    const mmdModel = await createAndSetMmdModel(
+      0,
+      CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
+    );
 
     const vmdLoader = new VmdLoader(scene);
-    const modelMotion = await vmdLoader.loadAsync("model_motion_1", [
-      "/mmd/paint.vmd",
-    ]);
+    addMmdMotion(
+      0,
+      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS]
+        .modelAnimationPaths[0],
+    );
 
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
       "/mmd/cam.vmd",
     );
 
-    mmdModel.addAnimation(modelMotion);
-    mmdModel.setAnimation("model_motion_1");
-
     camera.addAnimation(cameraMotion);
     camera.setAnimation("camera_motion_1");
 
-    const audioPlayer = new StreamAudioPlayer(scene);
-    audioPlayer.source = "/mmd/paint.wav";
+    const audioPlayer = createAudioPlayer(
+      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
+    );
     mmdRuntime.setAudioPlayer(audioPlayer);
 
     mmdRuntime.playAnimation();

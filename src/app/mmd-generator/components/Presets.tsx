@@ -18,14 +18,8 @@ import {
   ANIMATION_PRESETS_DATA,
   CHARACTER_MODELS_DATA,
 } from "../constants";
-import { BaseRuntime } from "../babylon/baseRuntime";
 
-interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
-}
-
-function Presets(props: Props) {
-  const scene = props.runtimeRef.current?._scene;
+function Presets() {
   const [selectedStage, setSelectedStage] = useState("Select Stage");
 
   const onCharacterSelect = (item: CharacterModelData) => {

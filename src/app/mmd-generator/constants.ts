@@ -20,7 +20,7 @@ export const CHARACTER_MODELS_DATA: {
   },
 };
 
-type AniamtionPaths = {
+export type ModelAniamtionPaths = {
   skeletonPath: string;
   facialPath?: string;
   lipsPath?: string;
@@ -28,9 +28,8 @@ type AniamtionPaths = {
 
 export type AnimationPresetData = {
   name: string;
-  folderPath: string;
   audioPath: string;
-  animationPaths: AniamtionPaths;
+  modelAnimationPaths: ModelAniamtionPaths[];
   cameraPath?: string;
 };
 
@@ -43,12 +42,13 @@ export const ANIMATION_PRESETS_DATA: {
 } = {
   [AnimationPreset.LAST_CHRISTMAS]: {
     name: "Last Christmas",
-    folderPath: "/mmd/LastChristmas/",
-    audioPath: "Audio.wav",
-    animationPaths: {
-      skeletonPath: "Skeleton.vmd",
-      facialPath: "FaceAndLips.vmd",
-      lipsPath: "FaceAndLips.vmd",
-    },
+    audioPath: "/mmd/Animations/LastChristmas/Audio.wav",
+    modelAnimationPaths: [
+      {
+        skeletonPath: "/mmd/Animations/LastChristmas/Skeleton.vmd",
+        facialPath: "/mmd/Animations/LastChristmas/FaceAndLips.vmd",
+        lipsPath: "/mmd/Animations/LastChristmas/FaceAndLips.vmd",
+      },
+    ],
   },
 };
