@@ -1,7 +1,10 @@
 import { ArcRotateCamera, Vector3 } from "@babylonjs/core";
 import { Scene } from "@babylonjs/core/scene";
 
-export function createArcCamera(scene: Scene, _canvas: HTMLCanvasElement): ArcRotateCamera {
+export function createArcCamera(
+  scene: Scene,
+  _canvas: HTMLCanvasElement
+): ArcRotateCamera {
   const arcRotateCamera = new ArcRotateCamera(
     "arcRotateCamera",
     0,

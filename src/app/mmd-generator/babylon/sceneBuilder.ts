@@ -45,8 +45,8 @@ import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
-
 import type { ISceneBuilder } from "./baseRuntime";
+import createShadowGenerator from "./shadowGenerator";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(
@@ -81,14 +81,7 @@ export class SceneBuilder implements ISceneBuilder {
     directionalLight.intensity = 0.7;
     directionalLight.shadowMaxZ = 20;
     directionalLight.shadowMinZ = -15;
-
-    const shadowGenerator = new ShadowGenerator(
-      2048,
-      directionalLight,
-      true,
-      camera
-    );
-    shadowGenerator.bias = 0.01;
+    const shadowGenerator = createShadowGenerator(directionalLight, null);
 
     const ground = MeshBuilder.CreateGround(
       "ground1",

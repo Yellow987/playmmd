@@ -4,8 +4,6 @@ import {
   WEBSITE_NAME,
   YOUTUBE_URL,
   EMAIL_ADDRESS,
-  LINKEDIN_URL,
-  CALENDLY_URL,
 } from "@/config/constants";
 import { Flex, chakra, Link, Box } from "@chakra-ui/react";
 import React from "react";

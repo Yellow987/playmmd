@@ -9,35 +9,41 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState } from "react";
+import Dropdown from "@/components/Dropdown";
+import {
+  AnimationPreset,
+  AnimationPresetData,
+  CharacterModel,
+  CharacterModelData,
+  ANIMATION_PRESETS_DATA,
+  CHARACTER_MODELS_DATA,
+} from "../constants";
+import { BaseRuntime } from "../babylon/baseRuntime";
 
-function Presets() {
-  const [selectedCharacter, setSelectedCharacter] = useState(
-    "Select Character Model"
-  );
+interface Props {
+  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
+}
+
+function Presets(props: Props) {
+  const scene = props.runtimeRef.current?._scene;
   const [selectedStage, setSelectedStage] = useState("Select Stage");
-  const [selectedAnimation, setSelectedAnimation] =
-    useState("Select Animation");
+
+  const onCharacterSelect = (item: CharacterModelData) => {
+    console.log(item);
+  };
+
+  const onAnimationSelect = (item: AnimationPresetData) => {
+    console.log(item);
+  };
 
   return (
     <>
-      <Box mb={2}>
-        <Box as="label" display="block" mb={1}>
-          Character Model
-        </Box>
-        <Menu>
-          <MenuButton as={Button} w="full" rightIcon={<ChevronDownIcon />}>
-            {selectedCharacter}
-          </MenuButton>
-          <MenuList>
-            <MenuItem onClick={() => setSelectedCharacter("Hatsune Miku YYB")}>
-              Hatsune Miku YYB
-            </MenuItem>
-            <MenuItem onClick={() => setSelectedCharacter("Cyborg")}>
-              Cyborg
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </Box>
+      <Dropdown
+        menuLabel="Character Model"
+        onMenuItemSelect={onCharacterSelect}
+        menuItems={CHARACTER_MODELS_DATA}
+        defaultItem={CharacterModel.HATSUNE_MIKU_YYB_10TH}
+      />
 
       <Box mb={2}>
         <Box as="label" display="block" mb={1}>
@@ -56,21 +62,12 @@ function Presets() {
         </Menu>
       </Box>
 
-      <Box>
-        <Box as="label" display="block" mb={1}>
-          Animation
-        </Box>
-        <Menu>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />} w="full">
-            {selectedAnimation}
-          </MenuButton>
-          <MenuList>
-            <MenuItem onClick={() => setSelectedAnimation("Last Christmas")}>
-              Last Christmas
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </Box>
+      <Dropdown
+        menuLabel="Animation Name"
+        onMenuItemSelect={onAnimationSelect}
+        menuItems={ANIMATION_PRESETS_DATA}
+        defaultItem={AnimationPreset.LAST_CHRISTMAS}
+      />
     </>
   );
 }
