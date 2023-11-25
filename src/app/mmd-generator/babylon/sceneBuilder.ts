@@ -60,6 +60,8 @@ import {
   ANIMATION_PRESETS_DATA,
   AnimationPreset,
 } from "../constants";
+import { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
+import { Material } from "@babylonjs/core/Materials";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(
@@ -67,6 +69,33 @@ export class SceneBuilder implements ISceneBuilder {
     engine: Engine,
   ): Promise<Scene> {
     SdefInjector.OverrideEngineCreateEffect(engine);
+    const pmxLoader = SceneLoader.GetPluginForExtension(".pmx") as PmxLoader;
+    pmxLoader.useSdef = false;
+    const materialBuilder =
+      pmxLoader.materialBuilder as MmdStandardMaterialBuilder;
+    materialBuilder.useAlphaEvaluation = false;
+    const alphaBlendMaterials = [
+      "face02",
+      "Facial02",
+      "HL",
+      "Hairshadow",
+      "q302",
+    ];
+    const alphaTestMaterials = ["q301"];
+    materialBuilder.afterBuildSingleMaterial = (material): void => {
+      if (
+        !alphaBlendMaterials.includes(material.name) &&
+        !alphaTestMaterials.includes(material.name)
+      )
+        return;
+      material.transparencyMode = alphaBlendMaterials.includes(material.name)
+        ? Material.MATERIAL_ALPHABLEND
+        : Material.MATERIAL_ALPHATEST;
+      material.useAlphaFromDiffuseTexture = true;
+      material.diffuseTexture!.hasAlpha = true;
+    };
+    materialBuilder.loadOutlineRenderingProperties = () => { /* do nothing */ };
+
     const scene = await createScene(engine);
 
     const camera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
@@ -91,7 +120,7 @@ export class SceneBuilder implements ISceneBuilder {
 
     const mmdRuntime = createMmdRuntime(scene);
     mmdRuntime.setCamera(camera);
-    const mmdModel = await createAndSetMmdModel(
+    await createAndSetMmdModel(
       0,
       CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
     );
@@ -115,11 +144,9 @@ export class SceneBuilder implements ISceneBuilder {
       ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
     );
     mmdRuntime.setAudioPlayer(audioPlayer);
-
     mmdRuntime.playAnimation();
 
     new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
-
     return scene;
   }
 }
