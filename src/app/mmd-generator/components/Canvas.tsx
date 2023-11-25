@@ -31,7 +31,7 @@ function Canvas(props: Props) {
           doNotHandleContextLost: true,
           audioEngine: false,
         },
-        true
+        true,
       );
 
       BaseRuntime.Create({

@@ -1,6 +1,6 @@
 import React from "react";
-import { Box, useTheme  } from "@chakra-ui/react";
-import { keyframes } from '@emotion/react';
+import { Box, useTheme } from "@chakra-ui/react";
+import { keyframes } from "@emotion/react";
 
 type Props = {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ const YellowPulseText = ({ children }: Props) => {
       backgroundImage="linear-gradient(to right, yellow, orange, black, black, orange, yellow, orange, black, black, orange, yellow)"
       backgroundSize="200% 200%"
       animation={`${scroll} 2s linear infinite`}
-      bgClip='text'
+      bgClip="text"
     >
       {children}
     </Box>

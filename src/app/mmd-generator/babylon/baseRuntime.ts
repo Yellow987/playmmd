@@ -26,7 +26,7 @@ export class BaseRuntime {
   }
 
   public static async Create(
-    params: BaseRuntimeInitParams
+    params: BaseRuntimeInitParams,
   ): Promise<BaseRuntime> {
     const runtime = new BaseRuntime(params);
     runtime._scene = await runtime._initialize(params.sceneBuilder);

@@ -51,13 +51,13 @@ import { createShadowGenerator } from "./mmdRuntime";
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
-    engine: Engine
+    engine: Engine,
   ): Promise<Scene> {
     SdefInjector.OverrideEngineCreateEffect(engine);
     const scene = new Scene(engine);
     scene.enablePhysics(
       new Vector3(0, -9.8 * 10, 0),
-      new HavokPlugin(true, await HavokPhysics())
+      new HavokPlugin(true, await HavokPhysics()),
     );
 
     scene.ambientColor = new Color3(1, 1, 1);
@@ -67,7 +67,7 @@ export class SceneBuilder implements ISceneBuilder {
     const hemisphericLight = new HemisphericLight(
       "HemisphericLight",
       new Vector3(0, 1, 0),
-      scene
+      scene,
     );
     hemisphericLight.intensity = 0.3;
     hemisphericLight.specular.set(0, 0, 0);
@@ -76,7 +76,7 @@ export class SceneBuilder implements ISceneBuilder {
     const directionalLight = new DirectionalLight(
       "DirectionalLight",
       new Vector3(0.5, -1, 1),
-      scene
+      scene,
     );
     directionalLight.intensity = 0.7;
     directionalLight.shadowMaxZ = 20;
@@ -86,7 +86,7 @@ export class SceneBuilder implements ISceneBuilder {
     const ground = MeshBuilder.CreateGround(
       "ground1",
       { width: 60, height: 60, subdivisions: 2, updatable: false },
-      scene
+      scene,
     );
     ground.receiveShadows = true;
     shadowGenerator.addShadowCaster(ground);
@@ -95,7 +95,7 @@ export class SceneBuilder implements ISceneBuilder {
       "",
       "/mmd/YYB Hatsune Miku_10th/",
       "YYB Hatsune Miku_10th_v1.02.pmx",
-      scene
+      scene,
     ).then((result) => result.meshes[0] as Mesh);
     mmdMesh.receiveShadows = true;
     shadowGenerator.addShadowCaster(mmdMesh);
@@ -113,7 +113,7 @@ export class SceneBuilder implements ISceneBuilder {
 
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
-      "/mmd/cam.vmd"
+      "/mmd/cam.vmd",
     );
 
     mmdModel.addAnimation(modelMotion);

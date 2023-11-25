@@ -19,7 +19,7 @@ export default function Home() {
       <Canvas runtimeRef={runtimeRef} />
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
-          <Presets runtimeRef={runtimeRef}/>
+          <Presets runtimeRef={runtimeRef} />
         </Box>
         <Box flex="2" p={4} maxWidth={flexDir === "row" ? "67%" : "100%"}>
           <Controls runtimeRef={runtimeRef} />

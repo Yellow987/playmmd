@@ -38,11 +38,11 @@ function Footer() {
   const GithubIcon = () => <Icon href={GITHUB_URL} icon={<FaGithub />} />;
   const YoutubeIcon = () => <Icon href={YOUTUBE_URL} icon={<FaYoutube />} />;
   const DiscordIcon = () => (
-      <Icon
-        href={DISCORD_INVITE_URL}
-        icon={<Image src={discordIcon} alt="Discord" width={16} height={16} />}
-        style={{ paddingTop: '1.6px' }}
-      />
+    <Icon
+      href={DISCORD_INVITE_URL}
+      icon={<Image src={discordIcon} alt="Discord" width={16} height={16} />}
+      style={{ paddingTop: "1.6px" }}
+    />
   );
 
   return (

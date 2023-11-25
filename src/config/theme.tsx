@@ -1,18 +1,16 @@
-'use client'
-import { extendTheme } from '@chakra-ui/react'
-import { withProse } from '@nikolovlazar/chakra-ui-prose'
+"use client";
+import { extendTheme } from "@chakra-ui/react";
+import { withProse } from "@nikolovlazar/chakra-ui-prose";
 
 export const theme = extendTheme(
   {
     global: {
-      primary: '#FFFF00',
-      lightGreen: '#c9ff94',
-      limeGreen: '#d2ff4c',
-      tan: '#ffe28a'
+      primary: "#FFFF00",
+      lightGreen: "#c9ff94",
+      limeGreen: "#d2ff4c",
+      tan: "#ffe28a",
     },
-    colors: {
-
-    },
+    colors: {},
     spacing: {
       "0": "0px",
       "1": "8px",
@@ -30,4 +28,4 @@ export const theme = extendTheme(
       lineHeight: "0.9em",
     },
   }),
-)
+);

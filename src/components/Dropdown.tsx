@@ -21,7 +21,7 @@ interface Props {
 
 function Dropdown(props: Props) {
   const [selectedItem, setSelectedItem] = useState(
-    props.menuItems[props.defaultItem]
+    props.menuItems[props.defaultItem],
   );
   const menuOptions = Object.values(props.menuItems);
 

@@ -3,7 +3,7 @@ import { Scene } from "@babylonjs/core/scene";
 
 export function createArcCamera(
   scene: Scene,
-  _canvas: HTMLCanvasElement
+  _canvas: HTMLCanvasElement,
 ): ArcRotateCamera {
   const arcRotateCamera = new ArcRotateCamera(
     "arcRotateCamera",
@@ -11,7 +11,7 @@ export function createArcCamera(
     0,
     45,
     new Vector3(0, 10, 0),
-    scene
+    scene,
   );
   arcRotateCamera.maxZ = 5000;
   arcRotateCamera.setPosition(new Vector3(0, 10, -45));

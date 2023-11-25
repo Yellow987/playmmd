@@ -7,14 +7,7 @@ import { Link } from "@chakra-ui/next-js";
 
 function Header() {
   return (
-    <Box
-      textAlign="center"
-      top={0}
-      bg="white"
-      zIndex={1}
-      pt={0}
-      pb={0}
-    >
+    <Box textAlign="center" top={0} bg="white" zIndex={1} pt={0} pb={0}>
       <Link href="/" _hover={{ textDecoration: "none" }}>
         <YellowPulseText>
           <Heading as="h1" size="lg">

@@ -17,7 +17,7 @@ function Controls(props: Props) {
       const scene = runtimeRef.current._scene;
       const arcRotateCamera = createArcCamera(
         scene,
-        runtimeRef.current._canvas
+        runtimeRef.current._canvas,
       );
       scene.activeCamera = arcRotateCamera;
     }
