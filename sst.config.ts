@@ -4,7 +4,7 @@ import { NextjsSite } from "sst/constructs";
 export default {
   config(_input) {
     return {
-      name: "yellowdesi-studio",
+      name: "playmmd",
       region: "us-east-1",
     };
   },
