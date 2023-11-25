@@ -45,6 +45,10 @@ import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
+// needed according to https://noname0310.github.io/babylon-mmd/docs/deep-usage/postprocesses/
+import "@babylonjs/core/Rendering/prePassRendererSceneComponent";
+import "@babylonjs/core/Rendering/depthRendererSceneComponent";
+
 import type { ISceneBuilder } from "./baseRuntime";
 import {
   addMmdMotion,
@@ -61,7 +65,12 @@ import {
   AnimationPreset,
 } from "../constants";
 import { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
-import { Material } from "@babylonjs/core/Materials";
+import {
+  ImageProcessingConfiguration,
+  Material,
+} from "@babylonjs/core/Materials";
+import { SSRRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/ssrRenderingPipeline";
+import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(
@@ -94,11 +103,13 @@ export class SceneBuilder implements ISceneBuilder {
       material.useAlphaFromDiffuseTexture = true;
       material.diffuseTexture!.hasAlpha = true;
     };
-    materialBuilder.loadOutlineRenderingProperties = () => { /* do nothing */ };
+    materialBuilder.loadOutlineRenderingProperties = () => {
+      /* do nothing */
+    };
 
     const scene = await createScene(engine);
 
-    const camera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
+    const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
 
     const directionalLight = new DirectionalLight(
       "DirectionalLight",
@@ -119,8 +130,8 @@ export class SceneBuilder implements ISceneBuilder {
     shadowGenerator.addShadowCaster(ground);
 
     const mmdRuntime = createMmdRuntime(scene);
-    mmdRuntime.setCamera(camera);
-    await createAndSetMmdModel(
+    mmdRuntime.setCamera(mmdCamera);
+    const mmdModel = await createAndSetMmdModel(
       0,
       CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
     );
@@ -137,8 +148,8 @@ export class SceneBuilder implements ISceneBuilder {
       "/mmd/cam.vmd",
     );
 
-    camera.addAnimation(cameraMotion);
-    camera.setAnimation("camera_motion_1");
+    mmdCamera.addAnimation(cameraMotion);
+    mmdCamera.setAnimation("camera_motion_1");
 
     const audioPlayer = createAudioPlayer(
       ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
@@ -147,6 +158,80 @@ export class SceneBuilder implements ISceneBuilder {
     mmdRuntime.playAnimation();
 
     new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
+
+    const defaultPipeline = new DefaultRenderingPipeline(
+      "default",
+      true,
+      scene,
+      [mmdCamera],
+    );
+    defaultPipeline.samples = 4;
+    defaultPipeline.bloomEnabled = true;
+    defaultPipeline.chromaticAberrationEnabled = true;
+    defaultPipeline.chromaticAberration.aberrationAmount = 1;
+    defaultPipeline.depthOfFieldEnabled = true;
+    defaultPipeline.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
+    defaultPipeline.fxaaEnabled = true;
+    defaultPipeline.imageProcessingEnabled = true;
+    defaultPipeline.imageProcessing.toneMappingEnabled = true;
+    defaultPipeline.imageProcessing.toneMappingType =
+      ImageProcessingConfiguration.TONEMAPPING_ACES;
+    defaultPipeline.imageProcessing.vignetteWeight = 0.5;
+    defaultPipeline.imageProcessing.vignetteStretch = 0.5;
+    defaultPipeline.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
+    defaultPipeline.imageProcessing.vignetteEnabled = true;
+
+    defaultPipeline.depthOfField.fStop = 0.05;
+    defaultPipeline.depthOfField.focalLength = 20;
+
+    const headBone = mmdModel.skeleton!.bones.find(
+      (bone) => bone.name === "頭",
+    );
+
+    const rotationMatrix = new Matrix();
+    const cameraNormal = new Vector3();
+    const cameraEyePosition = new Vector3();
+    const headRelativePosition = new Vector3();
+
+    scene.onBeforeRenderObservable.add(() => {
+      const cameraRotation = mmdCamera.rotation;
+      Matrix.RotationYawPitchRollToRef(
+        -cameraRotation.y,
+        -cameraRotation.x,
+        -cameraRotation.z,
+        rotationMatrix,
+      );
+
+      Vector3.TransformNormalFromFloatsToRef(
+        0,
+        0,
+        1,
+        rotationMatrix,
+        cameraNormal,
+      );
+
+      mmdCamera.position.addToRef(
+        Vector3.TransformCoordinatesFromFloatsToRef(
+          0,
+          0,
+          mmdCamera.distance,
+          rotationMatrix,
+          cameraEyePosition,
+        ),
+        cameraEyePosition,
+      );
+
+      headBone!
+        .getFinalMatrix()
+        .getTranslationToRef(headRelativePosition)
+        .subtractToRef(cameraEyePosition, headRelativePosition);
+
+      defaultPipeline.depthOfField.focusDistance =
+        (Vector3.Dot(headRelativePosition, cameraNormal) /
+          Vector3.Dot(cameraNormal, cameraNormal)) *
+        1000;
+    });
+
     return scene;
   }
 }
