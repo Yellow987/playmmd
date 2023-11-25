@@ -67,6 +67,7 @@ import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
 import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
 import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
+import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
@@ -104,7 +105,7 @@ export class SceneBuilder implements ISceneBuilder {
 
     const scene = await createScene(engine);
 
-    const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
+    const mmdCamera = createMmdCamera(scene);
 
     const directionalLight = new DirectionalLight(
       "DirectionalLight",
@@ -154,11 +155,13 @@ export class SceneBuilder implements ISceneBuilder {
 
     new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
 
+    const arcCamera = createArcCamera(scene, _canvas);
+
     const defaultPipeline = new DefaultRenderingPipeline(
       "default",
       true,
       scene,
-      [mmdCamera],
+      [mmdCamera, arcCamera],
     );
     defaultPipeline.samples = 4;
     defaultPipeline.bloomEnabled = true;

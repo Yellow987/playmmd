@@ -1,7 +1,10 @@
 "use client";
 import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
-import { enableUserControlCamera } from "../babylon/util";
+import {
+  enableUserControlCamera,
+  enableMmdCamera,
+} from "../babylon/mmdComponents/cameras";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -18,12 +21,14 @@ function Controls(props: Props) {
   const cameraControlMenuItems = {
     [CameraControl.MMD_CAMERA]: {
       name: "MMD Camera",
-      function: () => {},
+      function: () => {
+        enableMmdCamera();
+      },
     },
     [CameraControl.USER_CONTROL_CAMERA]: {
-      name: "User Control Camera",
+      name: "Free Camera",
       function: () => {
-        enableUserControlCamera(runtimeRef);
+        enableUserControlCamera();
       },
     },
   };

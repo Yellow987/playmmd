@@ -34,7 +34,6 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.8.0",
     "sst": "^2.8.7",
-    "three": "^0.156.1",
     "typescript": "5.0.4"
   },
   "devDependencies": {
