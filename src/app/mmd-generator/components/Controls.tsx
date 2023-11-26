@@ -2,7 +2,7 @@
 import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
 import {
-  enableUserControlCamera,
+  enableArcCamera,
   enableMmdCamera,
 } from "../babylon/mmdComponents/cameras";
 
@@ -28,7 +28,7 @@ function Controls(props: Props) {
     [CameraControl.USER_CONTROL_CAMERA]: {
       name: "Free Camera",
       function: () => {
-        enableUserControlCamera();
+        enableArcCamera();
       },
     },
   };

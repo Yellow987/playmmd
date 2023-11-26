@@ -68,6 +68,7 @@ import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
 import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
 import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
+import { createPostProcessor } from "./mmdComponents/postProcessing";
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
@@ -155,80 +156,9 @@ export class SceneBuilder implements ISceneBuilder {
 
     new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
 
-    const arcCamera = createArcCamera(scene, _canvas);
+    createArcCamera(scene, _canvas);
 
-    const defaultPipeline = new DefaultRenderingPipeline(
-      "default",
-      true,
-      scene,
-      [mmdCamera, arcCamera],
-    );
-    defaultPipeline.samples = 4;
-    defaultPipeline.bloomEnabled = true;
-    defaultPipeline.chromaticAberrationEnabled = true;
-    defaultPipeline.chromaticAberration.aberrationAmount = 1;
-    defaultPipeline.depthOfFieldEnabled = true;
-    defaultPipeline.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
-    defaultPipeline.fxaaEnabled = true;
-    defaultPipeline.imageProcessingEnabled = true;
-    defaultPipeline.imageProcessing.toneMappingEnabled = true;
-    defaultPipeline.imageProcessing.toneMappingType =
-      ImageProcessingConfiguration.TONEMAPPING_ACES;
-    defaultPipeline.imageProcessing.vignetteWeight = 0.5;
-    defaultPipeline.imageProcessing.vignetteStretch = 0.5;
-    defaultPipeline.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
-    defaultPipeline.imageProcessing.vignetteEnabled = true;
-
-    defaultPipeline.depthOfField.fStop = 0.05;
-    defaultPipeline.depthOfField.focalLength = 20;
-
-    const headBone = mmdModel.skeleton!.bones.find(
-      (bone) => bone.name === "頭",
-    );
-
-    const rotationMatrix = new Matrix();
-    const cameraNormal = new Vector3();
-    const cameraEyePosition = new Vector3();
-    const headRelativePosition = new Vector3();
-
-    scene.onBeforeRenderObservable.add(() => {
-      const cameraRotation = mmdCamera.rotation;
-      Matrix.RotationYawPitchRollToRef(
-        -cameraRotation.y,
-        -cameraRotation.x,
-        -cameraRotation.z,
-        rotationMatrix,
-      );
-
-      Vector3.TransformNormalFromFloatsToRef(
-        0,
-        0,
-        1,
-        rotationMatrix,
-        cameraNormal,
-      );
-
-      mmdCamera.position.addToRef(
-        Vector3.TransformCoordinatesFromFloatsToRef(
-          0,
-          0,
-          mmdCamera.distance,
-          rotationMatrix,
-          cameraEyePosition,
-        ),
-        cameraEyePosition,
-      );
-
-      headBone!
-        .getFinalMatrix()
-        .getTranslationToRef(headRelativePosition)
-        .subtractToRef(cameraEyePosition, headRelativePosition);
-
-      defaultPipeline.depthOfField.focusDistance =
-        (Vector3.Dot(headRelativePosition, cameraNormal) /
-          Vector3.Dot(cameraNormal, cameraNormal)) *
-        1000;
-    });
+    createPostProcessor();
 
     return scene;
   }

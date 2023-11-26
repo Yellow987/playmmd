@@ -47,12 +47,7 @@ function Presets() {
           <MenuButton as={Button} rightIcon={<ChevronDownIcon />} w="full">
             {selectedStage}
           </MenuButton>
-          <MenuList>
-            <MenuItem onClick={() => setSelectedStage("Basic")}>Basic</MenuItem>
-            <MenuItem onClick={() => setSelectedStage("Castle")}>
-              Castle
-            </MenuItem>
-          </MenuList>
+          <MenuList></MenuList>
         </Menu>
       </Box>
 

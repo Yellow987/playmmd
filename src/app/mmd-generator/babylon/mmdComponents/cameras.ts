@@ -3,7 +3,7 @@ import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Scene } from "@babylonjs/core/scene";
 import { getScene } from "./scene";
-import { BaseRuntime } from "../baseRuntime";
+import { getPostProcessor } from "./postProcessing";
 
 type Cameras = {
   mmdCamera: MmdCamera | null;
@@ -43,16 +43,22 @@ export function createArcCamera(
   return arcRotateCamera;
 }
 
-export function getCameras(): Cameras {
+export function getCameras(): {
+  mmdCamera: MmdCamera;
+  arcCamera: ArcRotateCamera;
+} {
   if (!cameras.mmdCamera || !cameras.arcCamera) {
     throw new Error("Cameras are not initialized");
   }
-  return cameras;
+  return cameras as { mmdCamera: MmdCamera; arcCamera: ArcRotateCamera };
 }
 
-export const enableUserControlCamera = () => {
+export const enableArcCamera = () => {
   const scene = getScene();
   const arcRotateCamera = cameras.arcCamera;
+  const postProcessor = getPostProcessor();
+  
+  postProcessor.depthOfFieldEnabled = false;
   scene.activeCamera = arcRotateCamera;
 };
 
