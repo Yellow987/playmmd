@@ -7,11 +7,12 @@ import { SceneBuilder } from "../babylon/sceneBuilder";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
+  setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function Canvas(props: Props) {
   const canvasRef = useRef(null);
-  const { runtimeRef } = props;
+  const { runtimeRef, setIsLoaded } = props;
 
   useEffect(() => {
     // Ensure the canvas is available
@@ -41,6 +42,8 @@ function Canvas(props: Props) {
       }).then((runtime) => {
         runtime.run();
         runtimeRef.current = runtime;
+        console.log(runtimeRef.current)
+        setIsLoaded(true);
       });
 
       // Correctly typed resize handler for TypeScript
@@ -59,9 +62,9 @@ function Canvas(props: Props) {
   }, []);
 
   return (
-    <div>
+    <>
       <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
-    </div>
+    </>
   );
 }
 

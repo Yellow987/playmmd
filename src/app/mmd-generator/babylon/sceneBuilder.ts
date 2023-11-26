@@ -152,9 +152,6 @@ export class SceneBuilder implements ISceneBuilder {
       ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
     );
     mmdRuntime.setAudioPlayer(audioPlayer);
-    mmdRuntime.playAnimation();
-
-    new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
 
     createArcCamera(scene, _canvas);
 
