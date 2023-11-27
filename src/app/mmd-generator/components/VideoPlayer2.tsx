@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Slider,
@@ -29,7 +29,11 @@ const VideoPlayer2 = () => {
     return format(new Date(0, 0, 0, 0, 0, seconds), "mm:ss");
   }
   const [isPlaying, setIsPlaying] = useState(mmdRuntime.isAnimationPlaying);
-  let preSeekIsPlaying: boolean = isPlaying;
+  const isPlayingRef = useRef(isPlaying);
+  const [preSeekIsPlaying, setPreSeekIsPlaying] = useState<Boolean>(mmdRuntime.isAnimationPlaying)
+  const shouldPlayOneFrame = useRef(false);
+  const shouldPauseAnimation = useRef(false);
+  const tryingToPlayAnimation = useRef(false);
   const [second, setSecond] = useState(0);
   const [frame, setFrame] = useState(0);
   const [volume, setVolume] = useState(100);
@@ -38,24 +42,31 @@ const VideoPlayer2 = () => {
   useEffect(() => {
     const onPlayAnimationObserver: Observer<void> =
       mmdRuntime.onPlayAnimationObservable.add(() => {
-        setIsPlaying(true);
+        isPlayingRef.current = true;
       });
 
     const onPauseAnimationObserver: Observer<void> =
       mmdRuntime.onPauseAnimationObservable.add(() => {
-        setIsPlaying(false);
+        isPlayingRef.current = false;
       });
 
     const onSeekAnimationObserver: Observer<void> =
       mmdRuntime.onSeekAnimationObservable.add(() => {
-        setSecond(mmdRuntime.currentTime);
-        setFrame(mmdRuntime.currentFrameTime);
+        console.log("seeking")
       });
 
     const onTickAnimatinoObserver: Observer<void> =
       mmdRuntime.onAnimationTickObservable.add(() => {
-        setSecond(mmdRuntime.currentTime);
-        setFrame(mmdRuntime.currentFrameTime);
+        if (tryingToPlayAnimation.current) {
+          tryingToPlayAnimation.current = false;
+        }
+        if (shouldPauseAnimation.current) {
+          mmdRuntime.pauseAnimation();
+          shouldPauseAnimation.current = false;
+        } else {
+          setSecond(mmdRuntime.currentTime);
+          setFrame(mmdRuntime.currentFrameTime);
+        }
       });
 
     const onVolumeChangeObserver: Observer<void> | undefined =
@@ -77,19 +88,53 @@ const VideoPlayer2 = () => {
     };
   }, []);
 
-  function seekMmdAnimation(second: number) {
+  const seekMmdAnimation = async (sliderValue: number) => {
+    doLogging()
+    const second = (sliderValue / 100) * mmdRuntime.animationDuration;
     mmdRuntime.seekAnimation(
-      (second / 100) * mmdRuntime.animationDuration * 30,
+      second * 30,
     );
+    setSecond(second);
+    if (!shouldPauseAnimation.current) {
+      shouldPauseAnimation.current = true;
+      tryToPlayAnimation();
+    }
   }
+
+  const tryToPlayAnimation = () => {
+    if (tryingToPlayAnimation.current) {
+      return;
+    }
+    tryingToPlayAnimation.current = true;
+    mmdRuntime.playAnimation()
+  }
+  
+  const pauseAnimation = () => {
+    shouldPauseAnimation.current = true;
+    setIsPlaying(false)
+  }
+
+  const playAnimation = () => {
+    // shouldPauseAnimation.current = false;
+    doLogging()
+    tryToPlayAnimation();
+    setIsPlaying(true)
+  }
+
+  function doLogging() {
+    console.log("shouldPlayAnimation.current:" + tryingToPlayAnimation.current)
+    console.log("isPlayingRef.current:" + isPlayingRef.current)
+    console.log("shouldPauseAnimation.current:" + shouldPauseAnimation.current)
+  }
+  
 
   return (
     <Flex align="center" justify="center" mx={4}>
       <Button
         onClick={() =>
-          mmdRuntime.isAnimationPlaying
-            ? mmdRuntime.pauseAnimation()
-            : mmdRuntime.playAnimation()
+          isPlaying
+            ? pauseAnimation()
+            : playAnimation()
         }
         size="sm"
         mr={4}
@@ -102,20 +147,23 @@ const VideoPlayer2 = () => {
           aria-label="seek-slider"
           value={(second / mmdRuntime.animationDuration) * 100}
           step={0.1}
-          onChange={(second) => {
-            mmdRuntime.playAnimation();
-            seekMmdAnimation(second);
-            mmdRuntime.pauseAnimation();
-          }}
-          onChangeStart={(second) => {
-            preSeekIsPlaying = isPlaying;
+          onChange={(sliderValue) => {
+            //mmdRuntime.playAnimation();
+            seekMmdAnimation(sliderValue);
             //mmdRuntime.pauseAnimation();
-            seekMmdAnimation(second);
           }}
-          onChangeEnd={(second) => {
-            seekMmdAnimation(second);
+          onChangeStart={(sliderValue) => {
+            setPreSeekIsPlaying(isPlaying);
+            //seekMmdAnimation(sliderValue);
+            // console.log("before:" + preSeekIsPlaying);
+            //mmdRuntime.pauseAnimation();
+          }}
+          onChangeEnd={(sliderValue) => {
+            //seekMmdAnimation(val);
+            console.log("after:" + preSeekIsPlaying);
+            seekMmdAnimation(sliderValue);
             if (preSeekIsPlaying) {
-              mmdRuntime.playAnimation();
+              tryToPlayAnimation();
             }
           }}
         >

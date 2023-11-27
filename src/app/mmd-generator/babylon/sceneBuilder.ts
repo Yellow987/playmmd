@@ -151,6 +151,7 @@ export class SceneBuilder implements ISceneBuilder {
     const audioPlayer = createAudioPlayer(
       ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
     );
+    audioPlayer.volume = 0.2;
     mmdRuntime.setAudioPlayer(audioPlayer);
 
     createArcCamera(scene, _canvas);

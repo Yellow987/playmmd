@@ -9,6 +9,7 @@ import VideoPlayer from "./components/VideoPlayer";
 import VideoPlayer2 from "./components/VideoPlayer2";
 
 export default function Home() {
+  // TODO fix ssr
   const flexDir: "column" | "row" =
     useBreakpointValue({ base: "column", md: "row" }) || "column";
   const runtimeRef = useRef<BaseRuntime | null>(null);
