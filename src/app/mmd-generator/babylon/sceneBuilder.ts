@@ -43,7 +43,6 @@ import { StreamAudioPlayer } from "babylon-mmd/esm/Runtime/Audio/streamAudioPlay
 import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
-import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 // needed according to https://noname0310.github.io/babylon-mmd/docs/deep-usage/postprocesses/
 import "@babylonjs/core/Rendering/prePassRendererSceneComponent";
@@ -69,6 +68,8 @@ import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
 import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
 import { createPostProcessor } from "./mmdComponents/postProcessing";
+import { MmdPlayerControl } from "../components/MmdPlayerControls";
+
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
@@ -153,6 +154,11 @@ export class SceneBuilder implements ISceneBuilder {
     );
     audioPlayer.volume = 0.2;
     mmdRuntime.setAudioPlayer(audioPlayer);
+
+    //const controller = new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
+    //controller.hidePlayerControl();
+
+    const controller = new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
 
     createArcCamera(scene, _canvas);
 

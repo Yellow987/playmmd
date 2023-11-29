@@ -30,10 +30,9 @@ const VideoPlayer2 = () => {
   }
   const [isPlaying, setIsPlaying] = useState(mmdRuntime.isAnimationPlaying);
   const isPlayingRef = useRef(isPlaying);
-  const [preSeekIsPlaying, setPreSeekIsPlaying] = useState<Boolean>(mmdRuntime.isAnimationPlaying)
-  const shouldPlayOneFrame = useRef(false);
-  const shouldPauseAnimation = useRef(false);
-  const tryingToPlayAnimation = useRef(false);
+  const preSeekIsPlayingRef = useRef(false);
+  const isSeekingRef = useRef(false);
+  const sholdPlayRef = useRef(false);
   const [second, setSecond] = useState(0);
   const [frame, setFrame] = useState(0);
   const [volume, setVolume] = useState(100);
@@ -43,27 +42,30 @@ const VideoPlayer2 = () => {
     const onPlayAnimationObserver: Observer<void> =
       mmdRuntime.onPlayAnimationObservable.add(() => {
         isPlayingRef.current = true;
+        console.log("PLAYING ---------------------------------------")
       });
 
     const onPauseAnimationObserver: Observer<void> =
       mmdRuntime.onPauseAnimationObservable.add(() => {
         isPlayingRef.current = false;
+        console.log("Paused D:")
       });
 
-    const onSeekAnimationObserver: Observer<void> =
-      mmdRuntime.onSeekAnimationObservable.add(() => {
-        console.log("seeking")
-      });
+    // const onSeekAnimationObserver: Observer<void> =
+    //   mmdRuntime.onSeekAnimationObservable.add(() => {
+    //   });
 
     const onTickAnimatinoObserver: Observer<void> =
       mmdRuntime.onAnimationTickObservable.add(() => {
-        if (tryingToPlayAnimation.current) {
-          tryingToPlayAnimation.current = false;
-        }
-        if (shouldPauseAnimation.current) {
+        console.log("TICK")
+        if (isSeekingRef.current) {
           mmdRuntime.pauseAnimation();
-          shouldPauseAnimation.current = false;
+          console.log("Pausing attempt !")
+          isSeekingRef.current = false;
         } else {
+          //These lines prevent freecam from working. but i need state update on frame change. or i can check them every 100ms
+          //maybe make the second a useRef, but make a state update every 100ms
+          //or why make a useRef at all just have a time update second frequently
           setSecond(mmdRuntime.currentTime);
           setFrame(mmdRuntime.currentFrameTime);
         }
@@ -78,7 +80,7 @@ const VideoPlayer2 = () => {
       // Use the observable's remove method to unsubscribe
       mmdRuntime.onPlayAnimationObservable.remove(onPlayAnimationObserver);
       mmdRuntime.onPauseAnimationObservable.remove(onPauseAnimationObserver);
-      mmdRuntime.onSeekAnimationObservable.remove(onSeekAnimationObserver);
+      //mmdRuntime.onSeekAnimationObservable.remove(onSeekAnimationObserver);
       mmdRuntime.onAnimationTickObservable.remove(onTickAnimatinoObserver);
       if (onVolumeChangeObserver) {
         mmdRuntime.audioPlayer?.onDurationChangedObservable.remove(
@@ -88,45 +90,28 @@ const VideoPlayer2 = () => {
     };
   }, []);
 
-  const seekMmdAnimation = async (sliderValue: number) => {
-    doLogging()
+  const seekMmdAnimation = (sliderValue: number) => {
     const second = (sliderValue / 100) * mmdRuntime.animationDuration;
     mmdRuntime.seekAnimation(
       second * 30,
     );
     setSecond(second);
-    if (!shouldPauseAnimation.current) {
-      shouldPauseAnimation.current = true;
-      tryToPlayAnimation();
+    isSeekingRef.current = true;
+    console.log("seeking animation, isPlaying: " + isPlayingRef.current )
+    if (!isPlayingRef.current) {
+      mmdRuntime.playAnimation();
     }
-  }
-
-  const tryToPlayAnimation = () => {
-    if (tryingToPlayAnimation.current) {
-      return;
-    }
-    tryingToPlayAnimation.current = true;
-    mmdRuntime.playAnimation()
   }
   
   const pauseAnimation = () => {
-    shouldPauseAnimation.current = true;
+    mmdRuntime.pauseAnimation()
     setIsPlaying(false)
   }
 
   const playAnimation = () => {
-    // shouldPauseAnimation.current = false;
-    doLogging()
-    tryToPlayAnimation();
+    mmdRuntime.playAnimation()
     setIsPlaying(true)
   }
-
-  function doLogging() {
-    console.log("shouldPlayAnimation.current:" + tryingToPlayAnimation.current)
-    console.log("isPlayingRef.current:" + isPlayingRef.current)
-    console.log("shouldPauseAnimation.current:" + shouldPauseAnimation.current)
-  }
-  
 
   return (
     <Flex align="center" justify="center" mx={4}>
@@ -152,19 +137,29 @@ const VideoPlayer2 = () => {
             seekMmdAnimation(sliderValue);
             //mmdRuntime.pauseAnimation();
           }}
-          onChangeStart={(sliderValue) => {
-            setPreSeekIsPlaying(isPlaying);
-            //seekMmdAnimation(sliderValue);
-            // console.log("before:" + preSeekIsPlaying);
-            //mmdRuntime.pauseAnimation();
-          }}
+          // onChangeStart={(sliderValue) => {
+          //   preSeekIsPlayingRef.current = isPlaying
+          //   //seekMmdAnimation(sliderValue);
+          //   // console.log("before:" + preSeekIsPlaying);
+          //   //mmdRuntime.pauseAnimation();
+          // }}
           onChangeEnd={(sliderValue) => {
             //seekMmdAnimation(val);
-            console.log("after:" + preSeekIsPlaying);
-            seekMmdAnimation(sliderValue);
-            if (preSeekIsPlaying) {
-              tryToPlayAnimation();
+            //seekMmdAnimation(sliderValue);
+            if (isPlaying && !isSeekingRef.current) { //mmdPlayanimation resolved
+              console.log("MMD resolved, playing again")
+              mmdRuntime.playAnimation();
             }
+            else if (isPlaying) { //mmdPlayanimation next tick not occured yet
+              console.log("MMD Play STILL PENDING, not playing animation, isplaying:" + isPlayingRef.current)
+              isSeekingRef.current = false;
+              if (!isPlayingRef.current) { //
+                mmdRuntime.playAnimation();
+              } else {
+                mmdRuntime.playAnimation();
+              }
+            }
+            
           }}
         >
           <SliderTrack>

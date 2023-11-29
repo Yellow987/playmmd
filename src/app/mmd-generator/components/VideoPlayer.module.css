@@ -1,0 +1,16 @@
+/* components/VideoPlayer.module.css */
+.hideBigPlayButton {
+  display: none;
+}
+
+.none {
+  display: none;
+}
+
+.vjs-default-skin.vjs-paused .vjs-big-play-button {
+  display: none;
+}
+
+.vjs-default-skin.vjs-paused .vjs-control-bar {
+  display: block;
+}
