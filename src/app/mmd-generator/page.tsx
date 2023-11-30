@@ -5,8 +5,7 @@ import { Flex, Box, useBreakpointValue, useBoolean } from "@chakra-ui/react";
 import Presets from "./components/Presets";
 import Canvas from "./components/Canvas";
 import Controls from "./components/Controls";
-import VideoPlayer from "./components/VideoPlayer";
-import VideoPlayer2 from "./components/VideoPlayer2";
+import VideoPlayer from "./components/VideoPlayer/VideoPlayer";
 
 export default function Home() {
   // TODO fix ssr
@@ -18,7 +17,7 @@ export default function Home() {
   return (
     <>
       <Canvas runtimeRef={runtimeRef} setIsLoaded={setIsLoaded} />
-      {isLoaded && <VideoPlayer2 />}
+      {isLoaded && <VideoPlayer runtimeRef={runtimeRef} />}
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
           <Presets />
@@ -29,4 +28,11 @@ export default function Home() {
       </Flex>
     </>
   );
+}
+
+{
+  /* <Flex direction={flexDir} mt="-60px" // moves the component up by 60px
+height="100px"
+bg="red.200"
+position="relative"> */
 }
