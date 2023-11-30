@@ -1,18 +1,11 @@
 "use client";
-import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
 import {
   enableArcCamera,
   enableMmdCamera,
 } from "../babylon/mmdComponents/cameras";
 
-interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
-}
-
-function Controls(props: Props) {
-  const { runtimeRef } = props;
-
+function Controls() {
   enum CameraControl {
     MMD_CAMERA = "MMD Camera",
     USER_CONTROL_CAMERA = "USER_CONTROL_CAMERA",

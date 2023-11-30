@@ -68,7 +68,7 @@ import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
 import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
 import { createPostProcessor } from "./mmdComponents/postProcessing";
-import { MmdPlayerControl } from "../components/MmdPlayerControls";
+import { MmdPlayerControl } from "../controls/MmdPlayerControls";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(

@@ -4,7 +4,7 @@ import {
   SliderThumb,
   Slider as ChakraSlider,
 } from "@chakra-ui/react";
-import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
+import { getMmdRuntime } from "../babylon/mmdComponents/mmdRuntime";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
@@ -26,15 +26,15 @@ function Slider(props: Props) {
   //   mmdRuntime.seekAnimation(newSecond * 30, true);
   // };
 
-  useEffect(() => {
-    const updater = setInterval(() => {
-      setNum((num) => num + 0.02);
-    }, 500);
+  // useEffect(() => {
+  //   const updater = setInterval(() => {
+  //     setNum((num) => num + 0.02);
+  //   }, 500);
 
-    return () => {
-      clearInterval(updater);
-    };
-  }, []);
+  //   return () => {
+  //     clearInterval(updater);
+  //   };
+  // }, []);
 
   return (
     <ChakraSlider

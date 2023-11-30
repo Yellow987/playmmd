@@ -1,4 +1,4 @@
-import { SceneLoader, Mesh } from "@babylonjs/core";
+import { SceneLoader, Mesh, Scene } from "@babylonjs/core";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 import { CharacterModelData, ModelAniamtionPaths } from "../../constants";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
@@ -11,10 +11,10 @@ let mmdModels: MmdModel[] = [];
 export async function createAndSetMmdModel(
   index: number,
   modelData: CharacterModelData,
+  scene: Scene,
 ): Promise<MmdModel> {
   const mmdRuntime = getMmdRuntime();
   const shadowGenerator = getShadowGenerator();
-  const scene = getScene();
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     "",
     modelData.folderPath,
@@ -31,9 +31,9 @@ export async function createAndSetMmdModel(
 export async function addMmdMotion(
   index: number,
   animationPaths: ModelAniamtionPaths,
+  scene: Scene,
 ): Promise<void> {
   const mmdModel = mmdModels[index];
-  const scene = getScene();
   const orderedKeys: (keyof ModelAniamtionPaths)[] = [
     "skeletonPath",
     "facialPath",
