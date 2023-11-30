@@ -18,20 +18,11 @@ const VideoPlayer = (props: Props) => {
   function formatSecondsToMMSS(seconds: number): string {
     return format(new Date(0, 0, 0, 0, 0, seconds), "mm:ss");
   }
-  const [isPlaying, setIsPlaying] = useState(mmdRuntime.isAnimationPlaying);
-  const isSeekingRef = useRef(false);
   const [second, setSecond] = useState(0);
   const [frame, setFrame] = useState(0);
-  const [randomState, setRandomState] = useState(0);
   const [endSecond, setEndSecond] = useState(mmdRuntime.animationDuration);
 
   useEffect(() => {
-    const updater = setInterval(() => {
-      if (mmdRuntime.currentTime == 0) return;
-      setSecond((second) => second + 0.02);
-      //setFrame(mmdRuntime.currentFrameTime);
-    }, 20);
-
     const onAnimationDurationChangedObserver: Observer<void> | undefined =
       mmdRuntime.onAnimationDurationChangedObservable.add(() => {
         setEndSecond(mmdRuntime.animationDuration);
@@ -39,14 +30,15 @@ const VideoPlayer = (props: Props) => {
 
     const onTickObserver: Observer<void> | undefined =
       mmdRuntime.onAnimationTickObservable.add(() => {
-        //setSecond(mmdRuntime.currentTime);
+        setSecond(mmdRuntime.currentTime);
+        setFrame(mmdRuntime.currentFrameTime);
       });
 
     return () => {
-      clearInterval(updater);
       mmdRuntime.onAnimationDurationChangedObservable.remove(
         onAnimationDurationChangedObserver,
       );
+      mmdRuntime.onAnimationTickObservable.remove(onTickObserver);
     };
   }, []);
 
