@@ -15,6 +15,7 @@ export async function createAndSetMmdModel(
   const mmdRuntime = getMmdRuntime();
   const shadowGenerator = getShadowGenerator();
   const scene = getScene();
+  console.log("Loading model", modelData);
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     "",
     modelData.folderPath,

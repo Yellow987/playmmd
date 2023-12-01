@@ -1,5 +1,6 @@
 export enum CharacterModel {
   HATSUNE_MIKU_YYB_10TH = "HATSUNE_MIKU_YYB_10TH",
+  KAGAMINE_RIN_YYB_10TH = "KAGAMINE_RIN_YYB_10TH",
 }
 
 export const defaultCharacterModel = CharacterModel.HATSUNE_MIKU_YYB_10TH;
@@ -17,6 +18,11 @@ export const CHARACTER_MODELS_DATA: {
     name: "Hatsune Miku YYB 10th",
     folderPath: "/mmd/YYB Hatsune Miku_10th/",
     fileName: "YYB Hatsune Miku_10th_v1.02.pmx",
+  },
+  [CharacterModel.KAGAMINE_RIN_YYB_10TH]: {
+    name: "Kagamine Rin YYB 10th",
+    folderPath: "/mmd/YYB Kagamine Rin_10th/",
+    fileName: "YYB Kagamine Rin_10th_v1.0.pmx",
   },
 };
 
@@ -37,6 +43,8 @@ export enum AnimationPreset {
   LAST_CHRISTMAS = "LAST_CHRISTMAS",
 }
 
+export const defaultAnimationPreset = AnimationPreset.LAST_CHRISTMAS;
+
 export const ANIMATION_PRESETS_DATA: {
   [Key in AnimationPreset]: AnimationPresetData;
 } = {
@@ -44,6 +52,7 @@ export const ANIMATION_PRESETS_DATA: {
     name: "Last Christmas",
     audioPath: "/mmd/Animations/LastChristmas/Audio.wav",
     modelAnimationPaths: [
+      //array in case multiple dancers
       {
         skeletonPath: "/mmd/Animations/LastChristmas/Skeleton.vmd",
         facialPath: "/mmd/Animations/LastChristmas/FaceAndLips.vmd",

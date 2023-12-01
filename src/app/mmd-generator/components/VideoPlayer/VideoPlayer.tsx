@@ -8,6 +8,9 @@ import Slider from "./Slider";
 import Volume from "./Volume";
 import PlayPauseButton from "./PlayPauseButton";
 import { BaseRuntime } from "../../babylon/baseRuntime";
+import Duration from "./Duration";
+import useMmdMotions from "../../babylon/mmdComponents/useMmdMotions";
+import { getScene } from "../../babylon/mmdComponents/scene";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -15,12 +18,11 @@ interface Props {
 
 const VideoPlayer = (props: Props) => {
   const mmdRuntime = getMmdRuntime();
-  function formatSecondsToMMSS(seconds: number): string {
-    return format(new Date(0, 0, 0, 0, 0, seconds), "mm:ss");
-  }
   const [second, setSecond] = useState(0);
   const [frame, setFrame] = useState(0);
   const [endSecond, setEndSecond] = useState(mmdRuntime.animationDuration);
+  const scene = getScene();
+  useMmdMotions(scene, mmdRuntime);
 
   useEffect(() => {
     const onAnimationDurationChangedObserver: Observer<void> | undefined =
@@ -50,9 +52,7 @@ const VideoPlayer = (props: Props) => {
         <PlayPauseButton />
         <Spacer />
         <Flex align="center" position="absolute" right={0}>
-          <Text minWidth="50px" textAlign="center">
-            {formatSecondsToMMSS(second)}/{formatSecondsToMMSS(endSecond)}
-          </Text>
+          <Duration second={second} endSecond={endSecond} />
           <Volume />
         </Flex>
       </Flex>

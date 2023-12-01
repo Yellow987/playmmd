@@ -54,6 +54,7 @@ import {
   CharacterModel,
   ANIMATION_PRESETS_DATA,
   AnimationPreset,
+  defaultAnimationPreset,
 } from "../constants";
 import { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
 import {
@@ -135,11 +136,10 @@ export class SceneBuilder implements ISceneBuilder {
     );
 
     const vmdLoader = new VmdLoader(scene);
-    addMmdMotion(
-      0,
-      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS]
-        .modelAnimationPaths[0],
-    );
+    // addMmdMotion(
+    //   0,
+    //   ANIMATION_PRESETS_DATA[defaultAnimationPreset].modelAnimationPaths[0],
+    // );
 
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",

@@ -24,9 +24,10 @@ function Dropdown(props: Props) {
   );
   const menuOptions = Object.values(props.menuItems);
 
-  useEffect(() => {
-    props.onMenuItemSelect(selectedItem);
-  }, [selectedItem]);
+  const onDropdownMenuItemSelect = (item: any) => {
+    setSelectedItem(item);
+    props.onMenuItemSelect(item);
+  };
 
   return (
     <Box mb={4}>
@@ -39,7 +40,10 @@ function Dropdown(props: Props) {
         </MenuButton>
         <MenuList>
           {menuOptions.map((item) => (
-            <MenuItem key={item.name} onClick={() => setSelectedItem(item)}>
+            <MenuItem
+              key={item.name}
+              onClick={() => onDropdownMenuItemSelect(item)}
+            >
               {item.name}
             </MenuItem>
           ))}

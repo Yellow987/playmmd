@@ -1,14 +1,16 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BaseRuntime } from "./babylon/baseRuntime";
 import { Flex, Box, useBreakpointValue, useBoolean } from "@chakra-ui/react";
 import Presets from "./components/Presets";
-import Canvas from "./components/Canvas";
+import Canvas from "./babylon/Canvas";
 import Controls from "./components/Controls";
 import VideoPlayer from "./components/VideoPlayer/VideoPlayer";
+import useMmdMotions from "./babylon/mmdComponents/useMmdMotions";
+import { getMmdRuntime } from "./babylon/mmdComponents/mmdRuntime";
+import { getScene } from "./babylon/mmdComponents/scene";
 
 export default function Home() {
-  // TODO fix ssr
   const flexDir: "column" | "row" =
     useBreakpointValue({ base: "column", md: "row" }) || "column";
   const runtimeRef = useRef<BaseRuntime | null>(null);

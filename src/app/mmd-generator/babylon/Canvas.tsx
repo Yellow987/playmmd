@@ -2,8 +2,8 @@
 
 import { Engine } from "@babylonjs/core";
 import { useEffect, useRef } from "react";
-import { BaseRuntime } from "../babylon/baseRuntime";
-import { SceneBuilder } from "../babylon/sceneBuilder";
+import { BaseRuntime } from "./baseRuntime";
+import { SceneBuilder } from "./sceneBuilder";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
