@@ -61,16 +61,11 @@ import {
   ImageProcessingConfiguration,
   Material,
 } from "@babylonjs/core/Materials";
-import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
 import { createScene } from "./mmdComponents/scene";
 import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
 import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
-import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
 import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
-import { createPostProcessor } from "./mmdComponents/postProcessing";
-import { MmdPlayerControl } from "../components/MmdPlayerControls";
-
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
@@ -130,10 +125,10 @@ export class SceneBuilder implements ISceneBuilder {
 
     const mmdRuntime = createMmdRuntime(scene);
     mmdRuntime.setCamera(mmdCamera);
-    const mmdModel = await createAndSetMmdModel(
-      0,
-      CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
-    );
+    // const mmdModel = await createAndSetMmdModel(
+    //   0,
+    //   CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
+    // );
 
     const vmdLoader = new VmdLoader(scene);
     // addMmdMotion(
@@ -162,7 +157,7 @@ export class SceneBuilder implements ISceneBuilder {
 
     createArcCamera(scene, _canvas);
 
-    createPostProcessor();
+    //createPostProcessor();
 
     mmdRuntime.playAnimation();
 

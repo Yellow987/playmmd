@@ -1,14 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { BaseRuntime } from "./babylon/baseRuntime";
-import { Flex, Box, useBreakpointValue, useBoolean } from "@chakra-ui/react";
+import { Flex, Box, useBreakpointValue } from "@chakra-ui/react";
 import Presets from "./components/Presets";
 import Canvas from "./babylon/Canvas";
 import Controls from "./components/Controls";
 import VideoPlayer from "./components/VideoPlayer/VideoPlayer";
-import useMmdMotions from "./babylon/mmdComponents/useMmdMotions";
-import { getMmdRuntime } from "./babylon/mmdComponents/mmdRuntime";
-import { getScene } from "./babylon/mmdComponents/scene";
 
 export default function Home() {
   const flexDir: "column" | "row" =
@@ -30,11 +27,4 @@ export default function Home() {
       </Flex>
     </>
   );
-}
-
-{
-  /* <Flex direction={flexDir} mt="-60px" // moves the component up by 60px
-height="100px"
-bg="red.200"
-position="relative"> */
 }

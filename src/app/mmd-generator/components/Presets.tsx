@@ -18,13 +18,12 @@ import {
   ANIMATION_PRESETS_DATA,
   CHARACTER_MODELS_DATA,
 } from "../constants";
-import { createAndSetMmdModel } from "../babylon/mmdComponents/mmdModels";
 
 function Presets() {
   const [selectedStage, setSelectedStage] = useState("Select Stage");
 
   const onCharacterSelect = (item: CharacterModelData) => {
-    createAndSetMmdModel(1, item);
+    //createAndSetMmdModel(1, item);
   };
 
   const onAnimationSelect = (item: AnimationPresetData) => {

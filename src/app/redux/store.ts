@@ -1,10 +1,12 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
 import mmdMotions from "./mmdMotions";
+import mmdModels from "./mmdModels";
 
 export const store = configureStore({
   reducer: {
     mmdMotions: mmdMotions,
+    mmdModels: mmdModels,
   },
 });
 

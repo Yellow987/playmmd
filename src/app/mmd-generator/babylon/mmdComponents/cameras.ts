@@ -3,7 +3,6 @@ import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Scene } from "@babylonjs/core/scene";
 import { getScene } from "./scene";
-import { getPostProcessor } from "./postProcessing";
 
 type Cameras = {
   mmdCamera: MmdCamera | null;
@@ -56,9 +55,9 @@ export function getCameras(): {
 export const enableArcCamera = () => {
   const scene = getScene();
   const arcRotateCamera = cameras.arcCamera;
-  const postProcessor = getPostProcessor();
-  
-  postProcessor.depthOfFieldEnabled = false;
+  //const postProcessor = getPostProcessor();
+
+  //postProcessor.depthOfFieldEnabled = false;
   scene.activeCamera = arcRotateCamera;
 };
 

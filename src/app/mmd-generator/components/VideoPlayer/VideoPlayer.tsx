@@ -11,6 +11,8 @@ import { BaseRuntime } from "../../babylon/baseRuntime";
 import Duration from "./Duration";
 import useMmdMotions from "../../babylon/mmdComponents/useMmdMotions";
 import { getScene } from "../../babylon/mmdComponents/scene";
+import useMmdModels from "../../babylon/mmdComponents/useMmdModels";
+import usePostProcessor from "../../babylon/mmdComponents/usePostProcessor";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -22,7 +24,9 @@ const VideoPlayer = (props: Props) => {
   const [frame, setFrame] = useState(0);
   const [endSecond, setEndSecond] = useState(mmdRuntime.animationDuration);
   const scene = getScene();
-  useMmdMotions(scene, mmdRuntime);
+  const mmdRuntimeModels = useMmdModels(scene, mmdRuntime);
+  useMmdMotions(scene, mmdRuntime, mmdRuntimeModels);
+  usePostProcessor(scene, mmdRuntime, mmdRuntimeModels);
 
   useEffect(() => {
     const onAnimationDurationChangedObserver: Observer<void> | undefined =

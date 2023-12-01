@@ -1,7 +1,7 @@
-import { RootState } from "@/redux/store";
+import { RootState } from "@/app/redux/store";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   ANIMATION_PRESETS_DATA,
   AnimationPreset,
@@ -9,28 +9,43 @@ import {
   ModelAniamtionPaths,
 } from "../../constants";
 import { Scene } from "@babylonjs/core";
-import { getMmdModel } from "./mmdModels";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
+import { setMmdMotions } from "@/app/redux/mmdMotions";
+import { MmdModel } from "babylon-mmd";
 
-const useMmdMotions = (scene: Scene, mmdRuntime: MmdRuntime): void => {
-  const mmdMotions = useSelector((state: RootState) => state.mmdMotions);
-  const mmdModel = getMmdModel(0);
+const useMmdMotions = (
+  scene: Scene,
+  mmdRuntime: MmdRuntime,
+  mmdRuntimeModels: MmdModel[],
+): void => {
+  const dispatch = useDispatch();
+  const mmdMotions: AnimationPreset[] = useSelector(
+    (state: RootState) => state.mmdMotions.motions,
+  );
 
   useEffect(() => {
-    addMmdMotion(0, AnimationPreset.LAST_CHRISTMAS);
+    dispatch(setMmdMotions([AnimationPreset.LAST_CHRISTMAS]));
   }, []);
 
-  async function addMmdMotion(
+  useEffect(() => {
+    const index = 0;
+    console.log(mmdMotions, mmdRuntimeModels);
+    if (!mmdMotions[index] || !mmdRuntimeModels[index]) return;
+    setMmdMotionOnModel(index, mmdMotions[index]);
+  }, [mmdMotions, mmdRuntimeModels]);
+
+  async function setMmdMotionOnModel(
     index: number,
-    animation: AnimationPreset,
+    animationPreset: AnimationPreset,
   ): Promise<void> {
     const orderedKeys: (keyof ModelAniamtionPaths)[] = [
       "skeletonPath",
       "facialPath",
       "lipsPath",
     ];
+    console.log(ANIMATION_PRESETS_DATA[animationPreset].modelAnimationPaths[0]);
     const animationPaths: ModelAniamtionPaths =
-      ANIMATION_PRESETS_DATA[animation].modelAnimationPaths[0];
+      ANIMATION_PRESETS_DATA[animationPreset].modelAnimationPaths[0];
     const OrderedModelAnimationArray: string[] = orderedKeys
       .map((key) => animationPaths[key])
       .filter((path): path is string => path !== undefined);
@@ -41,6 +56,7 @@ const useMmdMotions = (scene: Scene, mmdRuntime: MmdRuntime): void => {
       OrderedModelAnimationArray, //Refactor to ? : ""
     );
 
+    const mmdModel = mmdRuntimeModels[index];
     mmdModel.addAnimation(modelMotion);
     mmdModel.setAnimation("Model_Animation");
   }
