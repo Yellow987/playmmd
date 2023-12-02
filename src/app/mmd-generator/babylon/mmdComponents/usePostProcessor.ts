@@ -1,6 +1,7 @@
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
+  ArcRotateCamera,
   Color4,
   DefaultRenderingPipeline,
   DepthOfFieldEffectBlurLevel,
@@ -9,26 +10,45 @@ import {
   Scene,
   Vector3,
 } from "@babylonjs/core";
-import { MmdModel } from "babylon-mmd";
-import { getCameras } from "./cameras";
+import { MmdCamera, MmdModel } from "babylon-mmd";
+import { Cameras } from "./useCameras";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 const usePostProcessor = (
   scene: Scene,
-  mmdRuntime: MmdRuntime,
+  camerasRef: React.MutableRefObject<Cameras>,
   mmdRuntimeModels: MmdModel[],
 ): void => {
-  const mmdModel = mmdRuntimeModels[0];
+  const depthOfFieldEnabled = useSelector(
+    (state: RootState) => state.controls.depthOfFieldEnabled,
+  );
+  const postProcessorRef = useRef<DefaultRenderingPipeline | null>(null);
+
   useEffect(() => {
-    if (!mmdModel) return;
-    createPostProcessor();
+    if (!mmdRuntimeModels[0]) return;
+    const mmdModel = mmdRuntimeModels[0];
+    const newPostProcessor = createPostProcessor(
+      mmdModel,
+      camerasRef.current.mmdCamera,
+      camerasRef.current.arcCamera,
+    );
+    postProcessorRef.current = newPostProcessor;
   }, [mmdRuntimeModels]);
 
-  function createPostProcessor(): void {
-    const cameras = getCameras();
+  useEffect(() => {
+    if (!postProcessorRef.current) return;
+    postProcessorRef.current.depthOfFieldEnabled = depthOfFieldEnabled;
+  }, [depthOfFieldEnabled]);
 
+  function createPostProcessor(
+    mmdModel: MmdModel,
+    mmdCamera: MmdCamera,
+    arcCamera: ArcRotateCamera,
+  ): DefaultRenderingPipeline {
     const postProcessor = new DefaultRenderingPipeline("default", true, scene, [
-      cameras.mmdCamera,
-      cameras.arcCamera,
+      mmdCamera,
+      arcCamera,
     ]);
     postProcessor.samples = 4;
     postProcessor.bloomEnabled = true;
@@ -59,7 +79,6 @@ const usePostProcessor = (
     const headRelativePosition = new Vector3();
 
     scene.onBeforeRenderObservable.add(() => {
-      const mmdCamera = cameras.mmdCamera;
       const cameraRotation = mmdCamera.rotation;
       Matrix.RotationYawPitchRollToRef(
         -cameraRotation.y,
@@ -98,6 +117,8 @@ const usePostProcessor = (
           Vector3.Dot(cameraNormal, cameraNormal)) *
         1000;
     });
+
+    return postProcessor;
   }
 };
 

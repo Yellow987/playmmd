@@ -5,6 +5,9 @@ import {
   enableArcCamera,
   enableMmdCamera,
 } from "../babylon/mmdComponents/cameras";
+import { useDispatch } from "react-redux";
+import { setActiveCamera } from "@/app/redux/cameras";
+import { setDepthOfFieldEnabled } from "@/app/redux/controls";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -12,6 +15,7 @@ interface Props {
 
 function Controls(props: Props) {
   const { runtimeRef } = props;
+  const dispatch = useDispatch();
 
   enum CameraControl {
     MMD_CAMERA = "MMD Camera",
@@ -22,13 +26,14 @@ function Controls(props: Props) {
     [CameraControl.MMD_CAMERA]: {
       name: "MMD Camera",
       function: () => {
-        enableMmdCamera();
+        dispatch(setActiveCamera("mmdCamera"));
       },
     },
     [CameraControl.USER_CONTROL_CAMERA]: {
       name: "Free Camera",
       function: () => {
-        enableArcCamera();
+        dispatch(setActiveCamera("arcCamera"));
+        dispatch(setDepthOfFieldEnabled(false));
       },
     },
   };

@@ -65,7 +65,6 @@ import { createScene } from "./mmdComponents/scene";
 import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
 import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
-import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
@@ -103,7 +102,7 @@ export class SceneBuilder implements ISceneBuilder {
 
     const scene = await createScene(engine);
 
-    const mmdCamera = createMmdCamera(scene);
+    // const mmdCamera = createMmdCamera(scene);
 
     const directionalLight = new DirectionalLight(
       "DirectionalLight",
@@ -124,25 +123,26 @@ export class SceneBuilder implements ISceneBuilder {
     shadowGenerator.addShadowCaster(ground);
 
     const mmdRuntime = createMmdRuntime(scene);
-    mmdRuntime.setCamera(mmdCamera);
+    //mmdRuntime.setCamera(mmdCamera);
     // const mmdModel = await createAndSetMmdModel(
     //   0,
     //   CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
     // );
 
-    const vmdLoader = new VmdLoader(scene);
     // addMmdMotion(
     //   0,
     //   ANIMATION_PRESETS_DATA[defaultAnimationPreset].modelAnimationPaths[0],
     // );
+    // const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
+    // const vmdLoader = new VmdLoader(scene);
 
-    const cameraMotion = await vmdLoader.loadAsync(
-      "camera_motion_1",
-      "/mmd/cam.vmd",
-    );
+    // const cameraMotion = await vmdLoader.loadAsync(
+    //   "camera_motion_1",
+    //   "/mmd/cam.vmd",
+    // );
 
-    mmdCamera.addAnimation(cameraMotion);
-    mmdCamera.setAnimation("camera_motion_1");
+    // mmdCamera.addAnimation(cameraMotion);
+    // mmdCamera.setAnimation("camera_motion_1");
 
     const audioPlayer = createAudioPlayer(
       ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
@@ -155,11 +155,11 @@ export class SceneBuilder implements ISceneBuilder {
 
     //const controller = new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
 
-    createArcCamera(scene, _canvas);
+    //createArcCamera(scene, _canvas);
 
     //createPostProcessor();
 
-    mmdRuntime.playAnimation();
+    //mmdRuntime.playAnimation();
 
     return scene;
   }

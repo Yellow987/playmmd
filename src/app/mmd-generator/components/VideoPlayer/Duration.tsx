@@ -7,8 +7,9 @@ interface Props {
   endSecond: number;
 }
 function Duration(props: Props) {
-  function formatSecondsToMMSS(seconds: number): string {
-    return format(new Date(0, 0, 0, 0, 0, seconds), "mm:ss");
+  function formatSecondsToMMSS(num: number): string {
+    if (!Number.isFinite(num)) return "--:--";
+    return format(new Date(0, 0, 0, 0, 0, num), "mm:ss");
   }
   const { second, endSecond } = props;
 

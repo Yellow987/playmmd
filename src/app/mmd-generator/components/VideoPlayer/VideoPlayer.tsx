@@ -13,6 +13,8 @@ import useMmdMotions from "../../babylon/mmdComponents/useMmdMotions";
 import { getScene } from "../../babylon/mmdComponents/scene";
 import useMmdModels from "../../babylon/mmdComponents/useMmdModels";
 import usePostProcessor from "../../babylon/mmdComponents/usePostProcessor";
+import useCameras from "../../babylon/mmdComponents/useCameras";
+import useMmd from "../../babylon/mmdComponents/useMmd";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -24,9 +26,11 @@ const VideoPlayer = (props: Props) => {
   const [frame, setFrame] = useState(0);
   const [endSecond, setEndSecond] = useState(mmdRuntime.animationDuration);
   const scene = getScene();
-  const mmdRuntimeModels = useMmdModels(scene, mmdRuntime);
-  useMmdMotions(scene, mmdRuntime, mmdRuntimeModels);
-  usePostProcessor(scene, mmdRuntime, mmdRuntimeModels);
+  if (props.runtimeRef.current?._canvas) {
+    useMmd(scene, mmdRuntime, props.runtimeRef.current._canvas);
+  } else {
+    throw new Error("canvas is not found");
+  }
 
   useEffect(() => {
     const onAnimationDurationChangedObserver: Observer<void> | undefined =
