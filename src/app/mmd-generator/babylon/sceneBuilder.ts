@@ -20,27 +20,13 @@ import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { Scene } from "@babylonjs/core/scene";
 import type { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import { SdefInjector } from "babylon-mmd/esm/Loader/sdefInjector";
-
 import type { ISceneBuilder } from "./baseRuntime";
-import {
-  CHARACTER_MODELS_DATA,
-  CharacterModel,
-  ANIMATION_PRESETS_DATA,
-  AnimationPreset,
-  defaultAnimationPreset,
-} from "../constants";
 import { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
-import {
-  ImageProcessingConfiguration,
-  Material,
-} from "@babylonjs/core/Materials";
+import { Material } from "@babylonjs/core/Materials";
 import { createScene } from "./mmdComponents/scene";
-import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
-import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
-import { createAudioPlayer } from "./mmdComponents/audioPlayer";
+import HavokPhysics from "@babylonjs/havok";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
-import HavokPhysics from "@babylonjs/havok";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 export class SceneBuilder implements ISceneBuilder {
   public async build(

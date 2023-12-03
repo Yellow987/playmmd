@@ -6,7 +6,7 @@ const mmd = createSlice({
   initialState: {
     second: 0,
     animationDuration: 0,
-    isPlaying: false,
+    isPlaying: true,
   },
   reducers: {
     setSecond: (state, action: PayloadAction<number>) => {

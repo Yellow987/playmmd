@@ -5,7 +5,6 @@ const controls = createSlice({
   name: "controls",
   initialState: {
     depthOfFieldEnabled: true,
-    playAnimation: true,
     volume: 1,
     isMuted: true,
   },
