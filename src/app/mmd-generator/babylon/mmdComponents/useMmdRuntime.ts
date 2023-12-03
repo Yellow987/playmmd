@@ -9,23 +9,21 @@ import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
 import { Observer } from "@babylonjs/core/Misc/observable";
 import { setAnimationDuration } from "@/app/redux/mmd";
 
-const useMmdRuntime = (
-  sceneRef: MutableRefObject<Scene>,
-): MutableRefObject<MmdRuntime> => {
-  const mmdRuntimeRef = useRef<MmdRuntime>(createMmdRuntime(sceneRef.current));
+const useMmdRuntime = (sceneRef: MutableRefObject<Scene>): MmdRuntime => {
   const dispatch = useDispatch();
+  let mmdRuntime: MmdRuntime | null = null;
 
   useEffect(() => {
-    mmdRuntimeRef.current.register(sceneRef.current);
+    mmdRuntime = createMmdRuntime(sceneRef.current);
 
     const onAnimationDurationChangedObserver: Observer<void> | undefined =
-      mmdRuntimeRef.current.onAnimationDurationChangedObservable.add(() => {
-        const newDuration = mmdRuntimeRef.current.animationDuration;
+      mmdRuntime.onAnimationDurationChangedObservable.add(() => {
+        const newDuration = mmdRuntime!.animationDuration;
         dispatch(setAnimationDuration(newDuration));
       });
 
     return () => {
-      mmdRuntimeRef.current.onAnimationDurationChangedObservable.remove(
+      mmdRuntime!.onAnimationDurationChangedObservable.remove(
         onAnimationDurationChangedObserver,
       );
     };
@@ -37,7 +35,7 @@ const useMmdRuntime = (
     return newMmdRuntime;
   }
 
-  return mmdRuntimeRef;
+  return mmdRuntime;
 };
 
 export default useMmdRuntime;

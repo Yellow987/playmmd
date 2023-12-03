@@ -5,7 +5,7 @@ import { Flex, Box, useBreakpointValue } from "@chakra-ui/react";
 import Presets from "./components/Presets";
 import Canvas from "./babylon/Canvas";
 import Controls from "./components/Controls";
-import VideoPlayerControls from "./components/VideoPlayer/VideoPlayer";
+import VideoPlayerControls from "./components/VideoPlayer/VideoPlayerControls";
 import { Scene } from "@babylonjs/core/scene";
 import UseMmd from "./babylon/mmdComponents/UseMmd";
 
@@ -32,10 +32,10 @@ export default function Home() {
       <VideoPlayerControls />
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
-          {/* <Presets /> */}
+          <Presets />
         </Box>
         <Box flex="2" p={4} maxWidth={flexDir === "row" ? "67%" : "100%"}>
-          {/* <Controls runtimeRef={runtimeRef} /> */}
+          <Controls />
         </Box>
       </Flex>
     </>

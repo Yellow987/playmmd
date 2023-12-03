@@ -6,6 +6,7 @@ const mmd = createSlice({
   initialState: {
     second: 0,
     animationDuration: 0,
+    isPlaying: false,
   },
   reducers: {
     setSecond: (state, action: PayloadAction<number>) => {
@@ -14,8 +15,11 @@ const mmd = createSlice({
     setAnimationDuration: (state, action: PayloadAction<number>) => {
       state.animationDuration = action.payload;
     },
+    setIsPlaying: (state, action: PayloadAction<boolean>) => {
+      state.isPlaying = action.payload;
+    },
   },
 });
 
-export const { setSecond, setAnimationDuration } = mmd.actions;
+export const { setSecond, setAnimationDuration, setIsPlaying } = mmd.actions;
 export default mmd.reducer;

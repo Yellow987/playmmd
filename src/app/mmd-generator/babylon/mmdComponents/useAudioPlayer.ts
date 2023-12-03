@@ -8,14 +8,15 @@ import { RootState } from "@/app/redux/store";
 
 const useAudioPlayer = (
   sceneRef: MutableRefObject<Scene>,
-  mmdRuntimeRef: MutableRefObject<MmdRuntime>,
+  mmdRuntime: MmdRuntime,
 ): void => {
   const audioPath = useSelector((state: RootState) => state.audio.audioPath);
   const volume = useSelector((state: RootState) => state.controls.volume);
+  const isMuted = useSelector((state: RootState) => state.controls.isMuted);
   const audioPlayerRef = useRef<StreamAudioPlayer>(
     new StreamAudioPlayer(sceneRef.current),
   );
-  mmdRuntimeRef.current.setAudioPlayer(audioPlayerRef.current);
+  mmdRuntime.setAudioPlayer(audioPlayerRef.current);
 
   useEffect(() => {
     audioPlayerRef.current.source = audioPath;
@@ -24,6 +25,14 @@ const useAudioPlayer = (
   useEffect(() => {
     audioPlayerRef.current.volume = volume;
   }, [volume]);
+
+  useEffect(() => {
+    if (isMuted) {
+      audioPlayerRef.current.mute();
+    } else {
+      audioPlayerRef.current.unmute();
+    }
+  }, [isMuted]);
 
   function createAudioPlayer(
     scene: Scene,

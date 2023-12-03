@@ -14,7 +14,7 @@ export type Cameras = {
 
 const useCameras = (
   sceneRef: MutableRefObject<Scene>,
-  mmdRuntimeRef: MutableRefObject<MmdRuntime>,
+  mmdRuntime: MmdRuntime,
   canvasRef: MutableRefObject<HTMLCanvasElement>,
 ): MutableRefObject<Cameras> => {
   const camerasRef = useRef<Cameras>({
@@ -30,7 +30,7 @@ const useCameras = (
       loadMmdCameraMotion();
     }
 
-    mmdRuntimeRef.current.setCamera(camerasRef.current.mmdCamera);
+    mmdRuntime.setCamera(camerasRef.current.mmdCamera);
     loadCameraMotion();
   }, []);
 

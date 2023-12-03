@@ -1,24 +1,27 @@
 "use client";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import {
-  INITIAL_DEPTH_OF_FIELD_ENABLED,
-  INITIAL_PLAY_ANIMATION,
-  INITIAL_VOLUME,
-} from "./initial";
 
 const controls = createSlice({
   name: "controls",
   initialState: {
-    depthOfFieldEnabled: INITIAL_DEPTH_OF_FIELD_ENABLED,
-    playAnimation: INITIAL_PLAY_ANIMATION,
-    volume: INITIAL_VOLUME,
+    depthOfFieldEnabled: true,
+    playAnimation: true,
+    volume: 1,
+    isMuted: true,
   },
   reducers: {
     setDepthOfFieldEnabled: (state, action: PayloadAction<boolean>) => {
       state.depthOfFieldEnabled = action.payload;
     },
+    setVolume: (state, action: PayloadAction<number>) => {
+      state.volume = action.payload;
+    },
+    setIsMuted: (state, action: PayloadAction<boolean>) => {
+      state.isMuted = action.payload;
+    },
   },
 });
 
-export const { setDepthOfFieldEnabled } = controls.actions;
+export const { setDepthOfFieldEnabled, setVolume, setIsMuted } =
+  controls.actions;
 export default controls.reducer;

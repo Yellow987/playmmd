@@ -4,27 +4,11 @@ import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
 import { Button, Icon } from "@chakra-ui/react";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { Observer } from "@babylonjs/core/Misc/observable";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 function PlayPauseButton() {
-  const mmdRuntime = getMmdRuntime();
-  const [isPlaying, setIsPlaying] = useState(mmdRuntime.isAnimationPlaying);
-
-  useEffect(() => {
-    const onPlayAnimationObserver: Observer<void> =
-      mmdRuntime.onPlayAnimationObservable.add(() => {
-        setIsPlaying(true);
-      });
-
-    const onPauseAnimationObserver: Observer<void> =
-      mmdRuntime.onPauseAnimationObservable.add(() => {
-        setIsPlaying(false);
-      });
-
-    return () => {
-      mmdRuntime.onPlayAnimationObservable.remove(onPlayAnimationObserver);
-      mmdRuntime.onPauseAnimationObservable.remove(onPauseAnimationObserver);
-    };
-  }, []);
+  const isPlaying = useSelector((state: RootState) => state.mmd.isPlaying);
 
   return (
     <>
@@ -33,9 +17,9 @@ function PlayPauseButton() {
       </Button> */}
       <Button
         onClick={() =>
-          mmdRuntime.isAnimationPlaying
-            ? mmdRuntime.pauseAnimation()
-            : mmdRuntime.playAnimation()
+          getMmdRuntime().isAnimationPlaying
+            ? getMmdRuntime().pauseAnimation()
+            : getMmdRuntime().playAnimation()
         }
         size="sm"
         mx={2}

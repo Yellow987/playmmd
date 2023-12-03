@@ -17,11 +17,12 @@ function Slider() {
     (state: RootState) => state.mmd.animationDuration,
   );
   const dispatch = useDispatch();
+  const wasPlayingRef = useRef(false);
 
   const onSeek = (seekTo: number) => {
     const newSecond = (seekTo / 100) * animationDuration;
     dispatch(setSecond(newSecond));
-    mmdRuntime.seekAnimation(newSecond * 30, true);
+    getMmdRuntime().seekAnimation(newSecond * 30, true);
   };
 
   return (
@@ -35,11 +36,11 @@ function Slider() {
         onSeek(sliderValue);
       }}
       onChangeStart={() => {
-        wasPlayingRef.current = mmdRuntime.isAnimationPlaying;
-        mmdRuntime.pauseAnimation();
+        wasPlayingRef.current = getMmdRuntime().isAnimationPlaying;
+        getMmdRuntime().pauseAnimation();
       }}
       onChangeEnd={() => {
-        if (wasPlayingRef.current) mmdRuntime.playAnimation();
+        if (wasPlayingRef.current) getMmdRuntime().playAnimation();
       }}
     >
       <SliderTrack>

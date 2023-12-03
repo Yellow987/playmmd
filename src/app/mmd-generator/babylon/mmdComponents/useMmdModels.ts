@@ -14,7 +14,7 @@ import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator"
 
 const useMmdModels = (
   sceneRef: MutableRefObject<Scene>,
-  mmdRuntimeRef: MutableRefObject<MmdRuntime>,
+  mmdRuntime: MmdRuntime,
 ): MmdModel[] => {
   const dispatch = useDispatch();
   const mmdCharacterModels: CharacterModel[] = useSelector(
@@ -58,7 +58,7 @@ const useMmdModels = (
       ?.getShadowGenerator() as ShadowGenerator;
     shadowGenerator.addShadowCaster(mmdMesh);
 
-    const mmdModel = mmdRuntimeRef.current.createMmdModel(mmdMesh);
+    const mmdModel = mmdRuntime.createMmdModel(mmdMesh);
     return mmdModel;
   }
 

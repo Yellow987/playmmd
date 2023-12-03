@@ -5,11 +5,7 @@ import { useDispatch } from "react-redux";
 import { setActiveCamera } from "@/app/redux/cameras";
 import { setDepthOfFieldEnabled } from "@/app/redux/controls";
 
-interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
-}
-
-function Controls(props: Props) {
+function Controls() {
   const dispatch = useDispatch();
 
   enum CameraControl {

@@ -44,8 +44,8 @@ const VideoPlayerControls = (props: Props) => {
 
   return (
     <VStack mx={2}>
-      <Slider second={second} setSecond={setSecond} setFrame={setFrame} />
-      {/* <Flex align="center" w="full" marginTop={-2}>
+      <Slider />
+      <Flex align="center" w="full" marginTop={-2}>
         <Spacer />
         <PlayPauseButton />
         <Spacer />
@@ -53,7 +53,7 @@ const VideoPlayerControls = (props: Props) => {
           <Duration second={second} endSecond={endSecond} />
           <Volume />
         </Flex>
-      </Flex> */}
+      </Flex>
     </VStack>
   );
 };

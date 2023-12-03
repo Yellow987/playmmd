@@ -38,6 +38,10 @@ import { createScene } from "./mmdComponents/scene";
 import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
 import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
+import HavokPhysics from "@babylonjs/havok";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 export class SceneBuilder implements ISceneBuilder {
   public async build(
     _canvas: HTMLCanvasElement,
@@ -73,7 +77,14 @@ export class SceneBuilder implements ISceneBuilder {
       /* do nothing */
     };
 
-    const scene = await createScene(engine);
+    const scene = createScene(engine);
+    // const scene = new Scene(engine);
+    // scene.enablePhysics(
+    //   new Vector3(0, -9.8 * 10, 0),
+    //   new HavokPlugin(true, await HavokPhysics()),
+    // );
+
+    // scene.ambientColor = new Color3(1, 1, 1);
 
     // const mmdCamera = createMmdCamera(scene);
 
@@ -117,10 +128,10 @@ export class SceneBuilder implements ISceneBuilder {
     // mmdCamera.addAnimation(cameraMotion);
     // mmdCamera.setAnimation("camera_motion_1");
 
-    const audioPlayer = createAudioPlayer(
-      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
-    );
-    audioPlayer.volume = 1;
+    // const audioPlayer = createAudioPlayer(
+    //   ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
+    // );
+    // audioPlayer.volume = 1;
     //mmdRuntime.setAudioPlayer(audioPlayer);
 
     //const controller = new MmdPlayerControl(scene, mmdRuntime, audioPlayer);

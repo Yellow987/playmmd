@@ -1,11 +1,14 @@
 "use client";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { INITIAL_AUDIO_PATH } from "./initial";
+import {
+  ANIMATION_PRESETS_DATA,
+  AnimationPreset,
+} from "../mmd-generator/constants";
 
 const audio = createSlice({
   name: "audio",
   initialState: {
-    audioPath: INITIAL_AUDIO_PATH,
+    audioPath: ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
   },
   reducers: {
     setActiveCamera: (state, action: PayloadAction<string>) => {
