@@ -4,21 +4,23 @@ import { Engine } from "@babylonjs/core";
 import { useEffect, useRef } from "react";
 import { BaseRuntime } from "./baseRuntime";
 import { SceneBuilder } from "./sceneBuilder";
+import { Scene } from "@babylonjs/core/scene";
 
 interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  sceneRef: React.MutableRefObject<Scene | null>;
 }
 
 function Canvas(props: Props) {
-  const canvasRef = useRef(null);
-  const { runtimeRef, setIsLoaded } = props;
+  const babylonCanvasRef = useRef(null);
+  const { canvasRef, sceneRef, setIsLoaded } = props;
 
   useEffect(() => {
     // Ensure the canvas is available
-    if (canvasRef.current) {
+    if (babylonCanvasRef.current) {
       console.log("RENDERED CANVAS");
-      const canvas = canvasRef.current;
+      const canvas = babylonCanvasRef.current;
       const engine = new Engine(
         canvas,
         false,
@@ -42,7 +44,8 @@ function Canvas(props: Props) {
         sceneBuilder: new SceneBuilder(),
       }).then((runtime) => {
         runtime.run();
-        runtimeRef.current = runtime;
+        canvasRef.current = runtime.canvas;
+        sceneRef.current = runtime.scene;
         setIsLoaded(true);
       });
 
@@ -63,7 +66,10 @@ function Canvas(props: Props) {
 
   return (
     <div>
-      <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
+      <canvas
+        ref={babylonCanvasRef}
+        style={{ width: "100%", height: "100%" }}
+      />
     </div>
   );
 }

@@ -1,22 +1,22 @@
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
-import { useEffect, useRef } from "react";
-import {
-  ArcRotateCamera,
-  Color4,
-  DefaultRenderingPipeline,
-  DepthOfFieldEffectBlurLevel,
-  ImageProcessingConfiguration,
-  Matrix,
-  Scene,
-  Vector3,
-} from "@babylonjs/core";
-import { MmdCamera, MmdModel } from "babylon-mmd";
+import { MutableRefObject, useEffect, useRef } from "react";
 import { Cameras } from "./useCameras";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
+import "@babylonjs/core/Rendering/prePassRendererSceneComponent";
+import "@babylonjs/core/Rendering/depthRendererSceneComponent";
+import { Scene } from "@babylonjs/core/scene";
+import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline";
+import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
+import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
+import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
+import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
+import { ImageProcessingConfiguration } from "@babylonjs/core/Materials/imageProcessingConfiguration";
+import { Color4 } from "@babylonjs/core/Maths/math.color";
+import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 const usePostProcessor = (
-  scene: Scene,
+  sceneRef: MutableRefObject<Scene>,
   camerasRef: React.MutableRefObject<Cameras>,
   mmdRuntimeModels: MmdModel[],
 ): void => {
@@ -30,8 +30,8 @@ const usePostProcessor = (
     const mmdModel = mmdRuntimeModels[0];
     const newPostProcessor = createPostProcessor(
       mmdModel,
-      camerasRef.current.mmdCamera,
-      camerasRef.current.arcCamera,
+      sceneRef.current.getCameraById("MmdCamera") as MmdCamera,
+      sceneRef.current.getCameraById("ArcCamera") as ArcRotateCamera,
     );
     postProcessorRef.current = newPostProcessor;
   }, [mmdRuntimeModels]);
@@ -46,10 +46,12 @@ const usePostProcessor = (
     mmdCamera: MmdCamera,
     arcCamera: ArcRotateCamera,
   ): DefaultRenderingPipeline {
-    const postProcessor = new DefaultRenderingPipeline("default", true, scene, [
-      mmdCamera,
-      arcCamera,
-    ]);
+    const postProcessor = new DefaultRenderingPipeline(
+      "default",
+      true,
+      sceneRef.current,
+      [mmdCamera, arcCamera],
+    );
     postProcessor.samples = 4;
     postProcessor.bloomEnabled = true;
     postProcessor.chromaticAberrationEnabled = true;
@@ -78,7 +80,7 @@ const usePostProcessor = (
     const cameraEyePosition = new Vector3();
     const headRelativePosition = new Vector3();
 
-    scene.onBeforeRenderObservable.add(() => {
+    sceneRef.current.onBeforeRenderObservable.add(() => {
       const cameraRotation = mmdCamera.rotation;
       Matrix.RotationYawPitchRollToRef(
         -cameraRotation.y,

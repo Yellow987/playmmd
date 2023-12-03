@@ -5,6 +5,7 @@ import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
+import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeCameraAnimation";
 
 export type Cameras = {
   mmdCamera: MmdCamera;
@@ -12,13 +13,13 @@ export type Cameras = {
 };
 
 const useCameras = (
-  scene: Scene,
-  mmdRuntime: MmdRuntime,
-  canvas: HTMLCanvasElement,
+  sceneRef: MutableRefObject<Scene>,
+  mmdRuntimeRef: MutableRefObject<MmdRuntime>,
+  canvasRef: MutableRefObject<HTMLCanvasElement>,
 ): MutableRefObject<Cameras> => {
   const camerasRef = useRef<Cameras>({
-    mmdCamera: createMmdCamera(scene),
-    arcCamera: createArcCamera(scene, canvas),
+    mmdCamera: createMmdCamera(sceneRef.current),
+    arcCamera: createArcCamera(sceneRef.current, canvasRef.current),
   });
   const activeCamera = useSelector(
     (state: RootState) => state.cameras.activeCamera,
@@ -29,21 +30,21 @@ const useCameras = (
       loadMmdCameraMotion();
     }
 
-    mmdRuntime.setCamera(camerasRef.current.mmdCamera);
+    mmdRuntimeRef.current.setCamera(camerasRef.current.mmdCamera);
     loadCameraMotion();
   }, []);
 
   useEffect(() => {
     console.log(activeCamera);
     if (activeCamera === "mmdCamera") {
-      scene.activeCamera = camerasRef.current.mmdCamera;
+      sceneRef.current.activeCamera = camerasRef.current.mmdCamera;
     } else {
-      scene.activeCamera = camerasRef.current.arcCamera;
+      sceneRef.current.activeCamera = camerasRef.current.arcCamera;
     }
   }, [activeCamera]);
 
   async function loadMmdCameraMotion() {
-    const vmdLoader = new VmdLoader(scene);
+    const vmdLoader = new VmdLoader(sceneRef.current);
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
       "/mmd/cam.vmd",
@@ -59,7 +60,7 @@ const useCameras = (
     _canvas: HTMLCanvasElement,
   ): ArcRotateCamera {
     const arcRotateCamera = new ArcRotateCamera(
-      "arcRotateCamera",
+      "ArcCamera",
       0,
       0,
       45,
@@ -76,7 +77,7 @@ const useCameras = (
   }
 
   function createMmdCamera(scene: Scene): MmdCamera {
-    const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
+    const mmdCamera = new MmdCamera("MmdCamera", new Vector3(0, 10, 0), scene);
     return mmdCamera;
   }
 

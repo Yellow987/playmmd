@@ -14,48 +14,38 @@ import { getScene } from "../../babylon/mmdComponents/scene";
 import useMmdModels from "../../babylon/mmdComponents/useMmdModels";
 import usePostProcessor from "../../babylon/mmdComponents/usePostProcessor";
 import useCameras from "../../babylon/mmdComponents/useCameras";
-import useMmd from "../../babylon/mmdComponents/useMmd";
 
-interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
-}
+interface Props {}
 
-const VideoPlayer = (props: Props) => {
-  const mmdRuntime = getMmdRuntime();
+const VideoPlayerControls = (props: Props) => {
   const [second, setSecond] = useState(0);
   const [frame, setFrame] = useState(0);
-  const [endSecond, setEndSecond] = useState(mmdRuntime.animationDuration);
-  const scene = getScene();
-  if (props.runtimeRef.current?._canvas) {
-    useMmd(scene, mmdRuntime, props.runtimeRef.current._canvas);
-  } else {
-    throw new Error("canvas is not found");
-  }
+  const [endSecond, setEndSecond] = useState(10);
 
-  useEffect(() => {
-    const onAnimationDurationChangedObserver: Observer<void> | undefined =
-      mmdRuntime.onAnimationDurationChangedObservable.add(() => {
-        setEndSecond(mmdRuntime.animationDuration);
-      });
+  // useEffect(() => {
+  //   const onAnimationDurationChangedObserver: Observer<void> | undefined =
+  //     mmdRuntime.onAnimationDurationChangedObservable.add(() => {
+  //       setEndSecond(mmdRuntime.animationDuration);
+  //     });
 
-    const onTickObserver: Observer<void> | undefined =
-      mmdRuntime.onAnimationTickObservable.add(() => {
-        setSecond(mmdRuntime.currentTime);
-        setFrame(mmdRuntime.currentFrameTime);
-      });
+  //   const onTickObserver: Observer<void> | undefined =
+  //     mmdRuntime.onAnimationTickObservable.add(() => {
+  //       setSecond(mmdRuntime.currentTime);
+  //       setFrame(mmdRuntime.currentFrameTime);
+  //     });
 
-    return () => {
-      mmdRuntime.onAnimationDurationChangedObservable.remove(
-        onAnimationDurationChangedObserver,
-      );
-      mmdRuntime.onAnimationTickObservable.remove(onTickObserver);
-    };
-  }, []);
+  //   return () => {
+  //     mmdRuntime.onAnimationDurationChangedObservable.remove(
+  //       onAnimationDurationChangedObserver,
+  //     );
+  //     mmdRuntime.onAnimationTickObservable.remove(onTickObserver);
+  //   };
+  // }, []);
 
   return (
     <VStack mx={2}>
       <Slider second={second} setSecond={setSecond} setFrame={setFrame} />
-      <Flex align="center" w="full" marginTop={-2}>
+      {/* <Flex align="center" w="full" marginTop={-2}>
         <Spacer />
         <PlayPauseButton />
         <Spacer />
@@ -63,9 +53,9 @@ const VideoPlayer = (props: Props) => {
           <Duration second={second} endSecond={endSecond} />
           <Volume />
         </Flex>
-      </Flex>
+      </Flex> */}
     </VStack>
   );
 };
 
-export default VideoPlayer;
+export default VideoPlayerControls;

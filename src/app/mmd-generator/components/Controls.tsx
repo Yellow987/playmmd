@@ -1,10 +1,6 @@
 "use client";
 import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
-import {
-  enableArcCamera,
-  enableMmdCamera,
-} from "../babylon/mmdComponents/cameras";
 import { useDispatch } from "react-redux";
 import { setActiveCamera } from "@/app/redux/cameras";
 import { setDepthOfFieldEnabled } from "@/app/redux/controls";
@@ -14,7 +10,6 @@ interface Props {
 }
 
 function Controls(props: Props) {
-  const { runtimeRef } = props;
   const dispatch = useDispatch();
 
   enum CameraControl {

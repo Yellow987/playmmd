@@ -6,23 +6,21 @@ import {
 } from "@chakra-ui/react";
 import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
+import { useDispatch } from "react-redux";
+import { setSecond } from "@/app/redux/mmd";
 
-interface Props {
-  second: number;
-  setSecond: (newSecond: number) => void;
-  setFrame: (newFrame: number) => void;
-}
-
-function Slider(props: Props) {
-  const { second, setSecond, setFrame } = props;
-  const mmdRuntime = getMmdRuntime();
-  const wasPlayingRef = useRef(false);
-  const [num, setNum] = useState(0);
+function Slider() {
+  const second = useSelector((state: RootState) => state.mmd.second);
+  const animationDuration = useSelector(
+    (state: RootState) => state.mmd.animationDuration,
+  );
+  const dispatch = useDispatch();
 
   const onSeek = (seekTo: number) => {
-    const newSecond = (seekTo / 100) * mmdRuntime.animationDuration;
-    setSecond(newSecond);
-    setFrame(Math.round(newSecond * 30));
+    const newSecond = (seekTo / 100) * animationDuration;
+    dispatch(setSecond(newSecond));
     mmdRuntime.seekAnimation(newSecond * 30, true);
   };
 
@@ -31,7 +29,7 @@ function Slider(props: Props) {
       mx={40}
       aria-label="seek-slider"
       focusThumbOnChange={false}
-      value={(second / mmdRuntime.animationDuration) * 100}
+      value={(second / animationDuration) * 100}
       step={0.1}
       onChange={(sliderValue) => {
         onSeek(sliderValue);

@@ -14,14 +14,14 @@ export async function createScene(engine: Engine): Promise<Scene> {
 
   scene.ambientColor = new Color3(1, 1, 1);
 
-  const hemisphericLight = new HemisphericLight(
-    "HemisphericLight",
-    new Vector3(0, 1, 0),
-    scene,
-  );
-  hemisphericLight.intensity = 0.3;
-  hemisphericLight.specular.set(0, 0, 0);
-  hemisphericLight.groundColor.set(1, 1, 1);
+  // const hemisphericLight = new HemisphericLight(
+  //   "HemisphericLight",
+  //   new Vector3(0, 1, 0),
+  //   scene,
+  // );
+  // hemisphericLight.intensity = 0.3;
+  // hemisphericLight.specular.set(0, 0, 0);
+  // hemisphericLight.groundColor.set(1, 1, 1);
 
   return scene;
 }
