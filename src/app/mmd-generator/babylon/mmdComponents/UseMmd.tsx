@@ -8,7 +8,6 @@ import useStage from "./useStage";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { Scene } from "@babylonjs/core/scene";
 import useAudioPlayer from "./useAudioPlayer";
-import useMmdRuntime from "./useMmdRuntime";
 import { BaseRuntime } from "../baseRuntime";
 import { createMmdRuntime } from "./mmdRuntime";
 import { Observer } from "@babylonjs/core/Misc/observable";
@@ -32,10 +31,13 @@ const UseMmd = (props: Props) => {
   useLighting(sceneRef);
   useStage(sceneRef);
   useAudioPlayer(sceneRef, mmdRuntime);
-  const mmdRuntimeModels = useMmdModels(sceneRef, mmdRuntime);
-  useMmdMotions(sceneRef, mmdRuntimeModels);
-  usePostProcessor(sceneRef, mmdRuntimeModels);
-  mmdRuntime.playAnimation();
+  const mmdCharacterModelsRef = useMmdModels(sceneRef, mmdRuntime);
+  useMmdMotions(sceneRef, mmdCharacterModelsRef);
+  //usePostProcessor(sceneRef, mmdRuntimeModels);
+
+  useEffect(() => {
+    mmdRuntime.playAnimation();
+  }, []);
 
   useEffect(() => {
     const onAnimationDurationChangedObserver: Observer<void> | undefined =

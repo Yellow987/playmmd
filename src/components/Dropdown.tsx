@@ -24,7 +24,7 @@ function Dropdown(props: Props) {
 
   const onDropdownMenuItemSelect = (key: string) => {
     setSelectedItem(key);
-    props.onMenuItemSelect(props.menuItems[key]);
+    props.onMenuItemSelect(key);
   };
 
   return (

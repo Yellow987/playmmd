@@ -5,7 +5,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 const mmdMotions = createSlice({
   name: "mmdMotions",
   initialState: {
-    motions: [] as AnimationPreset[],
+    motions: [AnimationPreset.LAST_CHRISTMAS],
   },
   reducers: {
     setMmdMotions: (state, action: PayloadAction<AnimationPreset[]>) => {

@@ -5,14 +5,19 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 const MmdModels = createSlice({
   name: "mmdModels",
   initialState: {
-    characterModels: [] as CharacterModel[],
+    models: [CharacterModel.HATSUNE_MIKU_YYB_10TH],
+    modelsLoaded: [false],
+    numberOfModels: 1,
   },
   reducers: {
-    setMmdModels: (state, action: PayloadAction<CharacterModel[]>) => {
-      state.characterModels = action.payload;
+    setModels: (state, action: PayloadAction<CharacterModel[]>) => {
+      state.models = action.payload;
+    },
+    setModelsLoaded: (state, action: PayloadAction<boolean[]>) => {
+      state.modelsLoaded = action.payload;
     },
   },
 });
 
-export const { setMmdModels } = MmdModels.actions;
+export const { setModels, setModelsLoaded } = MmdModels.actions;
 export default MmdModels.reducer;

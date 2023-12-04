@@ -16,23 +16,21 @@ import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 
 const useMmdMotions = (
   sceneRef: MutableRefObject<Scene>,
-  mmdRuntimeModels: MmdModel[],
+  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>,
 ): void => {
   const dispatch = useDispatch();
   const mmdMotions: AnimationPreset[] = useSelector(
     (state: RootState) => state.mmdMotions.motions,
   );
-
-  useEffect(() => {
-    dispatch(setMmdMotions([AnimationPreset.LAST_CHRISTMAS]));
-  }, []);
+  const mmdModelsLoaded = useSelector(
+    (state: RootState) => state.mmdModels.modelsLoaded,
+  );
 
   useEffect(() => {
     const index = 0;
-    console.log(mmdMotions, mmdRuntimeModels);
-    if (!mmdMotions[index] || !mmdRuntimeModels[index]) return;
+    if (!mmdMotions[index] || !mmdCharacterModelsRef.current[index]) return;
     setMmdMotionOnModel(index, mmdMotions[index]);
-  }, [mmdMotions, mmdRuntimeModels]);
+  }, [mmdMotions, mmdModelsLoaded]);
 
   async function setMmdMotionOnModel(
     index: number,
@@ -56,7 +54,7 @@ const useMmdMotions = (
       OrderedModelAnimationArray, //Refactor to ? : ""
     );
 
-    const mmdModel = mmdRuntimeModels[index];
+    const mmdModel = mmdCharacterModelsRef.current[index];
     mmdModel.addAnimation(modelMotion);
     mmdModel.setAnimation("Model_Animation");
   }

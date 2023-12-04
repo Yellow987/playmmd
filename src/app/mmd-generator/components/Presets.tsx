@@ -19,7 +19,7 @@ import {
   CHARACTER_MODELS_DATA,
 } from "../constants";
 import { useDispatch } from "react-redux";
-import { setMmdModels } from "@/app/redux/mmdModels";
+import { setModels } from "@/app/redux/mmdModels";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 
@@ -27,17 +27,17 @@ function Presets() {
   const [selectedStage, setSelectedStage] = useState("Select Stage");
   const dispatch = useDispatch();
   const characterModels = useSelector(
-    (state: RootState) => state.mmdModels.characterModels,
+    (state: RootState) => state.mmdModels.models,
   );
 
   const onCharacterSelect = (model: CharacterModel) => {
     const newCharacterModels = [...characterModels];
     newCharacterModels[0] = model;
-    dispatch(setMmdModels(newCharacterModels));
+    dispatch(setModels(newCharacterModels));
   };
 
-  const onAnimationSelect = (item: AnimationPresetData) => {
-    console.log(item);
+  const onAnimationSelect = (animation: AnimationPreset) => {
+    console.log(animation);
   };
 
   return (

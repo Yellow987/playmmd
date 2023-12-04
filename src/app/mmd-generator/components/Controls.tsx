@@ -29,7 +29,9 @@ function Controls() {
     },
   };
 
-  function onCameraControlSelect(item: any) {
+  function onCameraControlSelect(key: string) {
+    const item =
+      cameraControlMenuItems[key as keyof typeof cameraControlMenuItems];
     item.function();
   }
 
