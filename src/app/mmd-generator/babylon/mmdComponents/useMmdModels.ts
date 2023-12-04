@@ -36,6 +36,10 @@ const useMmdModels = (
 
     const index = 0;
     if (!mmdCharacterModels[index]) return;
+    if (mmdRuntimeModels[index]) {
+      mmdRuntimeModels[index].removeAnimation(index);
+      mmdRuntimeModels[index].mesh.releaseSubMeshes();
+    }
     loadMmdModels(index);
   }, [mmdCharacterModels]);
 

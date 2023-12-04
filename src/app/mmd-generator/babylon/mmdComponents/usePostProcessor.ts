@@ -17,60 +17,27 @@ import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 const usePostProcessor = (
   sceneRef: MutableRefObject<Scene>,
-  camerasRef: React.MutableRefObject<Cameras>,
   mmdRuntimeModels: MmdModel[],
 ): void => {
   const depthOfFieldEnabled = useSelector(
     (state: RootState) => state.controls.depthOfFieldEnabled,
   );
-  const postProcessorRef = useRef<DefaultRenderingPipeline | null>(null);
-
-  useEffect(() => {
-    if (!mmdRuntimeModels[0]) return;
-    const mmdModel = mmdRuntimeModels[0];
-    const newPostProcessor = createPostProcessor(
-      mmdModel,
+  const postProcessorRef = useRef<DefaultRenderingPipeline>(
+    createPostProcessor(
       sceneRef.current.getCameraById("MmdCamera") as MmdCamera,
       sceneRef.current.getCameraById("ArcCamera") as ArcRotateCamera,
-    );
-    postProcessorRef.current = newPostProcessor;
-  }, [mmdRuntimeModels]);
+    ),
+  );
 
   useEffect(() => {
-    if (!postProcessorRef.current) return;
+    return;
     postProcessorRef.current.depthOfFieldEnabled = depthOfFieldEnabled;
   }, [depthOfFieldEnabled]);
 
-  function createPostProcessor(
-    mmdModel: MmdModel,
-    mmdCamera: MmdCamera,
-    arcCamera: ArcRotateCamera,
-  ): DefaultRenderingPipeline {
-    const postProcessor = new DefaultRenderingPipeline(
-      "default",
-      true,
-      sceneRef.current,
-      [mmdCamera, arcCamera],
-    );
-    postProcessor.samples = 4;
-    postProcessor.bloomEnabled = true;
-    postProcessor.chromaticAberrationEnabled = true;
-    postProcessor.chromaticAberration.aberrationAmount = 1;
-    postProcessor.depthOfFieldEnabled = true;
-    postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
-    postProcessor.fxaaEnabled = true;
-    postProcessor.imageProcessingEnabled = true;
-    postProcessor.imageProcessing.toneMappingEnabled = true;
-    postProcessor.imageProcessing.toneMappingType =
-      ImageProcessingConfiguration.TONEMAPPING_ACES;
-    postProcessor.imageProcessing.vignetteWeight = 0.5;
-    postProcessor.imageProcessing.vignetteStretch = 0.5;
-    postProcessor.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
-    postProcessor.imageProcessing.vignetteEnabled = true;
-
-    postProcessor.depthOfField.fStop = 0.05;
-    postProcessor.depthOfField.focalLength = 20;
-
+  useEffect(() => {
+    return;
+    const mmdModel = mmdRuntimeModels[0];
+    if (!mmdModel) return;
     const headBone = mmdModel.skeleton!.bones.find(
       (bone) => bone.name === "頭",
     );
@@ -79,6 +46,7 @@ const usePostProcessor = (
     const cameraNormal = new Vector3();
     const cameraEyePosition = new Vector3();
     const headRelativePosition = new Vector3();
+    const mmdCamera = sceneRef.current.getCameraById("MmdCamera") as MmdCamera;
 
     sceneRef.current.onBeforeRenderObservable.add(() => {
       const cameraRotation = mmdCamera.rotation;
@@ -113,12 +81,41 @@ const usePostProcessor = (
         .getTranslationToRef(headRelativePosition)
         .subtractToRef(cameraEyePosition, headRelativePosition);
 
-      if (!postProcessor) return;
-      postProcessor.depthOfField.focusDistance =
+      postProcessorRef.current.depthOfField.focusDistance =
         (Vector3.Dot(headRelativePosition, cameraNormal) /
           Vector3.Dot(cameraNormal, cameraNormal)) *
         1000;
     });
+  }, [mmdRuntimeModels]);
+
+  function createPostProcessor(
+    mmdCamera: MmdCamera,
+    arcCamera: ArcRotateCamera,
+  ): DefaultRenderingPipeline {
+    const postProcessor = new DefaultRenderingPipeline(
+      "default",
+      true,
+      sceneRef.current,
+      [mmdCamera, arcCamera],
+    );
+    postProcessor.samples = 4;
+    postProcessor.bloomEnabled = true;
+    postProcessor.chromaticAberrationEnabled = true;
+    postProcessor.chromaticAberration.aberrationAmount = 1;
+    postProcessor.depthOfFieldEnabled = true;
+    postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
+    postProcessor.fxaaEnabled = true;
+    postProcessor.imageProcessingEnabled = true;
+    postProcessor.imageProcessing.toneMappingEnabled = true;
+    postProcessor.imageProcessing.toneMappingType =
+      ImageProcessingConfiguration.TONEMAPPING_ACES;
+    postProcessor.imageProcessing.vignetteWeight = 0.5;
+    postProcessor.imageProcessing.vignetteStretch = 0.5;
+    postProcessor.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
+    postProcessor.imageProcessing.vignetteEnabled = true;
+
+    postProcessor.depthOfField.fStop = 0.05;
+    postProcessor.depthOfField.focalLength = 20;
 
     return postProcessor;
   }

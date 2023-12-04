@@ -34,7 +34,7 @@ const UseMmd = (props: Props) => {
   useAudioPlayer(sceneRef, mmdRuntime);
   const mmdRuntimeModels = useMmdModels(sceneRef, mmdRuntime);
   useMmdMotions(sceneRef, mmdRuntimeModels);
-  usePostProcessor(sceneRef, camerasRef, mmdRuntimeModels);
+  usePostProcessor(sceneRef, mmdRuntimeModels);
   mmdRuntime.playAnimation();
 
   useEffect(() => {

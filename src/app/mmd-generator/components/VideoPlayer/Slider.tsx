@@ -35,7 +35,7 @@ function Slider() {
       onChange={(sliderValue) => {
         onSeek(sliderValue);
       }}
-      onChangeStart={() => {
+      onChangeStart={(sliderValue) => {
         wasPlayingRef.current = getMmdRuntime().isAnimationPlaying;
         getMmdRuntime().pauseAnimation();
       }}
