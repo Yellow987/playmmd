@@ -20,35 +20,42 @@ const useMmdModels = (
   const mmdCharacterModels = useSelector(
     (state: RootState) => state.mmdModels.models,
   );
-  let prevCharacterModels: CharacterModel[] = [];
   const mmdCharacterModelsRef = useRef<MmdModel[]>([]);
+  const prevMmdCharacterModels = useRef<CharacterModel[]>([]);
 
   useEffect(() => {
-    async function loadMmdModels(index: number) {
-      const mmdModel = await createMmdModel(index, mmdCharacterModels[index]);
-      const newMmdRuntimeModels = [...mmdCharacterModelsRef.current];
-      newMmdRuntimeModels[index] = mmdModel;
-      mmdCharacterModelsRef.current = newMmdRuntimeModels;
+    async function loadMmdModel(
+      index: number,
+      newCharacterModel: CharacterModel,
+    ) {
+      const newMmdModel = await createMmdModel(index, newCharacterModel);
+      mmdCharacterModelsRef.current[index] = newMmdModel;
       dispatch(setModelsLoaded([true]));
     }
 
-    const differentIndexs = getDifferentIndexes(
-      mmdCharacterModels,
-      prevCharacterModels,
-    );
-    if (differentIndexs.length === 0) return;
-    prevCharacterModels = mmdCharacterModels;
-
-    differentIndexs.forEach((index) => {
-      if (mmdCharacterModelsRef.current[index]) {
-        releaseMmdModel(index);
+    //Swap changed models
+    const length = prevMmdCharacterModels.current.length;
+    for (let i = 0; i < length; i++) {
+      const currentModel = prevMmdCharacterModels.current[i];
+      if (currentModel !== mmdCharacterModels[i]) {
+        releaseMmdModel(mmdCharacterModelsRef.current[i]);
+        loadMmdModel(i, mmdCharacterModels[i]);
       }
-      loadMmdModels(index);
-    });
+    }
+
+    //Load new models
+    for (let i = length; i < mmdCharacterModels.length; i++) {
+      loadMmdModel(i, mmdCharacterModels[i]);
+    }
+
+    //Release unneeded models
+    for (let i = mmdCharacterModels.length; i < length; i++) {
+      releaseMmdModel(mmdCharacterModelsRef.current[i]);
+    }
+    prevMmdCharacterModels.current = mmdCharacterModels;
   }, [mmdCharacterModels]);
 
-  function releaseMmdModel(index: number) {
-    const mmdModelToDestroy = mmdCharacterModelsRef.current[index];
+  function releaseMmdModel(mmdModelToDestroy: MmdModel) {
     mmdRuntime.destroyMmdModel(mmdModelToDestroy);
     mmdModelToDestroy.mesh.dispose();
   }
