@@ -18,26 +18,17 @@ import {
   ANIMATION_PRESETS_DATA,
   CHARACTER_MODELS_DATA,
 } from "../constants";
-import { useDispatch } from "react-redux";
-import { setModels } from "@/app/redux/mmdModels";
-import { useSelector } from "react-redux";
-import { RootState } from "@/app/redux/store";
+import { createAndSetMmdModel } from "../babylon/mmdComponents/mmdModels";
 
 function Presets() {
   const [selectedStage, setSelectedStage] = useState("Select Stage");
-  const dispatch = useDispatch();
-  const characterModels = useSelector(
-    (state: RootState) => state.mmdModels.models,
-  );
 
-  const onCharacterSelect = (model: CharacterModel) => {
-    const newCharacterModels = [...characterModels];
-    newCharacterModels[0] = model;
-    dispatch(setModels(newCharacterModels));
+  const onCharacterSelect = (item: CharacterModelData) => {
+    createAndSetMmdModel(1, item);
   };
 
-  const onAnimationSelect = (animation: AnimationPreset) => {
-    console.log(animation);
+  const onAnimationSelect = (item: AnimationPresetData) => {
+    console.log(item);
   };
 
   return (

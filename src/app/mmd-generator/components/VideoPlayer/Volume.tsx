@@ -15,23 +15,26 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/app/redux/store";
-import { setIsMuted, setVolume } from "@/app/redux/controls";
-import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
+import { getAudioPlayer } from "../../babylon/mmdComponents/audioPlayer";
 
 function Volume() {
-  const volume = useSelector((state: RootState) => state.controls.volume);
-  const isMuted = useSelector((state: RootState) => state.controls.isMuted);
-  const dispatch = useDispatch();
+  const audioPlayer = getAudioPlayer();
+  const [volume, setVolume] = useState(audioPlayer.volume * 100);
+  const [isMuted, setIsMuted] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
 
   const setMmdVolume = (newVolume: number) => {
-    dispatch(setVolume(newVolume / 100));
+    audioPlayer.volume = newVolume / 100;
+    setVolume(newVolume);
   };
 
   const toggleIsMuted = () => {
-    dispatch(setIsMuted(!isMuted));
+    if (!isMuted) {
+      audioPlayer.mute();
+    } else {
+      audioPlayer.unmute();
+    }
+    setIsMuted(!isMuted);
   };
 
   return (
@@ -48,7 +51,7 @@ function Volume() {
         <Slider
           aria-label="volume-slider"
           orientation="horizontal"
-          value={volume * 100}
+          value={volume}
           onChange={(sliderValue) => {
             setMmdVolume(sliderValue);
           }}

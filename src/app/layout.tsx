@@ -1,7 +1,9 @@
+"use client";
 import { ChakraThemeProvider } from "../providers/chakraThemeProvider";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-import ReduxProvider from "@/app/redux/ReduxProvider";
+import { Provider } from "react-redux";
+import { store } from "../redux/store";
 
 export const metadata = {
   title: "PlayMMD",
@@ -17,11 +19,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ChakraThemeProvider>
-          <ReduxProvider>
+          <Provider store={store}>
             <Header />
             {children}
             <Footer />
-          </ReduxProvider>
+          </Provider>
         </ChakraThemeProvider>
       </body>
     </html>

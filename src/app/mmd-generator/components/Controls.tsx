@@ -1,12 +1,17 @@
 "use client";
 import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
-import { useDispatch } from "react-redux";
-import { setActiveCamera } from "@/app/redux/cameras";
-import { setDepthOfFieldEnabled } from "@/app/redux/controls";
+import {
+  enableArcCamera,
+  enableMmdCamera,
+} from "../babylon/mmdComponents/cameras";
 
-function Controls() {
-  const dispatch = useDispatch();
+interface Props {
+  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
+}
+
+function Controls(props: Props) {
+  const { runtimeRef } = props;
 
   enum CameraControl {
     MMD_CAMERA = "MMD Camera",
@@ -17,21 +22,18 @@ function Controls() {
     [CameraControl.MMD_CAMERA]: {
       name: "MMD Camera",
       function: () => {
-        dispatch(setActiveCamera("mmdCamera"));
+        enableMmdCamera();
       },
     },
     [CameraControl.USER_CONTROL_CAMERA]: {
       name: "Free Camera",
       function: () => {
-        dispatch(setActiveCamera("arcCamera"));
-        dispatch(setDepthOfFieldEnabled(false));
+        enableArcCamera();
       },
     },
   };
 
-  function onCameraControlSelect(key: string) {
-    const item =
-      cameraControlMenuItems[key as keyof typeof cameraControlMenuItems];
+  function onCameraControlSelect(item: any) {
     item.function();
   }
 

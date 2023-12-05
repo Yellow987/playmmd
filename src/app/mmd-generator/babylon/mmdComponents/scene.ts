@@ -1,9 +1,7 @@
+import { Engine, HavokPlugin, Color3, HemisphericLight } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { Scene } from "@babylonjs/core/scene";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
-import { Engine } from "@babylonjs/core/Engines/engine";
-import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
-import { Color3 } from "@babylonjs/core/Maths/math.color";
 
 let scene: Scene | null = null;
 
@@ -15,6 +13,15 @@ export async function createScene(engine: Engine): Promise<Scene> {
   );
 
   scene.ambientColor = new Color3(1, 1, 1);
+
+  const hemisphericLight = new HemisphericLight(
+    "HemisphericLight",
+    new Vector3(0, 1, 0),
+    scene,
+  );
+  hemisphericLight.intensity = 0.3;
+  hemisphericLight.specular.set(0, 0, 0);
+  hemisphericLight.groundColor.set(1, 1, 1);
 
   return scene;
 }

@@ -6,23 +6,24 @@ import {
 } from "@chakra-ui/react";
 import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/app/redux/store";
-import { useDispatch } from "react-redux";
-import { setSecond } from "@/app/redux/mmd";
 
-function Slider() {
-  const second = useSelector((state: RootState) => state.mmd.second);
-  const animationDuration = useSelector(
-    (state: RootState) => state.mmd.animationDuration,
-  );
-  const dispatch = useDispatch();
+interface Props {
+  second: number;
+  setSecond: (newSecond: number) => void;
+  setFrame: (newFrame: number) => void;
+}
+
+function Slider(props: Props) {
+  const { second, setSecond, setFrame } = props;
+  const mmdRuntime = getMmdRuntime();
   const wasPlayingRef = useRef(false);
+  const [num, setNum] = useState(0);
 
   const onSeek = (seekTo: number) => {
-    const newSecond = (seekTo / 100) * animationDuration;
-    dispatch(setSecond(newSecond));
-    getMmdRuntime().seekAnimation(newSecond * 30, true);
+    const newSecond = (seekTo / 100) * mmdRuntime.animationDuration;
+    setSecond(newSecond);
+    setFrame(Math.round(newSecond * 30));
+    mmdRuntime.seekAnimation(newSecond * 30, true);
   };
 
   return (
@@ -30,17 +31,17 @@ function Slider() {
       mx={40}
       aria-label="seek-slider"
       focusThumbOnChange={false}
-      value={(second / animationDuration) * 100}
+      value={(second / mmdRuntime.animationDuration) * 100}
       step={0.1}
       onChange={(sliderValue) => {
         onSeek(sliderValue);
       }}
-      onChangeStart={(sliderValue) => {
-        wasPlayingRef.current = getMmdRuntime().isAnimationPlaying;
-        getMmdRuntime().pauseAnimation();
+      onChangeStart={() => {
+        wasPlayingRef.current = mmdRuntime.isAnimationPlaying;
+        mmdRuntime.pauseAnimation();
       }}
       onChangeEnd={() => {
-        if (wasPlayingRef.current) getMmdRuntime().playAnimation();
+        if (wasPlayingRef.current) mmdRuntime.playAnimation();
       }}
     >
       <SliderTrack>

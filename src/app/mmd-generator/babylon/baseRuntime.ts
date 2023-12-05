@@ -12,16 +12,16 @@ export interface BaseRuntimeInitParams {
 }
 
 export class BaseRuntime {
-  canvas: HTMLCanvasElement;
+  _canvas: HTMLCanvasElement;
   private readonly _engine: Engine;
-  scene: Scene;
+  _scene: Scene;
   private _onTick: () => void;
 
   private constructor(params: BaseRuntimeInitParams) {
-    this.canvas = params.canvas;
+    this._canvas = params.canvas;
     this._engine = params.engine;
 
-    this.scene = null!;
+    this._scene = null!;
     this._onTick = null!;
   }
 
@@ -29,7 +29,7 @@ export class BaseRuntime {
     params: BaseRuntimeInitParams,
   ): Promise<BaseRuntime> {
     const runtime = new BaseRuntime(params);
-    runtime.scene = await runtime._initialize(params.sceneBuilder);
+    runtime._scene = await runtime._initialize(params.sceneBuilder);
     runtime._onTick = runtime._makeOnTick();
     return runtime;
   }
@@ -51,11 +51,11 @@ export class BaseRuntime {
   };
 
   private async _initialize(sceneBuilder: ISceneBuilder): Promise<Scene> {
-    return await sceneBuilder.build(this.canvas, this._engine);
+    return await sceneBuilder.build(this._canvas, this._engine);
   }
 
   private _makeOnTick(): () => void {
-    const scene = this.scene;
+    const scene = this._scene;
     return () => scene.render();
   }
 }
