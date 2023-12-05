@@ -11,9 +11,13 @@ import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 
 const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
+  const light = useRef<DirectionalLight | null>(null);
+
   useEffect(() => {
-    const light = createDirectionalLight(sceneRef.current);
-    createShadowGenerator(light);
+    if (light.current) return;
+    console.log("Creating light");
+    light.current = createDirectionalLight(sceneRef.current);
+    createShadowGenerator(light.current);
   }, []);
 
   function createDirectionalLight(scene: Scene): DirectionalLight {

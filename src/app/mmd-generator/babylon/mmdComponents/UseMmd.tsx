@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, MutableRefObject, useRef } from "react";
 import useMmdModels from "./useMmdModels";
 import useMmdMotions from "./useMmdMotions";
@@ -27,13 +28,13 @@ const UseMmd = (props: Props) => {
   const dispatch = useDispatch();
 
   const mmdRuntime = createMmdRuntime(sceneRef.current);
-  const camerasRef = useCameras(sceneRef, mmdRuntime, canvasRef);
+  useCameras(sceneRef, mmdRuntime, canvasRef);
   useLighting(sceneRef);
   useStage(sceneRef);
   useAudioPlayer(sceneRef, mmdRuntime);
   const mmdCharacterModelsRef = useMmdModels(sceneRef, mmdRuntime);
   useMmdMotions(sceneRef, mmdCharacterModelsRef);
-  //usePostProcessor(sceneRef, mmdRuntimeModels);
+  usePostProcessor(sceneRef, mmdCharacterModelsRef);
 
   useEffect(() => {
     mmdRuntime.playAnimation();

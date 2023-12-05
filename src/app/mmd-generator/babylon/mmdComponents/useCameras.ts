@@ -16,26 +16,30 @@ const useCameras = (
   sceneRef: MutableRefObject<Scene>,
   mmdRuntime: MmdRuntime,
   canvasRef: MutableRefObject<HTMLCanvasElement>,
-): MutableRefObject<Cameras> => {
-  const camerasRef = useRef<Cameras>({
-    mmdCamera: createMmdCamera(sceneRef.current),
-    arcCamera: createArcCamera(sceneRef.current, canvasRef.current),
-  });
+): MutableRefObject<Cameras | null> => {
+  const camerasRef = useRef<Cameras | null>(null);
   const activeCamera = useSelector(
     (state: RootState) => state.cameras.activeCamera,
   );
 
   useEffect(() => {
-    async function loadCameraMotion() {
-      loadMmdCameraMotion();
+    if (camerasRef.current) return;
+    const cameras = {
+      mmdCamera: createMmdCamera(sceneRef.current),
+      arcCamera: createArcCamera(sceneRef.current, canvasRef.current),
+    };
+    camerasRef.current = cameras;
+
+    async function loadCameraMotion(cameras: Cameras) {
+      loadMmdCameraMotion(cameras);
     }
 
     mmdRuntime.setCamera(camerasRef.current.mmdCamera);
-    loadCameraMotion();
+    loadCameraMotion(camerasRef.current);
   }, []);
 
   useEffect(() => {
-    console.log(activeCamera);
+    if (!camerasRef.current) return;
     if (activeCamera === "mmdCamera") {
       sceneRef.current.activeCamera = camerasRef.current.mmdCamera;
     } else {
@@ -43,16 +47,15 @@ const useCameras = (
     }
   }, [activeCamera]);
 
-  async function loadMmdCameraMotion() {
+  async function loadMmdCameraMotion(cameras: Cameras) {
     const vmdLoader = new VmdLoader(sceneRef.current);
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
       "/mmd/cam.vmd",
     );
-    console.log(cameraMotion);
 
-    camerasRef.current.mmdCamera.addAnimation(cameraMotion);
-    camerasRef.current.mmdCamera.setAnimation("camera_motion_1");
+    cameras.mmdCamera.addAnimation(cameraMotion);
+    cameras.mmdCamera.setAnimation("camera_motion_1");
   }
 
   function createArcCamera(
