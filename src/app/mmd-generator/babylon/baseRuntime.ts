@@ -1,9 +1,21 @@
-import type { Engine } from "@babylonjs/core/Engines/engine";
-import type { Scene } from "@babylonjs/core/scene";
+import { Engine } from "@babylonjs/core/Engines/engine";
+import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline";
+import { Scene } from "@babylonjs/core/scene";
+import { StreamAudioPlayer } from "babylon-mmd/esm/Runtime/Audio/streamAudioPlayer";
+import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 
 export interface ISceneBuilder {
-  build(canvas: HTMLCanvasElement, engine: Engine): Scene | Promise<Scene>;
+  build(canvas: HTMLCanvasElement, engine: Engine): Promise<Mmd>;
 }
+
+export type Mmd = {
+  scene: Scene;
+  mmdRuntime: MmdRuntime;
+  canvas: HTMLCanvasElement;
+  postProcessor: DefaultRenderingPipeline;
+  audioPlayer: StreamAudioPlayer;
+  baseRuntime?: BaseRuntime;
+};
 
 export interface BaseRuntimeInitParams {
   canvas: HTMLCanvasElement;
@@ -12,26 +24,25 @@ export interface BaseRuntimeInitParams {
 }
 
 export class BaseRuntime {
-  _canvas: HTMLCanvasElement;
+  canvas: HTMLCanvasElement;
   private readonly _engine: Engine;
-  _scene: Scene;
+  scene: Scene;
   private _onTick: () => void;
 
   private constructor(params: BaseRuntimeInitParams) {
-    this._canvas = params.canvas;
+    this.canvas = params.canvas;
     this._engine = params.engine;
 
-    this._scene = null!;
+    this.scene = null!;
     this._onTick = null!;
   }
 
-  public static async Create(
-    params: BaseRuntimeInitParams,
-  ): Promise<BaseRuntime> {
-    const runtime = new BaseRuntime(params);
-    runtime._scene = await runtime._initialize(params.sceneBuilder);
-    runtime._onTick = runtime._makeOnTick();
-    return runtime;
+  public static async Create(params: BaseRuntimeInitParams): Promise<Mmd> {
+    const baseRuntime = new BaseRuntime(params);
+    const mmd: Mmd = await baseRuntime._initialize(params.sceneBuilder);
+    baseRuntime._onTick = baseRuntime._makeOnTick();
+    mmd.baseRuntime = baseRuntime;
+    return mmd;
   }
 
   public run(): void {
@@ -50,12 +61,12 @@ export class BaseRuntime {
     this._engine.resize();
   };
 
-  private async _initialize(sceneBuilder: ISceneBuilder): Promise<Scene> {
-    return await sceneBuilder.build(this._canvas, this._engine);
+  private async _initialize(sceneBuilder: ISceneBuilder): Promise<Mmd> {
+    return await sceneBuilder.build(this.canvas, this._engine);
   }
 
   private _makeOnTick(): () => void {
-    const scene = this._scene;
+    const scene = this.scene;
     return () => scene.render();
   }
 }

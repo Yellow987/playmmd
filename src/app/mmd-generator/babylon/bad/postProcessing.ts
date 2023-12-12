@@ -4,7 +4,7 @@ import { getCameras } from "./cameras";
 import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
 import { ImageProcessingConfiguration } from "@babylonjs/core/Materials/imageProcessingConfiguration";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
-import { getMmdModel } from "./mmdModels";
+import { getMmdModel } from "../mmdComponents/mmdModels";
 import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 let postProcessor: DefaultRenderingPipeline | null = null;

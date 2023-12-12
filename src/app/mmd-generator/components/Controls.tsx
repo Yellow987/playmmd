@@ -1,10 +1,7 @@
 "use client";
 import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
-import {
-  enableArcCamera,
-  enableMmdCamera,
-} from "../babylon/mmdComponents/cameras";
+import { enableArcCamera, enableMmdCamera } from "../babylon/bad/cameras";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;

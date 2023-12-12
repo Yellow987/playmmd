@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Box, Flex, Spacer, Text, VStack } from "@chakra-ui/react";
-import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
+import { createMmdRuntime, getMmdRuntime } from "../../babylon/bad/mmdRuntime";
 import { format, set } from "date-fns";
 import { Observer } from "@babylonjs/core/Misc/observable";
 import Slider from "./Slider";
@@ -9,44 +9,31 @@ import Volume from "./Volume";
 import PlayPauseButton from "./PlayPauseButton";
 import { BaseRuntime } from "../../babylon/baseRuntime";
 import Duration from "./Duration";
-import useMmdMotions from "../../babylon/mmdComponents/useMmdMotions";
-import { getScene } from "../../babylon/mmdComponents/scene";
+import useMmdMotions from "../../babylon/bad/useMmdMotions";
+import { getScene } from "../../babylon/bad/scene";
+import { createPostProcessor } from "../../babylon/bad/postProcessing";
+import { createArcCamera, createMmdCamera } from "../../babylon/bad/cameras";
+import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
+import { createAndSetMmdModel } from "../../babylon/mmdComponents/mmdModels";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { useLights } from "../../babylon/bad/lighting";
+import { createShadowGenerator } from "../../babylon/bad/shadowGenerator";
+import {
+  ANIMATION_PRESETS_DATA,
+  AnimationPreset,
+  CHARACTER_MODELS_DATA,
+  CharacterModel,
+} from "../../constants";
+import { createAudioPlayer } from "../../babylon/bad/audioPlayer";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
 }
 
 const VideoPlayer = (props: Props) => {
-  const mmdRuntime = getMmdRuntime();
-  const [second, setSecond] = useState(0);
-  const [frame, setFrame] = useState(0);
-  const [endSecond, setEndSecond] = useState(mmdRuntime.animationDuration);
-  const scene = getScene();
-  useMmdMotions(scene, mmdRuntime);
-
-  useEffect(() => {
-    const onAnimationDurationChangedObserver: Observer<void> | undefined =
-      mmdRuntime.onAnimationDurationChangedObservable.add(() => {
-        setEndSecond(mmdRuntime.animationDuration);
-      });
-
-    const onTickObserver: Observer<void> | undefined =
-      mmdRuntime.onAnimationTickObservable.add(() => {
-        setSecond(mmdRuntime.currentTime);
-        setFrame(mmdRuntime.currentFrameTime);
-      });
-
-    return () => {
-      mmdRuntime.onAnimationDurationChangedObservable.remove(
-        onAnimationDurationChangedObserver,
-      );
-      mmdRuntime.onAnimationTickObservable.remove(onTickObserver);
-    };
-  }, []);
-
   return (
     <VStack mx={2}>
-      <Slider second={second} setSecond={setSecond} setFrame={setFrame} />
+      {/* <Slider second={second} setSecond={setSecond} setFrame={setFrame} />
       <Flex align="center" w="full" marginTop={-2}>
         <Spacer />
         <PlayPauseButton />
@@ -55,7 +42,7 @@ const VideoPlayer = (props: Props) => {
           <Duration second={second} endSecond={endSecond} />
           <Volume />
         </Flex>
-      </Flex>
+      </Flex> */}
     </VStack>
   );
 };

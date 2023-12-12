@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
+import { getMmdRuntime } from "../../babylon/bad/mmdRuntime";
 import { Button, Icon } from "@chakra-ui/react";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { Observer } from "@babylonjs/core/Misc/observable";

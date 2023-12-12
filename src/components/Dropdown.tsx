@@ -12,10 +12,11 @@ import {
 import { useEffect, useState } from "react";
 
 interface Props {
-  menuLabel: string;
+  menuLabel?: string;
   onMenuItemSelect: (item: any) => void;
   menuItems: { [key: string]: { name: string } };
   defaultItem: string;
+  isInitializing: boolean;
 }
 
 function Dropdown(props: Props) {
@@ -31,11 +32,18 @@ function Dropdown(props: Props) {
 
   return (
     <Box mb={4}>
-      <Box as="label" display="block" mb={1}>
-        {props.menuLabel}
-      </Box>
+      {props.menuLabel && (
+        <Box as="label" display="block" mb={1}>
+          {props.menuLabel}
+        </Box>
+      )}
       <Menu>
-        <MenuButton as={Button} w="full" rightIcon={<ChevronDownIcon />}>
+        <MenuButton
+          as={Button}
+          w="full"
+          rightIcon={<ChevronDownIcon />}
+          isDisabled={props.isInitializing}
+        >
           {selectedItem.name}
         </MenuButton>
         <MenuList>

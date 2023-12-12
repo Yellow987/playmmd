@@ -1,4 +1,4 @@
-import { RootState } from "@/redux/store";
+import { RootState } from "@/app/redux/store";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -9,7 +9,7 @@ import {
   ModelAniamtionPaths,
 } from "../../constants";
 import { Scene } from "@babylonjs/core";
-import { getMmdModel } from "./mmdModels";
+import { getMmdModel } from "../mmdComponents/mmdModels";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 
 const useMmdMotions = (scene: Scene, mmdRuntime: MmdRuntime): void => {

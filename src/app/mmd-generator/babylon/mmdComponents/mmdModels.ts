@@ -1,21 +1,30 @@
-import { SceneLoader, Mesh } from "@babylonjs/core";
-import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
+import { SceneLoader, Mesh, Scene } from "@babylonjs/core";
 import { CharacterModelData, ModelAniamtionPaths } from "../../constants";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
-import { getMmdRuntime } from "./mmdRuntime";
+import { BabylonMmdRuntime } from "../../mmd";
 import { getShadowGenerator } from "./shadowGenerator";
-import { getScene } from "./scene";
-
-let mmdModels: MmdModel[] = [];
+import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
+import "babylon-mmd/esm/Loader/pmxLoader";
+import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeCameraAnimation";
+import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeModelAnimation";
+import "@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent";
+import "@babylonjs/core/Rendering/prePassRendererSceneComponent";
+import "@babylonjs/core/Rendering/depthRendererSceneComponent";
 
 export async function createAndSetMmdModel(
   index: number,
+  babylonMmdRuntime: BabylonMmdRuntime,
   modelData: CharacterModelData,
-): Promise<MmdModel> {
-  const mmdRuntime = getMmdRuntime();
-  const shadowGenerator = getShadowGenerator();
-  const scene = getScene();
-  console.log("Loading model", modelData);
+) {
+  const scene: Scene = babylonMmdRuntime.scene;
+  const mmdRuntime: MmdRuntime = babylonMmdRuntime.mmdRuntime;
+  const mmdModels = mmdRuntime.models;
+  const shadowGenerator = getShadowGenerator(scene);
+
+  if (mmdModels[index]) {
+    deleteMmdModel(index, babylonMmdRuntime);
+  }
+
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     "",
     modelData.folderPath,
@@ -25,16 +34,28 @@ export async function createAndSetMmdModel(
   mmdMesh.receiveShadows = true;
   shadowGenerator.addShadowCaster(mmdMesh);
 
-  mmdModels[index] = mmdRuntime.createMmdModel(mmdMesh);
-  return mmdModels[index];
+  mmdRuntime.createMmdModel(mmdMesh);
+}
+
+export function deleteMmdModel(
+  index: number,
+  babylonMmdRuntime: BabylonMmdRuntime,
+) {
+  const mmdRuntime: MmdRuntime = babylonMmdRuntime.mmdRuntime;
+  const mmdModel = mmdRuntime.models[index];
+  mmdRuntime.destroyMmdModel(mmdModel);
+  mmdModel.mesh.dispose();
 }
 
 export async function addMmdMotion(
   index: number,
+  babylonMmdRuntime: BabylonMmdRuntime,
   animationPaths: ModelAniamtionPaths,
 ): Promise<void> {
-  const mmdModel = mmdModels[index];
-  const scene = getScene();
+  const scene = babylonMmdRuntime.scene;
+  const mmdRuntime: MmdRuntime = babylonMmdRuntime.mmdRuntime;
+  const mmdModel = mmdRuntime.models[index];
+  console.log(mmdModel);
   const orderedKeys: (keyof ModelAniamtionPaths)[] = [
     "skeletonPath",
     "facialPath",
@@ -49,15 +70,9 @@ export async function addMmdMotion(
     "Model_Animation",
     modelAnimationArray,
   );
+  console.log(modelMotion);
 
   mmdModel.addAnimation(modelMotion);
   mmdModel.setAnimation("Model_Animation");
-}
-
-export function getMmdModel(index: number): MmdModel {
-  const mmdModel = mmdModels[index];
-  if (!mmdModel) {
-    throw new Error(`MmdModel ${index} has not been created yet.`);
-  }
-  return mmdModel;
+  console.log(mmdModel.currentAnimation);
 }

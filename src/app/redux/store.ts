@@ -1,12 +1,12 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
-import mmdMotions from "./mmdMotions";
+import mmd from "./mmd";
 
 export const store = configureStore({
   reducer: {
-    mmdMotions: mmdMotions,
+    mmd: mmd,
   },
 });
 
-export type RootState = ReturnType<typeof store.getState>;
+export type MmdState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

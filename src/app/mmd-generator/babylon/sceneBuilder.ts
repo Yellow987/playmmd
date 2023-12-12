@@ -48,7 +48,7 @@ import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import "@babylonjs/core/Rendering/prePassRendererSceneComponent";
 import "@babylonjs/core/Rendering/depthRendererSceneComponent";
 
-import type { ISceneBuilder } from "./baseRuntime";
+import type { ISceneBuilder, Mmd } from "./baseRuntime";
 import {
   CHARACTER_MODELS_DATA,
   CharacterModel,
@@ -62,20 +62,16 @@ import {
   Material,
 } from "@babylonjs/core/Materials";
 import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
-import { createScene } from "./mmdComponents/scene";
-import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
-import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
+import { createShadowGenerator } from "./bad/shadowGenerator";
 import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
-import { createAudioPlayer } from "./mmdComponents/audioPlayer";
-import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
-import { createPostProcessor } from "./mmdComponents/postProcessing";
+import { createAudioPlayer } from "./bad/audioPlayer";
+import { createArcCamera, createMmdCamera } from "./bad/cameras";
+import { createPostProcessor } from "./bad/postProcessing";
 import { MmdPlayerControl } from "../components/MmdPlayerControls";
+import { useLights } from "./bad/lighting";
 
 export class SceneBuilder implements ISceneBuilder {
-  public async build(
-    _canvas: HTMLCanvasElement,
-    engine: Engine,
-  ): Promise<Scene> {
+  public async build(canvas: HTMLCanvasElement, engine: Engine): Promise<Mmd> {
     SdefInjector.OverrideEngineCreateEffect(engine);
     const pmxLoader = SceneLoader.GetPluginForExtension(".pmx") as PmxLoader;
     pmxLoader.useSdef = false;
@@ -106,10 +102,14 @@ export class SceneBuilder implements ISceneBuilder {
       /* do nothing */
     };
 
-    const scene = await createScene(engine);
+    const scene = new Scene(engine);
+    scene.enablePhysics(
+      new Vector3(0, -9.8 * 10, 0),
+      new HavokPlugin(true, await HavokPhysics()),
+    );
 
-    const mmdCamera = createMmdCamera(scene);
-
+    const mmdRuntime = new MmdRuntime(new MmdPhysics(scene));
+    const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
     const directionalLight = new DirectionalLight(
       "DirectionalLight",
       new Vector3(0.5, -1, 1),
@@ -118,54 +118,42 @@ export class SceneBuilder implements ISceneBuilder {
     directionalLight.intensity = 0.7;
     directionalLight.shadowMaxZ = 20;
     directionalLight.shadowMinZ = -15;
-    const shadowGenerator = createShadowGenerator(directionalLight, null);
+    const shadowGenerator = new ShadowGenerator(2048, directionalLight, true);
+    const arcRotateCamera = new ArcRotateCamera(
+      "arcRotateCamera",
+      0,
+      0,
+      45,
+      new Vector3(0, 10, 0),
+      scene,
+    );
+    arcRotateCamera.maxZ = 5000;
+    arcRotateCamera.setPosition(new Vector3(0, 10, -45));
+    arcRotateCamera.attachControl(canvas, false);
+    arcRotateCamera.inertia = 0.8;
+    arcRotateCamera.speed = 10;
 
     const ground = MeshBuilder.CreateGround(
-      "ground1",
+      "STAGE",
       { width: 60, height: 60, subdivisions: 2, updatable: false },
       scene,
     );
     ground.receiveShadows = true;
-    shadowGenerator.addShadowCaster(ground);
 
-    const mmdRuntime = createMmdRuntime(scene);
-    mmdRuntime.setCamera(mmdCamera);
-    const mmdModel = await createAndSetMmdModel(
-      0,
-      CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
-    );
-
-    const vmdLoader = new VmdLoader(scene);
-    // addMmdMotion(
-    //   0,
-    //   ANIMATION_PRESETS_DATA[defaultAnimationPreset].modelAnimationPaths[0],
-    // );
-
-    const cameraMotion = await vmdLoader.loadAsync(
-      "camera_motion_1",
-      "/mmd/cam.vmd",
-    );
-
-    mmdCamera.addAnimation(cameraMotion);
-    mmdCamera.setAnimation("camera_motion_1");
-
-    const audioPlayer = createAudioPlayer(
-      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
-    );
-    audioPlayer.volume = 1;
+    const audioPlayer = new StreamAudioPlayer(scene);
     mmdRuntime.setAudioPlayer(audioPlayer);
+    const postProcessor = new DefaultRenderingPipeline("default", true, scene, [
+      mmdCamera,
+      arcRotateCamera,
+    ]);
 
-    //const controller = new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
-    //controller.hidePlayerControl();
-
-    //const controller = new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
-
-    createArcCamera(scene, _canvas);
-
-    createPostProcessor();
-
-    mmdRuntime.playAnimation();
-
-    return scene;
+    const mmd: Mmd = {
+      scene,
+      mmdRuntime,
+      canvas,
+      postProcessor,
+      audioPlayer,
+    };
+    return mmd;
   }
 }

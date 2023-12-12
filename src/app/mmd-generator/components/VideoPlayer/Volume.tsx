@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
-import { getAudioPlayer } from "../../babylon/mmdComponents/audioPlayer";
+import { getAudioPlayer } from "../../babylon/bad/audioPlayer";
 
 function Volume() {
   const audioPlayer = getAudioPlayer();

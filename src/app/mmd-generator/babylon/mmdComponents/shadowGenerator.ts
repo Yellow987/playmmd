@@ -1,23 +1,13 @@
-import { Camera, ShadowGenerator, DirectionalLight } from "@babylonjs/core";
+import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
+import { Scene } from "@babylonjs/core/scene";
 
-let shadowGenerator: ShadowGenerator | null = null;
-
-export function createShadowGenerator(
-  directionalLight: DirectionalLight,
-  camera: Camera | null,
-): ShadowGenerator {
+export function getShadowGenerator(scene: Scene): ShadowGenerator {
+  console.log(scene);
+  const shadowGenerator = scene
+    .getLightByName("DirectionalLight")
+    ?.getShadowGenerator() as ShadowGenerator;
   if (!shadowGenerator) {
-    shadowGenerator = new ShadowGenerator(2048, directionalLight, true, camera);
-    shadowGenerator.bias = 0.01;
-  }
-  return shadowGenerator;
-}
-
-export function getShadowGenerator(): ShadowGenerator {
-  if (!shadowGenerator) {
-    throw new Error(
-      "ShadowGenerator has not been created yet. Call createShadowGenerator first.",
-    );
+    throw new Error("ShadowGenerator not found");
   }
   return shadowGenerator;
 }

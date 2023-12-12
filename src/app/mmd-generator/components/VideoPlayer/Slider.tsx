@@ -4,7 +4,7 @@ import {
   SliderThumb,
   Slider as ChakraSlider,
 } from "@chakra-ui/react";
-import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
+import { getMmdRuntime } from "../../babylon/bad/mmdRuntime";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {

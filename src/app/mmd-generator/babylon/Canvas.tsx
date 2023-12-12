@@ -17,7 +17,6 @@ function Canvas(props: Props) {
   useEffect(() => {
     // Ensure the canvas is available
     if (canvasRef.current) {
-      console.log("RENDERED CANVAS");
       const canvas = canvasRef.current;
       const engine = new Engine(
         canvas,
@@ -40,9 +39,8 @@ function Canvas(props: Props) {
         canvas,
         engine,
         sceneBuilder: new SceneBuilder(),
-      }).then((runtime) => {
-        runtime.run();
-        runtimeRef.current = runtime;
+      }).then((mmd) => {
+        mmd.baseRuntime?.run();
         setIsLoaded(true);
       });
 
