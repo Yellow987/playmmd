@@ -27,9 +27,10 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import { MmdState } from "@/app/redux/store";
 import { setAnimationData } from "@/app/redux/mmd";
 import { StreamAudioPlayer } from "babylon-mmd/esm/Runtime/Audio/streamAudioPlayer";
+import { Mmd } from "../babylon/baseRuntime";
 
 type Props = {
-  babylonMmdRuntimeRef: MutableRefObject<BabylonMmdRuntime>;
+  mmdRef: MutableRefObject<Mmd | null>;
 };
 
 function Presets(props: Props) {
@@ -44,23 +45,14 @@ function Presets(props: Props) {
     const changeCharacterFunction = async (item: CharacterModelData) => {
       const currentAnimationData = store.getState().mmd.animationData;
 
-      await createAndSetMmdModel(
-        index,
-        props.babylonMmdRuntimeRef.current,
-        item,
-      );
+      await createAndSetMmdModel(index, props.mmdRef.current, item);
       await addMmdMotion(
         index,
-        props.babylonMmdRuntimeRef.current,
+        props.mmdRef.current,
         currentAnimationData.modelAnimationPaths[0],
       );
-      console.log(
-        props.babylonMmdRuntimeRef.current.mmdRuntime.models[0]
-          .currentAnimation,
-      );
-      console.log(
-        props.babylonMmdRuntimeRef.current.mmdRuntime.isAnimationPlaying,
-      );
+      console.log(props.mmdRef.current.mmdRuntime.models[0].currentAnimation);
+      console.log(props.mmdRef.current.mmdRuntime.isAnimationPlaying);
     };
     return changeCharacterFunction;
   };
@@ -68,12 +60,12 @@ function Presets(props: Props) {
   const onAnimationSelect = (item: AnimationPresetData) => {
     dispatch(setAnimationData(item));
     const audioPlayer: StreamAudioPlayer = new StreamAudioPlayer(
-      props.babylonMmdRuntimeRef.current.scene,
+      props.mmdRef.current.scene,
     );
     audioPlayer.source = item.audioPath;
-    props.babylonMmdRuntimeRef.current.mmdRuntime.setAudioPlayer(audioPlayer);
-    props.babylonMmdRuntimeRef.current.mmdRuntime.playAnimation();
-    console.log(props.babylonMmdRuntimeRef.current.mmdRuntime.models[0]);
+    props.mmdRef.current.mmdRuntime.setAudioPlayer(audioPlayer);
+    props.mmdRef.current.mmdRuntime.playAnimation();
+    console.log(props.mmdRef.current.mmdRuntime.models[0]);
     //update animations of loaded models
   };
 
