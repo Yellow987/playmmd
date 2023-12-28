@@ -16,14 +16,14 @@ export default function Home() {
 
   return (
     <>
-      <Canvas runtimeRef={runtimeRef} setIsLoaded={setIsLoaded} />
-      {isLoaded && <VideoPlayer runtimeRef={runtimeRef} />}
+      <Canvas setIsLoaded={setIsLoaded} />
+      {isLoaded && <VideoPlayer />}
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
           <Presets />
         </Box>
         <Box flex="2" p={4} maxWidth={flexDir === "row" ? "67%" : "100%"}>
-          <Controls runtimeRef={runtimeRef} />
+          <Controls />
         </Box>
       </Flex>
     </>

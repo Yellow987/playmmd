@@ -9,9 +9,7 @@ import Volume from "./Volume";
 import PlayPauseButton from "./PlayPauseButton";
 import { BaseRuntime } from "../../babylon/baseRuntime";
 
-interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
-}
+interface Props {}
 
 const VideoPlayer = (props: Props) => {
   const mmdRuntime = getMmdRuntime();

@@ -6,13 +6,12 @@ import { BaseRuntime } from "../babylon/baseRuntime";
 import { SceneBuilder } from "../babylon/sceneBuilder";
 
 interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function Canvas(props: Props) {
   const canvasRef = useRef(null);
-  const { runtimeRef, setIsLoaded } = props;
+  const { setIsLoaded } = props;
 
   useEffect(() => {
     // Ensure the canvas is available
@@ -42,7 +41,6 @@ function Canvas(props: Props) {
         sceneBuilder: new SceneBuilder(),
       }).then((runtime) => {
         runtime.run();
-        runtimeRef.current = runtime;
         setIsLoaded(true);
       });
 

@@ -6,13 +6,9 @@ import {
   enableMmdCamera,
 } from "../babylon/mmdComponents/cameras";
 
-interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
-}
+interface Props {}
 
 function Controls(props: Props) {
-  const { runtimeRef } = props;
-
   enum CameraControl {
     MMD_CAMERA = "MMD Camera",
     USER_CONTROL_CAMERA = "USER_CONTROL_CAMERA",
