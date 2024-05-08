@@ -16,10 +16,11 @@ export async function createAndSetMmdModel(
   const mmdRuntime = getMmdRuntime();
   const shadowGenerator = getShadowGenerator();
   const scene = getScene();
+  const { folderPath, fileName } = extractFolderPathAndFileName(modelData.url);
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     undefined,
-    modelData.folderPath,
-    modelData.fileName,
+    folderPath,
+    fileName,
     scene,
   ).then((result) => result.meshes[0] as Mesh);
   mmdMesh.receiveShadows = true;
@@ -70,4 +71,24 @@ export function cleanupAllModels(): void {
     console.log("CLEANUP MODEL");
   });
   mmdModels = [];
+}
+
+function extractFolderPathAndFileName(url: string) {
+  try {
+    // Create a new URL object from the input string
+    const parsedUrl = new URL(url);
+
+    // Extract and clean up the pathname
+    const path = parsedUrl.pathname;
+    const lastSlashIndex = path.lastIndexOf("/");
+
+    // Extract folder path and file name
+    const folderPath = parsedUrl.origin + path.substring(0, lastSlashIndex + 1);
+    const fileName = path.substring(lastSlashIndex + 1);
+
+    return { folderPath, fileName };
+  } catch (error) {
+    // If the input string is not a valid URL
+    throw new Error("Invalid URL provided.");
+  }
 }

@@ -74,6 +74,7 @@ export function createPostProcessor(): void {
     );
 
     headBone!
+      // @ts-ignore
       .getFinalMatrix()
       .getTranslationToRef(headRelativePosition)
       .subtractToRef(cameraEyePosition, headRelativePosition);

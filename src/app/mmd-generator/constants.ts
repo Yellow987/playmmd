@@ -1,13 +1,12 @@
 export enum CharacterModel {
   HATSUNE_MIKU_YYB_10TH = "HATSUNE_MIKU_YYB_10TH",
+  SORA = "SORA",
 }
 
 export const defaultCharacterModel = CharacterModel.HATSUNE_MIKU_YYB_10TH;
 
 export type CharacterModelData = {
   name: string;
-  folderPath: string;
-  fileName: string;
   url: string;
 };
 
@@ -16,9 +15,11 @@ export const CHARACTER_MODELS_DATA: {
 } = {
   [CharacterModel.HATSUNE_MIKU_YYB_10TH]: {
     name: "Hatsune Miku YYB 10th",
-    folderPath: "/mmd/models/",
-    fileName: "miku.bpmx",
     url: "https://playmmd-model-assets.s3.amazonaws.com/YYB+Hatsune+Miku_10th_v1.02.bpmx",
+  },
+  [CharacterModel.SORA]: {
+    name: "Sora",
+    url: "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
   },
 };
 
