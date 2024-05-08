@@ -1,6 +1,7 @@
 import { Scene } from "@babylonjs/core";
 import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
+import { getScene } from "./scene";
 
 let mmdRuntime: MmdRuntime | null = null;
 
@@ -19,4 +20,12 @@ export function getMmdRuntime(): MmdRuntime {
     );
   }
   return mmdRuntime;
+}
+
+export function cleanupMmdRuntime(): void {
+  if (mmdRuntime) {
+    mmdRuntime.unregister(getScene());
+    mmdRuntime = null;
+    console.log("CLEANUP MMD RUNTIME DONE");
+  }
 }

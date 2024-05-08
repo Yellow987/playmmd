@@ -1,9 +1,12 @@
 "use client";
 
 import { Engine } from "@babylonjs/core";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BaseRuntime } from "../babylon/baseRuntime";
 import { SceneBuilder } from "../babylon/sceneBuilder";
+import { cleanupAllModels } from "../babylon/mmdComponents/mmdModels";
+import { cleanupScene } from "../babylon/mmdComponents/scene";
+import { cleanupMmdRuntime } from "../babylon/mmdComponents/mmdRuntime";
 
 interface Props {
   runtimeRef: React.MutableRefObject<BaseRuntime | null>;
@@ -11,55 +14,68 @@ interface Props {
 }
 
 function Canvas(props: Props) {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isInitialized = useRef(false);
+  const initializationStarted = useRef(false);
   const { runtimeRef, setIsLoaded } = props;
 
   useEffect(() => {
-    // Ensure the canvas is available
-    if (canvasRef.current) {
-      console.log("RENDERED CANVAS");
-      const canvas = canvasRef.current;
-      const engine = new Engine(
-        canvas,
-        false,
-        {
-          preserveDrawingBuffer: false,
-          stencil: false,
-          antialias: false,
-          alpha: false,
-          premultipliedAlpha: false,
-          powerPreference: "high-performance",
-          doNotHandleTouchAction: true,
-          doNotHandleContextLost: true,
-          audioEngine: false,
-        },
-        true,
-      );
+    const initializeRuntime = async () => {
+      if (
+        canvasRef.current &&
+        !isInitialized.current &&
+        !initializationStarted.current
+      ) {
+        initializationStarted.current = true;
+        const canvas = canvasRef.current;
+        const engine = new Engine(
+          canvas,
+          false,
+          {
+            preserveDrawingBuffer: false,
+            stencil: false,
+            antialias: false,
+            alpha: false,
+            premultipliedAlpha: false,
+            powerPreference: "high-performance",
+            doNotHandleTouchAction: true,
+            doNotHandleContextLost: true,
+            audioEngine: false,
+          },
+          true,
+        );
 
-      BaseRuntime.Create({
-        canvas,
-        engine,
-        sceneBuilder: new SceneBuilder(),
-      }).then((runtime) => {
+        const runtime = await BaseRuntime.Create({
+          canvas,
+          engine,
+          sceneBuilder: new SceneBuilder(),
+        });
+
         runtime.run();
         runtimeRef.current = runtime;
         setIsLoaded(true);
-      });
+        isInitialized.current = true;
 
-      // Correctly typed resize handler for TypeScript
-      const handleResize = () => {
-        engine.resize();
-      };
+        return () => {
+          if (isInitialized.current) {
+            console.log("CLEANUP CANVAS");
+            cleanupAllModels();
+            cleanupScene();
+            cleanupMmdRuntime();
+            engine.dispose();
+          }
+        };
+      }
+    };
 
-      window.addEventListener("resize", handleResize);
+    initializeRuntime();
 
-      // Clean up the engine on unmount
-      return () => {
-        engine.dispose();
-        window.removeEventListener("resize", handleResize);
-      };
-    }
-  }, []);
+    return () => {
+      if (initializationStarted && !isInitialized.current) {
+        console.log("Attempted cleanup without initialization complete.");
+      }
+    };
+  }, [runtimeRef, setIsLoaded]);
 
   return (
     <div>

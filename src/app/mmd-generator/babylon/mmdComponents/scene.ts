@@ -32,3 +32,12 @@ export function getScene(): Scene {
   }
   return scene;
 }
+
+export function cleanupScene(): void {
+  console.log("CLEANUP SCENE");
+  if (scene) {
+    scene.dispose();
+    scene = null;
+    console.log("CLEANUP SCENE DONE");
+  }
+}

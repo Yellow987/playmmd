@@ -7,6 +7,7 @@ import { getShadowGenerator } from "./shadowGenerator";
 import { getScene } from "./scene";
 
 let mmdModels: MmdModel[] = [];
+let mmdModelsLoading: boolean[] = [];
 
 export async function createAndSetMmdModel(
   index: number,
@@ -59,4 +60,14 @@ export function getMmdModel(index: number): MmdModel {
     throw new Error(`MmdModel ${index} has not been created yet.`);
   }
   return mmdModel;
+}
+
+export function cleanupAllModels(): void {
+  console.log(mmdModels.length);
+  mmdModels.forEach((mmdModel) => {
+    mmdModel.mesh.dispose();
+    getMmdRuntime().destroyMmdModel(mmdModel);
+    console.log("CLEANUP MODEL");
+  });
+  mmdModels = [];
 }
