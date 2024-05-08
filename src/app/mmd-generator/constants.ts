@@ -8,6 +8,7 @@ export type CharacterModelData = {
   name: string;
   folderPath: string;
   fileName: string;
+  url: string;
 };
 
 export const CHARACTER_MODELS_DATA: {
@@ -15,8 +16,9 @@ export const CHARACTER_MODELS_DATA: {
 } = {
   [CharacterModel.HATSUNE_MIKU_YYB_10TH]: {
     name: "Hatsune Miku YYB 10th",
-    folderPath: "/mmd/YYB Hatsune Miku_10th/",
-    fileName: "YYB Hatsune Miku_10th_v1.02.pmx",
+    folderPath: "/mmd/models/",
+    fileName: "miku.bpmx",
+    url: "https://playmmd-model-assets.s3.amazonaws.com/YYB+Hatsune+Miku_10th_v1.02.bpmx",
   },
 };
 

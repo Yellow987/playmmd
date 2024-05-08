@@ -6,44 +6,25 @@ import "@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent";
 import "@babylonjs/core/Helpers/sceneHelpers";
 import "@babylonjs/core/Materials/Node/Blocks";
 // if your model has .tga texture, uncomment following line.
-// import "@babylonjs/core/Materials/Textures/Loaders/tgaTextureLoader";
+import "@babylonjs/core/Materials/Textures/Loaders/tgaTextureLoader";
 // for load .bpmx file, we need to import following module.
 import "babylon-mmd/esm/Loader/Optimized/bpmxLoader";
 // if you want to use .pmx file, uncomment following line.
-import "babylon-mmd/esm/Loader/pmxLoader";
+// import "babylon-mmd/esm/Loader/pmxLoader";
 // if you want to use .pmd file, uncomment following line.
 // import "babylon-mmd/esm/Loader/pmdLoader";
 // for play `MmdAnimation` we need to import following two modules.
 import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeCameraAnimation";
 import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeModelAnimation";
 
-import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import type { Engine } from "@babylonjs/core/Engines/engine";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
-import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
-import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
-import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
-import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
-import { CreateGround } from "@babylonjs/core/Meshes/Builders/groundBuilder";
-import type { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
-import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Scene } from "@babylonjs/core/scene";
-import HavokPhysics from "@babylonjs/havok";
-import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
-import type { MmdAnimation } from "babylon-mmd/esm/Loader/Animation/mmdAnimation";
 import type { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import type { BpmxLoader } from "babylon-mmd/esm/Loader/Optimized/bpmxLoader";
-import { BvmdLoader } from "babylon-mmd/esm/Loader/Optimized/bvmdLoader";
-import { SdefInjector } from "babylon-mmd/esm/Loader/sdefInjector";
-import { StreamAudioPlayer } from "babylon-mmd/esm/Runtime/Audio/streamAudioPlayer";
-import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
-import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
-import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
-import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 // needed according to https://noname0310.github.io/babylon-mmd/docs/deep-usage/postprocesses/
 import "@babylonjs/core/Rendering/prePassRendererSceneComponent";
 import "@babylonjs/core/Rendering/depthRendererSceneComponent";
@@ -55,12 +36,6 @@ import {
   ANIMATION_PRESETS_DATA,
   AnimationPreset,
 } from "../constants";
-import { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
-import {
-  ImageProcessingConfiguration,
-  Material,
-} from "@babylonjs/core/Materials";
-import { DepthOfFieldEffectBlurLevel } from "@babylonjs/core/PostProcesses/depthOfFieldEffect";
 import { createScene } from "./mmdComponents/scene";
 import { createShadowGenerator } from "./mmdComponents/shadowGenerator";
 import { createMmdRuntime } from "./mmdComponents/mmdRuntime";
@@ -68,7 +43,17 @@ import { addMmdMotion, createAndSetMmdModel } from "./mmdComponents/mmdModels";
 import { createAudioPlayer } from "./mmdComponents/audioPlayer";
 import { createArcCamera, createMmdCamera } from "./mmdComponents/cameras";
 import { createPostProcessor } from "./mmdComponents/postProcessing";
-import { MmdPlayerControl } from "../components/MmdPlayerControls";
+import {
+  MmdCamera,
+  MmdMesh,
+  MmdPhysics,
+  MmdPlayerControl,
+  MmdRuntime,
+  PmxLoader,
+  SdefInjector,
+  StreamAudioPlayer,
+  VmdLoader,
+} from "babylon-mmd";
 
 export class SceneBuilder implements ISceneBuilder {
   public async build(
@@ -76,31 +61,12 @@ export class SceneBuilder implements ISceneBuilder {
     engine: Engine,
   ): Promise<Scene> {
     SdefInjector.OverrideEngineCreateEffect(engine);
-    const pmxLoader = SceneLoader.GetPluginForExtension(".pmx") as PmxLoader;
-    pmxLoader.useSdef = false;
+    // const pmxLoader = SceneLoader.GetPluginForExtension(".pmx") as PmxLoader;
+    // pmxLoader.useSdef = false;
+    const bpmxLoader = SceneLoader.GetPluginForExtension(".bpmx") as BpmxLoader;
+    bpmxLoader.loggingEnabled = true;
     const materialBuilder =
-      pmxLoader.materialBuilder as MmdStandardMaterialBuilder;
-    materialBuilder.useAlphaEvaluation = false;
-    const alphaBlendMaterials = [
-      "face02",
-      "Facial02",
-      "HL",
-      "Hairshadow",
-      "q302",
-    ];
-    const alphaTestMaterials = ["q301"];
-    materialBuilder.afterBuildSingleMaterial = (material): void => {
-      if (
-        !alphaBlendMaterials.includes(material.name) &&
-        !alphaTestMaterials.includes(material.name)
-      )
-        return;
-      material.transparencyMode = alphaBlendMaterials.includes(material.name)
-        ? Material.MATERIAL_ALPHABLEND
-        : Material.MATERIAL_ALPHATEST;
-      material.useAlphaFromDiffuseTexture = true;
-      material.diffuseTexture!.hasAlpha = true;
-    };
+      bpmxLoader.materialBuilder as MmdStandardMaterialBuilder;
     materialBuilder.loadOutlineRenderingProperties = () => {
       /* do nothing */
     };
@@ -129,13 +95,16 @@ export class SceneBuilder implements ISceneBuilder {
 
     const mmdRuntime = createMmdRuntime(scene);
     mmdRuntime.setCamera(mmdCamera);
+
+    bpmxLoader.boundingBoxMargin = 60;
+
     const mmdModel = await createAndSetMmdModel(
       0,
       CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
     );
 
     const vmdLoader = new VmdLoader(scene);
-    addMmdMotion(
+    await addMmdMotion(
       0,
       ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS]
         .modelAnimationPaths[0],

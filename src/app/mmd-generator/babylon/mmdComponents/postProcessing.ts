@@ -23,7 +23,7 @@ export function createPostProcessor(): void {
   postProcessor.chromaticAberrationEnabled = true;
   postProcessor.chromaticAberration.aberrationAmount = 1;
   postProcessor.depthOfFieldEnabled = true;
-  postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
+  postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.Low;
   postProcessor.fxaaEnabled = true;
   postProcessor.imageProcessingEnabled = true;
   postProcessor.imageProcessing.toneMappingEnabled = true;
