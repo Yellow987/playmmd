@@ -1,4 +1,4 @@
 ## Run
 
 yarn run dev
-AdministratorAccess-748072373005
+npx ampx sandbox --profile AdministratorAccess-748072373005

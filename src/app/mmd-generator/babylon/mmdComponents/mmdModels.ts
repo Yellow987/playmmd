@@ -19,8 +19,8 @@ export async function createAndSetMmdModel(
   const { folderPath, fileName } = extractFolderPathAndFileName(modelData.url);
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     undefined,
-    folderPath,
-    fileName,
+    "/mmd/models/",
+    "futureRin.bpmx",
     scene,
   ).then((result) => result.meshes[0] as Mesh);
   mmdMesh.receiveShadows = true;
