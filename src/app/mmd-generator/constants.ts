@@ -38,6 +38,7 @@ export type AnimationPresetData = {
 
 export enum AnimationPreset {
   LAST_CHRISTMAS = "LAST_CHRISTMAS",
+  FIGHTING_MY_WAY = "FIGHTING_MY_WAY",
 }
 
 export const ANIMATION_PRESETS_DATA: {
@@ -53,5 +54,17 @@ export const ANIMATION_PRESETS_DATA: {
         lipsPath: "/mmd/Animations/LastChristmas/FaceAndLips.vmd",
       },
     ],
+  },
+  [AnimationPreset.FIGHTING_MY_WAY]: {
+    name: "Fighting My Way",
+    audioPath: "/mmd/Animations/FightingMyWay/Audio.wav",
+    modelAnimationPaths: [
+      {
+        skeletonPath: "/mmd/Animations/FightingMyWay/Motion.vmd",
+        facialPath: "/mmd/Animations/FightingMyWay/Motion.vmd",
+        lipsPath: "/mmd/Animations/FightingMyWay/Motion.vmd",
+      },
+    ],
+    cameraPath: "/mmd/Animations/FightingMyWay/Camera.vmd",
   },
 };

@@ -55,7 +55,7 @@ function Presets() {
         menuLabel="Animation Name"
         onMenuItemSelect={onAnimationSelect}
         menuItems={ANIMATION_PRESETS_DATA}
-        defaultItem={AnimationPreset.LAST_CHRISTMAS}
+        defaultItem={AnimationPreset.FIGHTING_MY_WAY}
       />
     </>
   );

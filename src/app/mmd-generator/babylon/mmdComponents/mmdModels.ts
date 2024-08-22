@@ -5,9 +5,9 @@ import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import { getMmdRuntime } from "./mmdRuntime";
 import { getShadowGenerator } from "./shadowGenerator";
 import { getScene } from "./scene";
+import { getUrl } from "aws-amplify/storage";
 
 let mmdModels: MmdModel[] = [];
-let mmdModelsLoading: boolean[] = [];
 
 export async function createAndSetMmdModel(
   index: number,
@@ -17,10 +17,13 @@ export async function createAndSetMmdModel(
   const shadowGenerator = getShadowGenerator();
   const scene = getScene();
   const { folderPath, fileName } = extractFolderPathAndFileName(modelData.url);
+  const linkToStorageFile = await getUrl({
+    path: "models/Vigna.bpmx",
+  });
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     undefined,
-    "/mmd/models/",
-    "futureRin.bpmx",
+    String(linkToStorageFile.url),
+    "",
     scene,
   ).then((result) => result.meshes[0] as Mesh);
   mmdMesh.receiveShadows = true;

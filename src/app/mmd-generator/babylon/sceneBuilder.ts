@@ -106,20 +106,20 @@ export class SceneBuilder implements ISceneBuilder {
     const vmdLoader = new VmdLoader(scene);
     await addMmdMotion(
       0,
-      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS]
+      ANIMATION_PRESETS_DATA[AnimationPreset.FIGHTING_MY_WAY]
         .modelAnimationPaths[0],
     );
 
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
-      "/mmd/cam.vmd",
+      "/mmd/Animations/FightingMyWay/Camera.vmd",
     );
 
     mmdCamera.addAnimation(cameraMotion);
     mmdCamera.setAnimation("camera_motion_1");
 
     const audioPlayer = createAudioPlayer(
-      ANIMATION_PRESETS_DATA[AnimationPreset.LAST_CHRISTMAS].audioPath,
+      ANIMATION_PRESETS_DATA[AnimationPreset.FIGHTING_MY_WAY].audioPath,
     );
     audioPlayer.volume = 1;
     mmdRuntime.setAudioPlayer(audioPlayer);
