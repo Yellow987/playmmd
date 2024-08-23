@@ -17,12 +17,13 @@ export async function createAndSetMmdModel(
   const shadowGenerator = getShadowGenerator();
   const scene = getScene();
   const { folderPath, fileName } = extractFolderPathAndFileName(modelData.url);
-  const linkToStorageFile = await getUrl({
-    path: "models/Vigna.bpmx",
-  });
+  // const linkToStorageFile = await getUrl({
+  //   path: "public/models/Vigna.bpmx",
+  // });
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     undefined,
-    String(linkToStorageFile.url),
+    //String(linkToStorageFile.url),
+    "https://playmmd-model-assets.s3.amazonaws.com/YYB+Hatsune+Miku_10th_v1.02.bpmx",
     "",
     scene,
   ).then((result) => result.meshes[0] as Mesh);

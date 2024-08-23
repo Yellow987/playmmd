@@ -1,11 +1,8 @@
+"use client"
+import { Authenticator } from "@aws-amplify/ui-react";
 import { ChakraThemeProvider } from "../providers/chakraThemeProvider";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-
-export const metadata = {
-  title: "PlayMMD",
-  description: "Play MMD animations in browser!",
-};
 
 export default function RootLayout({
   children,
@@ -16,9 +13,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ChakraThemeProvider>
-          <Header />
-          {children}
-          <Footer />
+          <Authenticator.Provider>
+            <Header />
+            {children}
+            <Footer />
+          </Authenticator.Provider>
         </ChakraThemeProvider>
       </body>
     </html>
