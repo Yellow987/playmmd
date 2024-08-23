@@ -23,7 +23,7 @@ export async function createAndSetMmdModel(
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     undefined,
     //String(linkToStorageFile.url),
-    "https://playmmd-model-assets.s3.amazonaws.com/YYB+Hatsune+Miku_10th_v1.02.bpmx",
+    "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
     "",
     scene,
   ).then((result) => result.meshes[0] as Mesh);
