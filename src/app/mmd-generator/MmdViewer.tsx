@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { BaseRuntime } from "./babylon/baseRuntime";
-import { Flex, Box, useBreakpointValue, useBoolean } from "@chakra-ui/react";
+import { Flex, Box, useBreakpointValue } from "@chakra-ui/react";
 import Presets from "./components/Presets";
 import Canvas from "./components/Canvas";
 import Controls from "./components/Controls";

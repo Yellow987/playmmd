@@ -1,14 +1,10 @@
 "use client";
-
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { MdKeyboardArrowDown } from "react-icons/md";
 import {
-  Menu,
-  MenuButton,
   Button,
-  MenuList,
-  MenuItem,
   Box,
 } from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/menu';
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -34,8 +30,9 @@ function Dropdown(props: Props) {
         {props.menuLabel}
       </Box>
       <Menu>
-        <MenuButton as={Button} w="full" rightIcon={<ChevronDownIcon />}>
+        <MenuButton as={Button} w="full">
           {selectedItem.name}
+          <MdKeyboardArrowDown />
         </MenuButton>
         <MenuList>
           {menuOptions.map((item) => (

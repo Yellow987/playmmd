@@ -4,7 +4,7 @@ import { Box, Flex, Spacer, Text, VStack } from "@chakra-ui/react";
 import { getMmdRuntime } from "../../babylon/mmdComponents/mmdRuntime";
 import { format, set } from "date-fns";
 import { Observer } from "@babylonjs/core/Misc/observable";
-import Slider from "./Slider";
+import SliderComponent from "./SliderComponent";
 import Volume from "./Volume";
 import PlayPauseButton from "./PlayPauseButton";
 import { BaseRuntime } from "../../babylon/baseRuntime";
@@ -44,7 +44,7 @@ const VideoPlayer = (props: Props) => {
 
   return (
     <VStack mx={2}>
-      <Slider second={second} setSecond={setSecond} setFrame={setFrame} />
+      <SliderComponent second={second} setSecond={setSecond} setFrame={setFrame} />
       <Flex align="center" w="full" marginTop={-2}>
         <Spacer />
         <PlayPauseButton />

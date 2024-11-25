@@ -1,3 +1,4 @@
+"use client"
 import {
   Popover,
   PopoverTrigger,
@@ -6,13 +7,12 @@ import {
   PopoverArrow,
   PopoverBody,
   VStack,
-  Slider,
   SliderTrack,
-  SliderFilledTrack,
   SliderThumb,
   Box,
   HStack,
 } from "@chakra-ui/react";
+import { Slider } from "@/components/ui/slider"
 import { useState } from "react";
 import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { getAudioPlayer } from "../../babylon/mmdComponents/audioPlayer";
@@ -52,22 +52,19 @@ function Volume() {
           aria-label="volume-slider"
           orientation="horizontal"
           value={volume}
-          onChange={(sliderValue) => {
+          onChange={(sliderValue: number) => {
             setMmdVolume(sliderValue);
           }}
         >
           <SliderTrack>
-            <SliderFilledTrack />
+            <Box position="relative" width="100%" height="100%" bg="blue.500" />
           </SliderTrack>
           <SliderThumb />
         </Slider>
       </Box>
-      <IconButton
-        aria-label="Volume"
-        icon={isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
-        variant="ghost"
-        onClick={toggleIsMuted}
-      />
+      <IconButton aria-label="Volume" variant="ghost" onClick={toggleIsMuted}>
+        {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+      </IconButton>
     </HStack>
   );
 }

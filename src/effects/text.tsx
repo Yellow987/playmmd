@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, useTheme } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 type Props = {

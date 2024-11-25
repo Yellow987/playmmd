@@ -1,8 +1,10 @@
-"use client"
+"use client";
 import { Authenticator } from "@aws-amplify/ui-react";
-import { ChakraThemeProvider } from "../providers/chakraThemeProvider";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
+import { system } from "@/config/theme";
+import { Provider } from "@/components/ui/provider";
+import { defaultSystem } from "@chakra-ui/react"
 
 export default function RootLayout({
   children,
@@ -11,15 +13,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <ChakraThemeProvider>
-          <Authenticator.Provider>
-            <Header />
-            {children}
-            <Footer />
-          </Authenticator.Provider>
-        </ChakraThemeProvider>
-      </body>
+      <html suppressHydrationWarning>
+        <body>
+          <Provider>
+            <Authenticator.Provider>
+              <Header />
+              {children}
+              <Footer />
+            </Authenticator.Provider>
+          </Provider>
+        </body>
+      </html>
     </html>
   );
 }

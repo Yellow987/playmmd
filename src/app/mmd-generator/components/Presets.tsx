@@ -1,13 +1,10 @@
 "use client";
 import {
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   Button,
   Box,
 } from "@chakra-ui/react";
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { Menu, MenuButton, MenuList } from '@chakra-ui/menu';
+import { MdKeyboardArrowDown } from "react-icons/md";
 import { useState } from "react";
 import Dropdown from "@/components/Dropdown";
 import {
@@ -44,8 +41,8 @@ function Presets() {
           Stage
         </Box>
         <Menu>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />} w="full">
-            {selectedStage}
+          <MenuButton as={Button} w="full">
+            {selectedStage} <MdKeyboardArrowDown />
           </MenuButton>
           <MenuList></MenuList>
         </Menu>

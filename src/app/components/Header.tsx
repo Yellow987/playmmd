@@ -6,18 +6,15 @@ import {
   Flex,
   Icon,
   Link,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider,
   Button,
   Avatar,
 } from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, MenuItem, MenuDivider } from '@chakra-ui/menu';
 import { FaUser } from "react-icons/fa"; // Example icon, replaceable with other icons
 import YellowPulseText from "@/effects/text";
 import { WEBSITE_NAME } from "@/config/constants";
 import { useRouter } from "next/navigation"; // useRouter from Next.js
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 function Header() {
   const profileIconSrc = "";
@@ -26,6 +23,12 @@ function Header() {
   const handleLoginClick = () => {
     router.push("/login"); // Navigate to the /login page
   };
+
+  const { authStatus, signOut, user } = useAuthenticator((context) => [context.authStatus]);
+  const authenticated = authStatus === "authenticated";
+
+
+  console.log("Loading header", user);
 
   return (
     <Box
@@ -50,7 +53,7 @@ function Header() {
           <MenuButton
             as={Button}
             rounded={"full"}
-            variant={"link"}
+            // variant={"link"}
             cursor={"pointer"}
             minW={0}
             position="absolute"
@@ -58,17 +61,21 @@ function Header() {
             right="10px"
             transform="translateY(-50%)"
           >
-            {profileIconSrc ? (
+            {/* {profileIconSrc ? (
               <Avatar size={"sm"} src={profileIconSrc} />
-            ) : (
+            ) : ( */}
               <Icon as={FaUser} w={6} h={6} />
-            )}
+            {/* )} */}
           </MenuButton>
           <MenuList>
-            <MenuItem onClick={handleLoginClick}>Login</MenuItem>
+            {!authenticated && <MenuItem onClick={handleLoginClick}>Login</MenuItem>}
             <MenuItem>Settings</MenuItem>
-            <MenuDivider />
-            <MenuItem>Logout</MenuItem>
+            {authenticated && (
+              <>
+                <MenuDivider />
+                <MenuItem onClick={signOut}>Logout</MenuItem>
+              </>
+            )}
           </MenuList>
         </Menu>
       </Flex>
