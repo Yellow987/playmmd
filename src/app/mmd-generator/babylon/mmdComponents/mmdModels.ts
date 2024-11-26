@@ -1,6 +1,6 @@
 import { SceneLoader, Mesh } from "@babylonjs/core";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
-import { CharacterModelData, ModelAniamtionPaths } from "../../constants";
+import { AwsAsset, ModelAniamtionPaths } from "../../constants";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import { getMmdRuntime } from "./mmdRuntime";
 import { getShadowGenerator } from "./shadowGenerator";
@@ -11,8 +11,9 @@ let mmdModels: MmdModel[] = [];
 
 export async function createAndSetMmdModel(
   index: number,
-  modelData: CharacterModelData,
+  modelData: AwsAsset,
 ): Promise<MmdModel> {
+  console.log("createAndSetMmdModel");
   const mmdRuntime = getMmdRuntime();
   const shadowGenerator = getShadowGenerator();
   const scene = getScene();
@@ -22,8 +23,8 @@ export async function createAndSetMmdModel(
   // });
   const mmdMesh = await SceneLoader.ImportMeshAsync(
     undefined,
+    modelData.url,
     //String(linkToStorageFile.url),
-    "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
     "",
     scene,
   ).then((result) => result.meshes[0] as Mesh);
@@ -31,6 +32,7 @@ export async function createAndSetMmdModel(
   shadowGenerator.addShadowCaster(mmdMesh);
 
   mmdModels[index] = mmdRuntime.createMmdModel(mmdMesh);
+  console.log("createAndSetMmdModel COMPLETE");
   return mmdModels[index];
 }
 
@@ -75,6 +77,24 @@ export function cleanupAllModels(): void {
     console.log("CLEANUP MODEL");
   });
   mmdModels = [];
+}
+
+export function cleanupModelInArray(index: number): void {
+  console.log(mmdModels.length);
+  if (!mmdModels[index]) {
+    return 
+  }
+  const mmdModel = mmdModels[index];
+  mmdModel.mesh.dispose();
+  getMmdRuntime().destroyMmdModel(mmdModel);
+  console.log("CLEANUP MODEL");
+  // double check logic
+}
+
+export function cleanupModel(mmdModel: MmdModel): void {
+  mmdModel.mesh.dispose();
+  getMmdRuntime().destroyMmdModel(mmdModel);
+  console.log("CLEANUP MODEL");
 }
 
 function extractFolderPathAndFileName(url: string) {

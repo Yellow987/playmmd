@@ -31,8 +31,6 @@ import "@babylonjs/core/Rendering/depthRendererSceneComponent";
 
 import type { ISceneBuilder } from "./baseRuntime";
 import {
-  CHARACTER_MODELS_DATA,
-  CharacterModel,
   ANIMATION_PRESETS_DATA,
   AnimationPreset,
 } from "../constants";
@@ -98,17 +96,17 @@ export class SceneBuilder implements ISceneBuilder {
 
     bpmxLoader.boundingBoxMargin = 60;
 
-    const mmdModel = await createAndSetMmdModel(
-      0,
-      CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
-    );
+    // const mmdModel = await createAndSetMmdModel(
+    //   0,
+    //   CHARACTER_MODELS_DATA[CharacterModel.HATSUNE_MIKU_YYB_10TH],
+    // );
 
     const vmdLoader = new VmdLoader(scene);
-    await addMmdMotion(
-      0,
-      ANIMATION_PRESETS_DATA[AnimationPreset.FIGHTING_MY_WAY]
-        .modelAnimationPaths[0],
-    );
+    // await addMmdMotion(
+    //   0,
+    //   ANIMATION_PRESETS_DATA[AnimationPreset.FIGHTING_MY_WAY]
+    //     .modelAnimationPaths[0],
+    // );
 
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
@@ -131,7 +129,7 @@ export class SceneBuilder implements ISceneBuilder {
 
     createArcCamera(scene, _canvas);
 
-    createPostProcessor();
+    // createPostProcessor();
 
     mmdRuntime.playAnimation();
 

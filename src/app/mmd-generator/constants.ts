@@ -5,13 +5,13 @@ export enum CharacterModel {
 
 export const defaultCharacterModel = CharacterModel.HATSUNE_MIKU_YYB_10TH;
 
-export type CharacterModelData = {
+export type AwsAsset = {
   name: string;
   url: string;
 };
 
 export const CHARACTER_MODELS_DATA: {
-  [Key in CharacterModel]: CharacterModelData;
+  [Key in CharacterModel]: AwsAsset;
 } = {
   [CharacterModel.HATSUNE_MIKU_YYB_10TH]: {
     name: "Hatsune Miku YYB 10th",
@@ -22,6 +22,19 @@ export const CHARACTER_MODELS_DATA: {
     url: "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
   },
 };
+
+export const STAGE_DATA: {
+  [key: string]: AwsAsset
+} = {
+  "DefaultStage": {
+    name: "Default Stage",
+    url: "",
+  },
+  "Stage 2": {
+    name: "Stage 2",
+    url: "",
+  }
+}
 
 export type ModelAniamtionPaths = {
   skeletonPath: string;
