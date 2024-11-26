@@ -18,6 +18,8 @@ import { FaUser } from "react-icons/fa"; // Example icon, replaceable with other
 import YellowPulseText from "@/effects/text";
 import { WEBSITE_NAME } from "@/config/constants";
 import { useRouter } from "next/navigation"; // useRouter from Next.js
+import { Authenticator, useAuthenticator } from "@aws-amplify/ui-react";
+import { AuthStatus } from '@aws-amplify/ui';
 
 function Header() {
   const profileIconSrc = "";
@@ -27,6 +29,9 @@ function Header() {
     router.push("/login"); // Navigate to the /login page
   };
 
+  const { authStatus } = useAuthenticator(context => [context.authStatus]);
+  const isAuthenticated = authStatus === 'authenticated';
+  
   return (
     <Box
       position="relative"
@@ -65,10 +70,15 @@ function Header() {
             )}
           </MenuButton>
           <MenuList>
-            <MenuItem onClick={handleLoginClick}>Login</MenuItem>
+            {!isAuthenticated && <MenuItem onClick={handleLoginClick}>Login</MenuItem>}
+            <MenuItem>Profile</MenuItem>
             <MenuItem>Settings</MenuItem>
-            <MenuDivider />
-            <MenuItem>Logout</MenuItem>
+            {isAuthenticated && (
+              <>
+                <MenuDivider />
+                <MenuItem>Logout</MenuItem>
+              </>
+            )}
           </MenuList>
         </Menu>
       </Flex>
