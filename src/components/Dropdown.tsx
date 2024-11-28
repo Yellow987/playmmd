@@ -19,14 +19,13 @@ interface Props {
 }
 
 function Dropdown(props: Props) {
-  const [selectedItem, setSelectedItem] = useState(
-    props.menuItems[props.defaultItem],
-  );
-  const menuOptions = Object.values(props.menuItems);
+  const [selectedItem, setSelectedItem] = useState(props.defaultItem);
+  const menuOptions = Object.entries(props.menuItems);
 
-  useEffect(() => {
-    props.onMenuItemSelect(selectedItem);
-  }, [selectedItem]);
+  const onDropdownMenuItemSelect = (key: string) => {
+    setSelectedItem(key);
+    props.onMenuItemSelect(key);
+  };
 
   return (
     <Box mb={4}>
@@ -35,12 +34,12 @@ function Dropdown(props: Props) {
       </Box>
       <Menu>
         <MenuButton as={Button} w="full" rightIcon={<ChevronDownIcon />}>
-          {selectedItem.name}
+          {props.menuItems[selectedItem].name}
         </MenuButton>
         <MenuList>
-          {menuOptions.map((item) => (
-            <MenuItem key={item.name} onClick={() => setSelectedItem(item)}>
-              {item.name}
+          {menuOptions.map(([key, value]) => (
+            <MenuItem key={key} onClick={() => onDropdownMenuItemSelect(key)}>
+              {value.name}
             </MenuItem>
           ))}
         </MenuList>

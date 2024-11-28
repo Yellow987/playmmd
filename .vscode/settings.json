@@ -1,0 +1,17 @@
+{
+  "files.exclude": {
+    "node_modules": true,
+    "dist": true,
+    "public": false
+  },
+  "search.exclude": {
+    "node_modules": true,
+    "dist": true,
+    "public": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/public": true
+  }
+}

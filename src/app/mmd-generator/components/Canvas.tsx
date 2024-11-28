@@ -1,23 +1,30 @@
 "use client";
 
-import { Engine } from "@babylonjs/core";
+import { Engine, Scene } from "@babylonjs/core";
 import { useEffect, useRef, useState } from "react";
 import { BaseRuntime } from "../babylon/baseRuntime";
 import { SceneBuilder } from "../babylon/sceneBuilder";
-import { cleanupAllModels } from "../babylon/mmdComponents/mmdModels";
-import { cleanupScene } from "../babylon/mmdComponents/scene";
-import { cleanupMmdRuntime } from "../babylon/mmdComponents/mmdRuntime";
+import { createMmdRuntime } from "../babylon/mmdHooks/mmdRuntime";
+import useCameras from "../babylon/mmdHooks/useCameras";
+import useLighting from "../babylon/mmdHooks/useLighting";
+import useStage from "../babylon/mmdHooks/useStage";
+import useAudioPlayer from "../babylon/mmdHooks/useAudioPlayer";
+import useMmdMotions from "../babylon/mmdHooks/useMmdMotions";
+import useMmdModels from "../babylon/mmdHooks/useMmdModels";
+import usePostProcessor from "../babylon/mmdHooks/usePostProcessor";
+import { cleanupScene } from "../babylon/mmdHooks/scene";
 
 interface Props {
-  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  runtimeRef: React.MutableRefObject<BaseRuntime | null>;
+  sceneRef: React.MutableRefObject<Scene | null>;
 }
 
 function Canvas(props: Props) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isInitialized = useRef(false);
   const initializationStarted = useRef(false);
-  const { runtimeRef, setIsLoaded } = props;
+  const { canvasRef, sceneRef, runtimeRef, setIsLoaded } = props;
 
   useEffect(() => {
     const initializeRuntime = async () => {
@@ -51,7 +58,9 @@ function Canvas(props: Props) {
           sceneBuilder: new SceneBuilder(),
         });
 
-        runtime.run();
+        // runtime.run();
+        canvasRef.current = runtime.canvas;
+        sceneRef.current = runtime.scene;
         runtimeRef.current = runtime;
         setIsLoaded(true);
         isInitialized.current = true;
@@ -59,9 +68,9 @@ function Canvas(props: Props) {
         return () => {
           if (isInitialized.current) {
             console.log("CLEANUP CANVAS");
-            cleanupAllModels();
+            // cleanupAllModels();
             cleanupScene();
-            cleanupMmdRuntime();
+            // cleanupMmdRuntime();
             engine.dispose();
           }
         };
@@ -75,7 +84,7 @@ function Canvas(props: Props) {
         console.log("Attempted cleanup without initialization complete.");
       }
     };
-  }, [runtimeRef, setIsLoaded]);
+  }, [setIsLoaded]);
 
   return (
     <div>

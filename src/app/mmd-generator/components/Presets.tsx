@@ -18,16 +18,26 @@ import {
   ANIMATION_PRESETS_DATA,
   CHARACTER_MODELS_DATA,
 } from "../constants";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { setModels } from "@/redux/mmdModels";
 
 function Presets() {
   const [selectedStage, setSelectedStage] = useState("Select Stage");
+  const dispatch = useDispatch();
+  const characterModels = useSelector(
+    (state: RootState) => state.mmdModels.models,
+  );
 
-  const onCharacterSelect = (item: CharacterModelData) => {
-    console.log(item);
+  const onCharacterSelect = (model: CharacterModel) => {
+    const newCharacterModels = [...characterModels];
+    newCharacterModels[0] = model;
+    dispatch(setModels(newCharacterModels));
   };
 
-  const onAnimationSelect = (item: AnimationPresetData) => {
-    console.log(item);
+  const onAnimationSelect = (animation: AnimationPreset) => {
+    console.log(animation);
   };
 
   return (
@@ -55,7 +65,7 @@ function Presets() {
         menuLabel="Animation Name"
         onMenuItemSelect={onAnimationSelect}
         menuItems={ANIMATION_PRESETS_DATA}
-        defaultItem={AnimationPreset.FIGHTING_MY_WAY}
+        defaultItem={AnimationPreset.LAST_CHRISTMAS}
       />
     </>
   );

@@ -10,6 +10,7 @@ import React from "react";
 import NextLink from "next/link";
 import { FaYoutube, FaGithub } from "react-icons/fa";
 import { createIcon } from "@chakra-ui/react";
+import { buildTime } from "@/config/env";
 
 function Footer() {
   const DiscordSVGIcon = createIcon({
@@ -98,7 +99,7 @@ function Footer() {
             color: "white",
           }}
         >
-          Last updated:
+          Last updated: {buildTime}
         </chakra.p>
 
         <Flex align="center" justify="center">
