@@ -5,7 +5,6 @@ import { Flex, Box, useBreakpointValue, useBoolean } from "@chakra-ui/react";
 import Presets from "./components/Presets";
 import Canvas from "./components/Canvas";
 import Controls from "./components/Controls";
-import VideoPlayer from "./components/VideoPlayer_old/VideoPlayer";
 import UseMmd from "./babylon/mmdHooks/UseMmd";
 import { Scene } from "@babylonjs/core/scene";
 import VideoPlayerControls from "./components/VideoPlayer/VideoPlayerControls";
