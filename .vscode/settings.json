@@ -1,17 +1,20 @@
 {
   "files.exclude": {
+    ".amplify": true,
+    ".next": true,
     "node_modules": true,
-    "dist": true,
     "public": true
   },
   "search.exclude": {
+    ".amplify": true,
+    ".next": true,
     "node_modules": true,
-    "dist": true,
     "public": true
   },
   "files.watcherExclude": {
+    "**/.amplify": true,
+    "**/.next": true,
     "**/node_modules": true,
-    "**/dist": true,
     "**/public": true
   }
 }

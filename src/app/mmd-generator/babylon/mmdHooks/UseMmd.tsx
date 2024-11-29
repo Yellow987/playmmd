@@ -14,6 +14,7 @@ import { createMmdRuntime } from "./mmdRuntime";
 import { Observer } from "@babylonjs/core/Misc/observable";
 import { setAnimationDuration, setIsPlaying, setSecond } from "@/redux/mmd";
 import { useDispatch } from "react-redux";
+import useControls from "./useControls";
 
 interface Props {
   sceneRef: MutableRefObject<Scene>;
@@ -37,6 +38,7 @@ const UseMmd = (props: Props) => {
   const mmdCharacterModelsRef = useMmdModels(sceneRef, mmdRuntime);
   useMmdMotions(sceneRef, mmdCharacterModelsRef);
   usePostProcessor(sceneRef, mmdCharacterModelsRef);
+  useControls(baseRuntimeRef, canvasRef);
 
   useEffect(() => {
     mmdRuntime.playAnimation();

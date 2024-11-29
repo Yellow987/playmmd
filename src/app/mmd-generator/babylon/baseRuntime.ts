@@ -13,14 +13,13 @@ export interface BaseRuntimeInitParams {
 
 export class BaseRuntime {
   canvas: HTMLCanvasElement;
-  private readonly _engine: Engine;
+  readonly engine: Engine;
   scene: Scene;
   private _onTick: () => void;
 
   private constructor(params: BaseRuntimeInitParams) {
     this.canvas = params.canvas;
-    this._engine = params.engine;
-
+    this.engine = params.engine;
     this.scene = null!;
     this._onTick = null!;
   }
@@ -35,7 +34,7 @@ export class BaseRuntime {
   }
 
   public run(): void {
-    const engine = this._engine;
+    const engine = this.engine;
 
     window.addEventListener("resize", this._onResize);
     engine.runRenderLoop(this._onTick);
@@ -43,15 +42,15 @@ export class BaseRuntime {
 
   public dispose(): void {
     window.removeEventListener("resize", this._onResize);
-    this._engine.dispose();
+    this.engine.dispose();
   }
-
+  
   private readonly _onResize = (): void => {
-    this._engine.resize();
+    this.engine.resize();
   };
 
   private async _initialize(sceneBuilder: ISceneBuilder): Promise<Scene> {
-    return await sceneBuilder.build(this.canvas, this._engine);
+    return await sceneBuilder.build(this.canvas, this.engine);
   }
 
   private _makeOnTick(): () => void {

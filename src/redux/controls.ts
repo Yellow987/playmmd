@@ -7,6 +7,7 @@ const controls = createSlice({
     isDepthOfFieldEnabled: true,
     volume: 1,
     isMuted: true,
+    isFullscreen: false,
   },
   reducers: {
     setIsDepthOfFieldEnabled: (state, action: PayloadAction<boolean>) => {
@@ -18,9 +19,12 @@ const controls = createSlice({
     setIsMuted: (state, action: PayloadAction<boolean>) => {
       state.isMuted = action.payload;
     },
+    setIsFullscreen: (state, action: PayloadAction<boolean>) => {
+      state.isFullscreen = action.payload;
+    },
   },
 });
 
-export const { setIsDepthOfFieldEnabled: setIsDepthOfFieldEnabled, setVolume, setIsMuted } =
+export const { setIsDepthOfFieldEnabled, setVolume, setIsMuted, setIsFullscreen } =
   controls.actions;
 export default controls.reducer;

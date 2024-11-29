@@ -1,7 +1,7 @@
 "use client";
 import Dropdown from "@/components/Dropdown";
 import { setActiveCamera } from "@/redux/cameras";
-import { setIsDepthOfFieldEnabled } from "@/redux/controls";
+import { setIsDepthOfFieldEnabled, setIsFullscreen } from "@/redux/controls";
 import { RootState } from "@/redux/store";
 import { SimpleGrid, Box, VStack, Checkbox } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 function Controls() {
   const dispatch = useDispatch();
   const isDepthOfFieldEnabled = useSelector((state: RootState) => state.controls.isDepthOfFieldEnabled);
+  const isFullscreen = useSelector((state: RootState) => state.controls.isFullscreen);
 
   enum CameraControl {
     MMD_CAMERA = "MMD Camera",
@@ -54,7 +55,13 @@ function Controls() {
           isChecked={isDepthOfFieldEnabled}
           onChange={(e) => dispatch(setIsDepthOfFieldEnabled(e.target.checked))}
         >
-          Depth of Field {process.env.STAGE}
+          Depth of Field
+        </Checkbox>
+        <Checkbox
+          isChecked={isFullscreen}
+          onChange={(e) => dispatch(setIsFullscreen(e.target.checked))}
+        >
+          Fullscreen
         </Checkbox>
       </VStack>
     </SimpleGrid>
