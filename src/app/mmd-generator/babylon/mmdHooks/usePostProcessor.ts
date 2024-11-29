@@ -19,8 +19,8 @@ const usePostProcessor = (
   sceneRef: MutableRefObject<Scene>,
   mmdRuntimeModels: MutableRefObject<MmdModel[]>,
 ): void => {
-  const depthOfFieldEnabled = useSelector(
-    (state: RootState) => state.controls.depthOfFieldEnabled,
+  const isDepthOfFieldEnabled = useSelector(
+    (state: RootState) => state.controls.isDepthOfFieldEnabled,
   );
   const mmdModelsLoaded = useSelector(
     (state: RootState) => state.mmdModels.modelsLoaded,
@@ -29,11 +29,15 @@ const usePostProcessor = (
   const postProcessorRef = useRef<DefaultRenderingPipeline | null>(null);
 
   useEffect(() => {
-    if (postProcessorRef.current) return;
+    if (postProcessorRef.current || !mmdModelsLoaded[0]) return;
+    console.log(mmdModelsLoaded)
+    console.log(mmdRuntimeModels.current)
+    console.log("Creating post processor");
     postProcessorRef.current = createPostProcessor(
       sceneRef.current.getCameraById("MmdCamera") as MmdCamera,
       sceneRef.current.getCameraById("ArcCamera") as ArcRotateCamera,
     );
+    postProcessorRef.current.depthOfFieldEnabled = isDepthOfFieldEnabled;
     console.log("Post processor created");
 
     return () => {
@@ -42,18 +46,17 @@ const usePostProcessor = (
       postProcessorRef.current.dispose();
       postProcessorRef.current = null;
     };
-  }, []);
+  }, [mmdModelsLoaded]);
 
   useEffect(() => {
     if (!postProcessorRef.current) return;
-    postProcessorRef.current.depthOfFieldEnabled = depthOfFieldEnabled;
-  }, [depthOfFieldEnabled]);
+    postProcessorRef.current.depthOfFieldEnabled = isDepthOfFieldEnabled;
+  }, [isDepthOfFieldEnabled]);
 
   function createPostProcessor(
     mmdCamera: MmdCamera,
     arcCamera: ArcRotateCamera,
   ): DefaultRenderingPipeline {
-    console.log("Creating post processor");
     const postProcessor = new DefaultRenderingPipeline(
       "default",
       true,
@@ -61,76 +64,53 @@ const usePostProcessor = (
       [mmdCamera, arcCamera],
     );
     postProcessor.samples = 4;
-    postProcessor.bloomEnabled = true;
-    postProcessor.chromaticAberrationEnabled = true;
-    postProcessor.chromaticAberration.aberrationAmount = 1;
+    // postProcessor.bloomEnabled = true;
+    // postProcessor.chromaticAberrationEnabled = true;
+    // postProcessor.chromaticAberration.aberrationAmount = 1;
     postProcessor.depthOfFieldEnabled = true;
-    postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
-    postProcessor.fxaaEnabled = true;
-    postProcessor.imageProcessingEnabled = true;
-    postProcessor.imageProcessing.toneMappingEnabled = true;
-    postProcessor.imageProcessing.toneMappingType =
-      ImageProcessingConfiguration.TONEMAPPING_ACES;
-    postProcessor.imageProcessing.vignetteWeight = 0.5;
-    postProcessor.imageProcessing.vignetteStretch = 0.5;
-    postProcessor.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
-    postProcessor.imageProcessing.vignetteEnabled = true;
+    postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.Low;
+    // postProcessor.fxaaEnabled = true;
+    // postProcessor.imageProcessingEnabled = true;
+    // postProcessor.imageProcessing.toneMappingEnabled = true;
+    // postProcessor.imageProcessing.toneMappingType =
+    //   ImageProcessingConfiguration.TONEMAPPING_ACES;
+    // postProcessor.imageProcessing.vignetteWeight = 0.5;
+    // postProcessor.imageProcessing.vignetteStretch = 0.5;
+    // postProcessor.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
+    // postProcessor.imageProcessing.vignetteEnabled = true;
 
     postProcessor.depthOfField.fStop = 0.05;
     postProcessor.depthOfField.focalLength = 20;
 
-    // mmdCamera = sceneRef.current.getCameraById("MmdCamera") as MmdCamera;
+    for (const depthRenderer of Object.values(sceneRef.current._depthRenderer)) {
+      depthRenderer.forceDepthWriteTransparentMeshes = true;
+    }
 
-    // sceneRef.current.onBeforeRenderObservable.add(() => {
-    //   if (!mmdRuntimeModels.current[0]) return;
-    //   const mmdModel = mmdRuntimeModels.current[0];
-    //   const headBone = mmdModel.skeleton!.bones.find(
-    //     (bone) => bone.name === "頭",
-    //   );
+    const modelskeleton = mmdRuntimeModels.current[0].mesh.metadata.skeleton;
+    const headBone = modelskeleton!.bones.find((bone) => bone.name === "頭");
 
-    //   const rotationMatrix = new Matrix();
-    //   const cameraNormal = new Vector3();
-    //   const cameraEyePosition = new Vector3();
-    //   const headRelativePosition = new Vector3();
+    const rotationMatrix = new Matrix();
+    const cameraNormal = new Vector3();
+    const cameraEyePosition = new Vector3();
+    const headRelativePosition = new Vector3();
 
-    //   const cameraRotation = mmdCamera.rotation;
-    //   Matrix.RotationYawPitchRollToRef(
-    //     -cameraRotation.y,
-    //     -cameraRotation.x,
-    //     -cameraRotation.z,
-    //     rotationMatrix,
-    //   );
+    sceneRef.current.onBeforeRenderObservable.add(() => {
+      const cameraRotation = mmdCamera.rotation;
+      Matrix.RotationYawPitchRollToRef(-cameraRotation.y, -cameraRotation.x, -cameraRotation.z, rotationMatrix);
 
-    //   Vector3.TransformNormalFromFloatsToRef(
-    //     0,
-    //     0,
-    //     1,
-    //     rotationMatrix,
-    //     cameraNormal,
-    //   );
+      Vector3.TransformNormalFromFloatsToRef(0, 0, 1, rotationMatrix, cameraNormal);
 
-    //   mmdCamera.position.addToRef(
-    //     Vector3.TransformCoordinatesFromFloatsToRef(
-    //       0,
-    //       0,
-    //       mmdCamera.distance,
-    //       rotationMatrix,
-    //       cameraEyePosition,
-    //     ),
-    //     cameraEyePosition,
-    //   );
+      mmdCamera.position.addToRef(
+          Vector3.TransformCoordinatesFromFloatsToRef(0, 0, mmdCamera.distance, rotationMatrix, cameraEyePosition),
+          cameraEyePosition
+      );
 
-    //   headBone!
-    //     .getFinalMatrix()
-    //     .getTranslationToRef(headRelativePosition)
-    //     .subtractToRef(cameraEyePosition, headRelativePosition);
+      headBone!.getFinalMatrix().getTranslationToRef(headRelativePosition)
+          .subtractToRef(cameraEyePosition, headRelativePosition);
 
-    //   postProcessor.depthOfField.focusDistance =
-    //     (Vector3.Dot(headRelativePosition, cameraNormal) /
-    //       Vector3.Dot(cameraNormal, cameraNormal)) *
-    //     1000;
-    // });
-
+      postProcessor.depthOfField.focusDistance = (Vector3.Dot(headRelativePosition, cameraNormal) / Vector3.Dot(cameraNormal, cameraNormal)) * 1000;
+    });
+    
     return postProcessor;
   }
 };

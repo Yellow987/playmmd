@@ -4,13 +4,13 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 const controls = createSlice({
   name: "controls",
   initialState: {
-    depthOfFieldEnabled: false,
+    isDepthOfFieldEnabled: true,
     volume: 1,
     isMuted: true,
   },
   reducers: {
-    setDepthOfFieldEnabled: (state, action: PayloadAction<boolean>) => {
-      state.depthOfFieldEnabled = action.payload;
+    setIsDepthOfFieldEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isDepthOfFieldEnabled = action.payload;
     },
     setVolume: (state, action: PayloadAction<number>) => {
       state.volume = action.payload;
@@ -21,6 +21,6 @@ const controls = createSlice({
   },
 });
 
-export const { setDepthOfFieldEnabled, setVolume, setIsMuted } =
+export const { setIsDepthOfFieldEnabled: setIsDepthOfFieldEnabled, setVolume, setIsMuted } =
   controls.actions;
 export default controls.reducer;

@@ -1,12 +1,14 @@
 "use client";
-import { BaseRuntime } from "../babylon/baseRuntime";
 import Dropdown from "@/components/Dropdown";
 import { setActiveCamera } from "@/redux/cameras";
-import { setDepthOfFieldEnabled } from "@/redux/controls";
-import { useDispatch } from "react-redux";
+import { setIsDepthOfFieldEnabled } from "@/redux/controls";
+import { RootState } from "@/redux/store";
+import { SimpleGrid, Box, VStack, Checkbox } from "@chakra-ui/react";
+import { useDispatch, useSelector } from "react-redux";
 
 function Controls() {
   const dispatch = useDispatch();
+  const isDepthOfFieldEnabled = useSelector((state: RootState) => state.controls.isDepthOfFieldEnabled);
 
   enum CameraControl {
     MMD_CAMERA = "MMD Camera",
@@ -24,7 +26,7 @@ function Controls() {
       name: "Free Camera",
       function: () => {
         dispatch(setActiveCamera("arcCamera"));
-        dispatch(setDepthOfFieldEnabled(false));
+        dispatch(setIsDepthOfFieldEnabled(false));
       },
     },
   };
@@ -37,12 +39,25 @@ function Controls() {
 
   return (
     <>
+    <SimpleGrid
+      columns={{ base: 1, md: 2 }} // 1 column on small screens, 2 columns on medium and larger screens
+      spacing="4" // Space between items
+    >
       <Dropdown
         menuLabel="Camera Control"
         onMenuItemSelect={onCameraControlSelect}
         menuItems={cameraControlMenuItems}
         defaultItem="MMD Camera"
       />
+      <VStack spacing={4} align="stretch">
+        <Checkbox
+          isChecked={isDepthOfFieldEnabled}
+          onChange={(e) => dispatch(setIsDepthOfFieldEnabled(e.target.checked))}
+        >
+          Depth of Field {process.env.STAGE}
+        </Checkbox>
+      </VStack>
+    </SimpleGrid>
     </>
   );
 }
