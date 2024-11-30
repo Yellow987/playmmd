@@ -15,7 +15,7 @@ import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { RootState } from "@/redux/store";
 import { ActiveCamera } from "@/redux/cameras";
-import { UniversalCamera } from "@babylonjs/core";
+import { ColorCurves, SSRRenderingPipeline, TAARenderingPipeline, UniversalCamera } from "@babylonjs/core";
 
 const usePostProcessor = (
   sceneRef: MutableRefObject<Scene>,
@@ -68,23 +68,29 @@ const usePostProcessor = (
       [mmdCamera, arcCamera, freeCamera],
     );
     postProcessor.samples = 4;
-    // postProcessor.bloomEnabled = true;
-    // postProcessor.chromaticAberrationEnabled = true;
-    // postProcessor.chromaticAberration.aberrationAmount = 1;
+    postProcessor.fxaaEnabled = true;
+
     postProcessor.depthOfFieldEnabled = true;
     postProcessor.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.Low;
-    // postProcessor.fxaaEnabled = true;
+    postProcessor.depthOfField.fStop = 0.05;
+    postProcessor.depthOfField.focalLength = 20;
+
     // postProcessor.imageProcessingEnabled = true;
     // postProcessor.imageProcessing.toneMappingEnabled = true;
     // postProcessor.imageProcessing.toneMappingType =
     //   ImageProcessingConfiguration.TONEMAPPING_ACES;
-    // postProcessor.imageProcessing.vignetteWeight = 0.5;
-    // postProcessor.imageProcessing.vignetteStretch = 0.5;
-    // postProcessor.imageProcessing.vignetteColor = new Color4(0, 0, 0, 0);
-    // postProcessor.imageProcessing.vignetteEnabled = true;
+    // postProcessor.imageProcessing.exposure = 1.2; // Brighten scene slightly.
+    // postProcessor.imageProcessing.contrast = 1.3; // Enhance contrast for a punchy look.
 
-    postProcessor.depthOfField.fStop = 0.05;
-    postProcessor.depthOfField.focalLength = 20;
+    // const colorCurves = new ColorCurves();
+    // colorCurves.globalSaturation = 100; // Increase saturation (default is 0).
+    // postProcessor.imageProcessing.colorCurves = colorCurves;
+
+    // Bloom for Highlights
+    // postProcessor.bloomEnabled = true;
+    // postProcessor.bloomWeight = 0.6; // Subtle bloom to mimic anime lighting.
+    // postProcessor.bloomThreshold = 0.9; // Focus on bright areas only.
+    // postProcessor.bloomKernel = 64; // Larger kernel for softer glow.
 
     for (const depthRenderer of Object.values(sceneRef.current._depthRenderer)) {
       depthRenderer.forceDepthWriteTransparentMeshes = true;
@@ -116,6 +122,34 @@ const usePostProcessor = (
     });
     
     return postProcessor;
+  }
+
+  function createSSRPostProcessor(
+    mmdCamera: MmdCamera,
+    arcCamera: ArcRotateCamera,
+    freeCamera: UniversalCamera,
+  ): SSRRenderingPipeline {
+    const ssrRenderingPipeline = new SSRRenderingPipeline(
+      "ssr",
+      sceneRef.current,
+      [mmdCamera, arcCamera, freeCamera],
+      false,
+    );
+    ssrRenderingPipeline.step = 32;
+    ssrRenderingPipeline.maxSteps = 128;
+    ssrRenderingPipeline.maxDistance = 500;
+    ssrRenderingPipeline.enableSmoothReflections = false;
+    ssrRenderingPipeline.enableAutomaticThicknessComputation = false;
+    ssrRenderingPipeline.blurDownsample = 2;
+    ssrRenderingPipeline.ssrDownsample = 2;
+    ssrRenderingPipeline.thickness = 0.1;
+    ssrRenderingPipeline.selfCollisionNumSkip = 2;
+    ssrRenderingPipeline.blurDispersionStrength = 0;
+    ssrRenderingPipeline.roughnessFactor = 0.1;
+    ssrRenderingPipeline.reflectivityThreshold = 0.9;
+    ssrRenderingPipeline.samples = 4;
+
+    return ssrRenderingPipeline;
   }
 };
 
