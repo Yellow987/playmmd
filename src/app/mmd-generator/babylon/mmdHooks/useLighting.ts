@@ -1,14 +1,11 @@
-import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
-import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
-import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
-import { useSelector } from "react-redux";
+import { MutableRefObject, useEffect, useRef } from "react";
 import "@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent";
 import { Scene } from "@babylonjs/core/scene";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+import { Mesh } from "@babylonjs/core/Meshes/mesh";
 
 const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
   const light = useRef<DirectionalLight | null>(null);
@@ -16,7 +13,7 @@ const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
   useEffect(() => {
     if (light.current) return;
     console.log("Creating light");
-    createHemisphericLight(sceneRef.current)
+    // createHemisphericLight(sceneRef.current);
     light.current = createDirectionalLight(sceneRef.current);
     createShadowGenerator(light.current);
   }, []);
@@ -38,7 +35,7 @@ const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
       new Vector3(1, -2, 2),
       scene,
     );
-    directionalLight.intensity = 0.7;
+    directionalLight.intensity = 1;
     directionalLight.autoCalcShadowZBounds = false;
     directionalLight.autoUpdateExtends = false;
     directionalLight.shadowMaxZ = 50;
@@ -54,17 +51,23 @@ const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
   function createShadowGenerator(
     directionalLight: DirectionalLight,
   ): ShadowGenerator {
-    const camera = sceneRef.current.getCameraById("MmdCamera") as MmdCamera;
     const shadowGenerator = new ShadowGenerator(1024, directionalLight, true);
+    shadowGenerator.transparencyShadow = true;
     shadowGenerator.usePercentageCloserFiltering = true;
     shadowGenerator.forceBackFacesOnly = false;
     shadowGenerator.bias = 0.01;
     shadowGenerator.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
     shadowGenerator.frustumEdgeFalloff = 0.1;
-    shadowGenerator.bias = 0.01;
 
     return shadowGenerator;
   }
 };
+
+export function addShadowCaster(mesh: Mesh, scene: Scene): void {
+  const shadowGenerator = scene
+    .getLightByName("DirectionalLight")
+    ?.getShadowGenerator() as ShadowGenerator;
+  shadowGenerator.addShadowCaster(mesh);
+}
 
 export default useLighting;

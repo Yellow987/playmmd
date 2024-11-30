@@ -15,6 +15,7 @@ import { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMa
 import type { MmdMesh } from "babylon-mmd/esm/Runtime/mmdMesh";
 import { loadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import { getUrl, list } from "aws-amplify/storage";
+import { addShadowCaster } from "./useLighting";
 
 const useMmdModels = (
   sceneRef: MutableRefObject<Scene>,
@@ -104,26 +105,26 @@ const useMmdModels = (
       linkToStorageFile.url.toString(),
       sceneRef.current,
       {
-          // onProgress: (event) => engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`,
-          pluginOptions: {
-              mmdmodel: {
-                  materialBuilder: materialBuilder,
-                  boundingBoxMargin: 60,
-                  loggingEnabled: true
-              }
-          }
-      }
-  ).then((result) => {
+        // onProgress: (event) => engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`,
+        pluginOptions: {
+          mmdmodel: {
+            materialBuilder: materialBuilder,
+            boundingBoxMargin: 60,
+            loggingEnabled: true,
+          },
+        },
+      },
+    ).then((result) => {
       result.addAllToScene();
       return result.meshes[0] as MmdMesh;
-  });
+    });
 
     mmdMesh.receiveShadows = true;
-    const camera = sceneRef.current.getCameraById("MmdCamera") as MmdCamera;
-    const shadowGenerator = sceneRef.current
-      .getLightByName("DirectionalLight")
-      ?.getShadowGenerator() as ShadowGenerator;
-    shadowGenerator.addShadowCaster(mmdMesh);
+
+    for (const mesh of mmdMesh.metadata.meshes) {
+      mesh.receiveShadows = true;
+      addShadowCaster(mesh, sceneRef.current);
+    }
 
     const mmdModel = mmdRuntime.createMmdModel(mmdMesh);
     return mmdModel;
