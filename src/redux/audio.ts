@@ -6,7 +6,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 const audio = createSlice({
   name: "audio",
   initialState: {
-    audioPath: ANIMATION_PRESETS_DATA[AnimationPreset.FIGHTING_MY_WAY].audioPath,
+    audioPath: ANIMATION_PRESETS_DATA[AnimationPreset.TAME_LIE_ONE_STEP].audioPath,
   },
   reducers: {
     setActiveCamera: (state, action: PayloadAction<string>) => {

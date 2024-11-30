@@ -2,12 +2,15 @@
 import { AnimationPreset } from "@/app/mmd-generator/constants";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-export type ActiveCamera = "mmdCamera" | "arcCamera";
-
+export enum ActiveCamera {
+  MMD_CAMERA = "mmdCamera",
+  ARC_CAMERA = "arcCamera",
+  FREE_CAMERA = "freeCamera",
+}
 const cameras = createSlice({
   name: "cameras",
   initialState: {
-    activeCamera: "mmdCamera" as ActiveCamera,
+    activeCamera: ActiveCamera.MMD_CAMERA,
     mmdCameraMotion: "",
   },
   reducers: {

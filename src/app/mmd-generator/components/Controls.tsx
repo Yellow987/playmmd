@@ -1,6 +1,6 @@
 "use client";
 import Dropdown from "@/components/Dropdown";
-import { setActiveCamera } from "@/redux/cameras";
+import { ActiveCamera, setActiveCamera } from "@/redux/cameras";
 import { setIsDepthOfFieldEnabled, setIsFullscreen } from "@/redux/controls";
 import { RootState } from "@/redux/store";
 import { SimpleGrid, Box, VStack, Checkbox } from "@chakra-ui/react";
@@ -11,22 +11,29 @@ function Controls() {
   const isDepthOfFieldEnabled = useSelector((state: RootState) => state.controls.isDepthOfFieldEnabled);
   const isFullscreen = useSelector((state: RootState) => state.controls.isFullscreen);
 
-  enum CameraControl {
-    MMD_CAMERA = "MMD Camera",
-    USER_CONTROL_CAMERA = "USER_CONTROL_CAMERA",
-  }
-
-  const cameraControlMenuItems = {
-    [CameraControl.MMD_CAMERA]: {
+  const cameraControlMenuItems: Record<
+  ActiveCamera,
+  {
+    name: string;
+    function: () => void;
+  }> = {
+    ["mmdCamera"]: {
       name: "MMD Camera",
       function: () => {
-        dispatch(setActiveCamera("mmdCamera"));
+        dispatch(setActiveCamera(ActiveCamera.MMD_CAMERA));
       },
     },
-    [CameraControl.USER_CONTROL_CAMERA]: {
+    ["arcCamera"]: {
+      name: "Arc Camera",
+      function: () => {
+        dispatch(setActiveCamera(ActiveCamera.ARC_CAMERA));
+        dispatch(setIsDepthOfFieldEnabled(false));
+      },
+    },
+    ["freeCamera"]: {
       name: "Free Camera",
       function: () => {
-        dispatch(setActiveCamera("arcCamera"));
+        dispatch(setActiveCamera(ActiveCamera.FREE_CAMERA));
         dispatch(setIsDepthOfFieldEnabled(false));
       },
     },
@@ -48,7 +55,7 @@ function Controls() {
         menuLabel="Camera Control"
         onMenuItemSelect={onCameraControlSelect}
         menuItems={cameraControlMenuItems}
-        defaultItem="MMD Camera"
+        defaultItem={ActiveCamera.MMD_CAMERA}
       />
       <VStack spacing={4} align="stretch">
         <Checkbox

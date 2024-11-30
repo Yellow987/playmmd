@@ -14,6 +14,8 @@ import { ImageProcessingConfiguration } from "@babylonjs/core/Materials/imagePro
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { RootState } from "@/redux/store";
+import { ActiveCamera } from "@/redux/cameras";
+import { UniversalCamera } from "@babylonjs/core";
 
 const usePostProcessor = (
   sceneRef: MutableRefObject<Scene>,
@@ -34,8 +36,9 @@ const usePostProcessor = (
     console.log(mmdRuntimeModels.current)
     console.log("Creating post processor");
     postProcessorRef.current = createPostProcessor(
-      sceneRef.current.getCameraById("MmdCamera") as MmdCamera,
-      sceneRef.current.getCameraById("ArcCamera") as ArcRotateCamera,
+      sceneRef.current.getCameraById(ActiveCamera.MMD_CAMERA) as MmdCamera,
+      sceneRef.current.getCameraById(ActiveCamera.ARC_CAMERA) as ArcRotateCamera,
+      sceneRef.current.getCameraById(ActiveCamera.FREE_CAMERA) as UniversalCamera,
     );
     postProcessorRef.current.depthOfFieldEnabled = isDepthOfFieldEnabled;
     console.log("Post processor created");
@@ -56,12 +59,13 @@ const usePostProcessor = (
   function createPostProcessor(
     mmdCamera: MmdCamera,
     arcCamera: ArcRotateCamera,
+    freeCamera: UniversalCamera,
   ): DefaultRenderingPipeline {
     const postProcessor = new DefaultRenderingPipeline(
       "default",
       true,
       sceneRef.current,
-      [mmdCamera, arcCamera],
+      [mmdCamera, arcCamera, freeCamera],
     );
     postProcessor.samples = 4;
     // postProcessor.bloomEnabled = true;

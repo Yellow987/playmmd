@@ -39,6 +39,7 @@ export type AnimationPresetData = {
 export enum AnimationPreset {
   LAST_CHRISTMAS = "LAST_CHRISTMAS",
   FIGHTING_MY_WAY = "FIGHTING_MY_WAY",
+  TAME_LIE_ONE_STEP = "TAME_LIE_ONE_STEP",
 }
 
 export const ANIMATION_PRESETS_DATA: {
@@ -66,5 +67,17 @@ export const ANIMATION_PRESETS_DATA: {
       },
     ],
     cameraPath: "/mmd/Animations/FightingMyWay/Camera.vmd",
+  },
+  [AnimationPreset.TAME_LIE_ONE_STEP]: {
+    name: "Tame Lie One Step",
+    audioPath: "/mmd/Animations/TameLieOneStep/Audio.wav",
+    modelAnimationPaths: [
+      {
+        skeletonPath: "/mmd/Animations/TameLieOneStep/Motion.vmd",
+        facialPath: "/mmd/Animations/TameLieOneStep/Motion.vmd",
+        lipsPath: "/mmd/Animations/TameLieOneStep/Motion.vmd",
+      },
+    ],
+    cameraPath: "/mmd/Animations/TameLieOneStep/Camera.vmd",
   },
 };

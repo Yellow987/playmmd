@@ -8,10 +8,13 @@ import { useSelector } from "react-redux";
 import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeCameraAnimation";
 import { RootState } from "@/redux/store";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
+import { UniversalCamera } from "@babylonjs/core";
+import { ActiveCamera } from "@/redux/cameras";
 
 export type Cameras = {
   mmdCamera: MmdCamera;
   arcCamera: ArcRotateCamera;
+  freeCamera: UniversalCamera;
 };
 
 const useCameras = (
@@ -29,6 +32,7 @@ const useCameras = (
     const cameras = {
       mmdCamera: createMmdCamera(sceneRef.current),
       arcCamera: createArcCamera(sceneRef.current, canvasRef.current),
+      freeCamera: createFreeCamera(sceneRef.current, canvasRef.current),
     };
     camerasRef.current = cameras;
 
@@ -42,10 +46,13 @@ const useCameras = (
 
   useEffect(() => {
     if (!camerasRef.current) return;
-    if (activeCamera === "mmdCamera") {
+    if (activeCamera === ActiveCamera.MMD_CAMERA) {
       sceneRef.current.activeCamera = camerasRef.current.mmdCamera;
-    } else {
+    } else if (activeCamera === ActiveCamera.ARC_CAMERA) {
       sceneRef.current.activeCamera = camerasRef.current.arcCamera;
+    }
+    else if (activeCamera === ActiveCamera.FREE_CAMERA) {
+      sceneRef.current.activeCamera = camerasRef.current.freeCamera;
     }
   }, [activeCamera]);
 
@@ -54,7 +61,7 @@ const useCameras = (
     console.log("Loading camera Motion")
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
-      "/mmd/Animations/FightingMyWay/Camera.vmd",
+      "/mmd/Animations/TameLieOneStep/Camera.vmd",
     );
     console.log("Loaded camera Motion")
     cameras.mmdCamera.addAnimation(cameraMotion);
@@ -63,10 +70,10 @@ const useCameras = (
 
   function createArcCamera(
     scene: Scene,
-    _canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement,
   ): ArcRotateCamera {
     const arcRotateCamera = new ArcRotateCamera(
-      "ArcCamera",
+      ActiveCamera.ARC_CAMERA,
       0,
       0,
       45,
@@ -75,15 +82,21 @@ const useCameras = (
     );
     arcRotateCamera.maxZ = 5000;
     arcRotateCamera.setPosition(new Vector3(0, 10, -45));
-    arcRotateCamera.attachControl(_canvas, false);
+    arcRotateCamera.attachControl(canvas, false);
     arcRotateCamera.inertia = 0.8;
     arcRotateCamera.speed = 10;
 
     return arcRotateCamera;
   }
 
+  function createFreeCamera(scene: Scene, canvas: HTMLCanvasElement): UniversalCamera {
+    const freeCamera = new UniversalCamera(ActiveCamera.FREE_CAMERA, new Vector3(0, 10, 0), scene);
+    freeCamera.attachControl(canvas, true);
+    return freeCamera;
+  }
+
   function createMmdCamera(scene: Scene): MmdCamera {
-    const mmdCamera = new MmdCamera("MmdCamera", new Vector3(0, 10, 0), scene);
+    const mmdCamera = new MmdCamera(ActiveCamera.MMD_CAMERA, new Vector3(0, 10, 0), scene);
     return mmdCamera;
   }
 
