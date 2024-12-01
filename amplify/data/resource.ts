@@ -7,11 +7,50 @@ specifies that any unauthenticated user can "create", "read", "update",
 and "delete" any "Todo" records.
 =========================================================================*/
 const schema = a.schema({
-  Todo: a
+  Motions: a
     .model({
-      content: a.string(),
+      uploaderUsername: a.string().required(),
+      title: a.string().required(),
+      description: a.string(),
+      credits: a.string().required(),
+      pathToFiles: a.string().required(),
+      recommendedStage: a.string(),
+      isR_18: a.boolean().required(),
+      numberOfDancers: a.integer().required(),
     })
-    .authorization((allow) => [allow.guest()]),
+    .authorization((allow) => [
+      allow.guest().to(['read']),
+      allow.authenticated().to(['read']),
+      allow.owner().to(['create', 'read', 'update', 'delete']),
+    ]),
+  Models: a
+    .model({
+      uploaderUsername: a.string().required(),
+      title: a.string().required(),
+      description: a.string(),
+      credits: a.string().required(),
+      pathToFiles: a.string().required(),
+      isR_18: a.boolean().required(),
+    })
+    .authorization((allow) => [
+      allow.guest().to(['read']),
+      allow.authenticated().to(['read']),
+      allow.owner().to(['create', 'read', 'update', 'delete']),
+    ]),
+  Stages: a
+    .model({
+      uploaderUsername: a.string().required(),
+      title: a.string().required(),
+      description: a.string(),
+      credits: a.string().required(),
+      pathToFiles: a.string().required(),
+      isR_18: a.boolean().required(),
+    })
+    .authorization((allow) => [
+      allow.guest().to(['read']),
+      allow.authenticated().to(['read']),
+      allow.owner().to(['create', 'read', 'update', 'delete']),
+    ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
