@@ -10,6 +10,11 @@ import { Scene } from "@babylonjs/core/scene";
 import VideoPlayerControls from "./components/VideoPlayer/VideoPlayerControls";
 import { FileUploader } from "@aws-amplify/ui-react-storage";
 
+export type localAssets = {
+  modelFile: File;
+  referenceFiles: File[];
+};
+
 export default function Home() {
   // TODO fix ssr
   const flexDir: "column" | "row" =
@@ -17,6 +22,7 @@ export default function Home() {
   const runtimeRef = useRef<BaseRuntime | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sceneRef = useRef<Scene | null>(null);
+  const localFilesRef = useRef<localAssets[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -32,23 +38,19 @@ export default function Home() {
           <UseMmd
             sceneRef={sceneRef as MutableRefObject<Scene>}
             canvasRef={canvasRef as MutableRefObject<HTMLCanvasElement>}
-            baseRuntimeRef={runtimeRef}
+            runtimeRef={runtimeRef}
+            localFilesRef={localFilesRef}
           />
           <VideoPlayerControls />
         </>
       )}
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
-          <Presets />
+          <Presets localFilesRef={localFilesRef} />
         </Box>
         <Box flex="2" p={4} maxWidth={flexDir === "row" ? "67%" : "100%"}>
           <Controls />
         </Box>
-        <FileUploader
-          path="models/"
-          maxFileCount={1}
-          isResumable
-        />
       </Flex>
     </>
   );

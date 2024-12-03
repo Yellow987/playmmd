@@ -67,7 +67,7 @@ export function addShadowCaster(mesh: Mesh, scene: Scene): void {
   const shadowGenerator = scene
     .getLightByName("DirectionalLight")
     ?.getShadowGenerator() as ShadowGenerator;
-  shadowGenerator.addShadowCaster(mesh);
+  shadowGenerator.addShadowCaster(mesh, false);
 }
 
 export default useLighting;

@@ -1,7 +1,11 @@
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { useState, useEffect, MutableRefObject, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CHARACTER_MODELS_DATA, CharacterModel } from "../../constants";
+import {
+  CHARACTER_MODELS_DATA,
+  CharacterModel,
+  CharacterModelData,
+} from "../../constants";
 import "@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent";
 import { Scene } from "@babylonjs/core/scene";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
@@ -11,27 +15,34 @@ import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 import { RootState } from "@/redux/store";
 import { setModelsLoaded } from "@/redux/mmdModels";
-import { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
+import {
+  MmdStandardMaterialBuilder,
+  MmdStandardMaterialRenderMethod,
+} from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import type { MmdMesh } from "babylon-mmd/esm/Runtime/mmdMesh";
 import { loadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import { getUrl, list } from "aws-amplify/storage";
 import { addShadowCaster } from "./useLighting";
+import { BaseRuntime } from "../baseRuntime";
+import { localAssets } from "../../MmdViewer";
 
 const useMmdModels = (
   sceneRef: MutableRefObject<Scene>,
   mmdRuntime: MmdRuntime,
+  localFilesRef: MutableRefObject<localAssets[]>,
+  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>,
+  runtimeRef: MutableRefObject<BaseRuntime | null>,
 ): MutableRefObject<MmdModel[]> => {
   const dispatch = useDispatch();
   const mmdCharacterModels = useSelector(
     (state: RootState) => state.mmdModels.models,
   );
-  const mmdCharacterModelsRef = useRef<MmdModel[]>([]);
-  const prevMmdCharacterModels = useRef<CharacterModel[]>([]);
+  const prevMmdCharacterModels = useRef<CharacterModelData[]>([]);
 
   useEffect(() => {
     async function loadMmdModel(
       index: number,
-      newCharacterModel: CharacterModel,
+      newCharacterModel: CharacterModelData,
     ) {
       console.log("Loading model", newCharacterModel);
       const newMmdModel = await createMmdModel(index, newCharacterModel);
@@ -63,67 +74,75 @@ const useMmdModels = (
   }, [mmdCharacterModels]);
 
   function releaseMmdModel(mmdModelToDestroy: MmdModel) {
+    console.log("Releasing model");
     mmdRuntime.destroyMmdModel(mmdModelToDestroy);
     mmdModelToDestroy.mesh.dispose();
   }
 
-  function getDifferentIndexes(arr1: any[], arr2: any[]): number[] {
-    let differentIndexs = [];
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) {
-        differentIndexs.push(i);
-      }
-    }
-    return differentIndexs;
-  }
-
   async function createMmdModel(
     index: number,
-    characterModel: CharacterModel,
+    characterModelData: CharacterModelData,
   ): Promise<MmdModel> {
-    const modelData = CHARACTER_MODELS_DATA[characterModel];
-    // const mmdMesh = await SceneLoader.ImportMeshAsync(
-    //   undefined,
-    //   //String(linkToStorageFile.url),
-    //   "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
-    //   "",
-    //   sceneRef.current,
-    // ).then((result) => result.meshes[0] as Mesh);
     const materialBuilder = new MmdStandardMaterialBuilder();
-    materialBuilder.loadOutlineRenderingProperties = (): void => { /* do nothing */ };
-    const fileList = await list({
-      path: "models/"
-    });
-    console.log(fileList)
-    const linkToStorageFile = await getUrl({
-        path: "models/Akabane.bpmx",
-    });
-    console.log(linkToStorageFile)
+    // materialBuilder.loadOutlineRenderingProperties = (): void => {
+    //   /* do nothing */
+    // };
+    materialBuilder.deleteTextureBufferAfterLoad = false;
+    materialBuilder.renderMethod =
+      MmdStandardMaterialRenderMethod.AlphaEvaluation;
+
+    runtimeRef.current!.engine.displayLoadingUI();
     const mmdMesh = await loadAssetContainerAsync(
-      // "https://amplify-d2ww8jogafwege-ma-amplifystoragebucket7f87-3kftebnyakak.s3.us-east-1.amazonaws.com/models/Akabane.bpmx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAUS6VUMSFAEYF6JNO%2F20241128%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241128T165312Z&X-Amz-Expires=300&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIAqqziW8o11GsLrc%2BHXy5kGxYgq9GYBL0Bd7ppHaNkF3AiEA77rapw3Ro9AnAEVBwG%2BrbxI8wvSsbuF6AECwG6GE1bAq0QMIYhAAGgwzMTU1OTEyNTUxNzgiDIH8FExdmPj60pAg4yquA71ZjI8X0e6vwWt54%2FJW60XIn9433Xu3oXY%2FKNwKMcT1orFEVjan4hJ1k1S0okVJpLSoHwcP9UBA5j9dYnE%2BvPeXCzwSfcfH9XS7ha3rz9o8Sr8AwyC8EnQKipGriMigheEBUpvkDGyOZnoKwnieXbva4Zbq0810OE%2F5%2FkW1YqL79SEpzWImVO49XznkYCknM7zJnObUh93s7f1r1PcHkn9YF4isfRT5J25X6ZzXuBlntT%2FUqn0FoG5EEisYb3FUhdSo8I80AtoKCfpPBC4H8oID%2FIIJsysOHj5jSfXxnaiyz%2FN6kYhdyg8xQLtmjrIyTitZ7mDg6Gvtw6sTpuf7DP4ekfBoovDYER3GXNh14dQFtn%2BjuAqEdtw1Ismw1RdKQAr15sWzJ5Wlx5P6C%2BKtRsE2lhOF15JxT1HjAldpP2%2BREv%2FRZJ%2B8DGowSRLCOfU1TrguSt0zPF667RZDv%2BCd%2BxENSkAbPTEYCFTmzkR7ryOaq6ZAlMdpyfH5VRDMROnDyyxESAkydFGlyrzo3hOI5zyo%2Fs6ZqPNM%2FmxcvDOl9rl2uNcSky2bWW8oggL1z1gwlLiiugY6lAL2X1oRRd5wPyFR5Z4E3H0njbEhEcoSTHXYz0Dw%2BCiD8%2Bnv7ZdAMQ67aY8cB3VKaAC85dIRLlxu3E3Mmm%2Be7cFsX7ZJ7Hdb1cUAcuvnQPRHM1W1VadD72URxORmmws5p93g0TPOkDRz9CYKxCE5m9UiNuVlA1xqrja2EM%2B%2Fpxk2hT%2BXo%2Fa%2FsY1l0gmMmBdoMozRVmRBu1pzCOK6yZQl6m9Gemb%2B2WImMSnTP1OYGWGMi%2Bcr68NjiFff4uKWUG5xBy71cRe9NIi3ix2x0PVFX9IvJj6BYSPlna0jZdZF4V3cThJHo9rknyoDgr7MEQ8svc7Up8kTAHv3yQ%2B4QdkKgPNvjM1jkPQSoUPf9tLeg1IciKN1vac%3D&X-Amz-Signature=60c1caa38879f19e5ba33b2e8c1fc283e5eb27a4d4c41f96f90b460104c24e37&X-Amz-SignedHeaders=host&x-id=GetObject",
-      // "Akabane.bpmx",
-      linkToStorageFile.url.toString(),
+      characterModelData.isLocalModel
+        ? localFilesRef.current[0]?.modelFile
+          ? localFilesRef.current[0].modelFile
+          : characterModelData.path
+        : await getUrl({
+            path: characterModelData.path,
+          }).then((result) => {
+            return result.url.toString();
+          }),
+      // "mmd/Akabane.bpmx",
       sceneRef.current,
       {
-        // onProgress: (event) => engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`,
+        onProgress: (event) =>
+          (runtimeRef.current!.engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor((event.loaded * 100) / event.total)}%)`),
+        rootUrl:
+          characterModelData.isLocalModel && localFilesRef.current[0]
+            ? (
+                localFilesRef.current[0].modelFile.webkitRelativePath as string
+              ).substring(
+                0,
+                (
+                  localFilesRef.current[0].modelFile
+                    .webkitRelativePath as string
+                ).lastIndexOf("/") + 1,
+              )
+            : undefined,
         pluginOptions: {
           mmdmodel: {
             materialBuilder: materialBuilder,
             boundingBoxMargin: 60,
             loggingEnabled: true,
+            referenceFiles:
+              characterModelData.isLocalModel && localFilesRef.current[0]
+                ? localFilesRef.current[0].referenceFiles
+                : undefined,
           },
         },
       },
     ).then((result) => {
       result.addAllToScene();
+      runtimeRef.current!.engine.hideLoadingUI();
       return result.meshes[0] as MmdMesh;
     });
 
-    mmdMesh.receiveShadows = true;
-
-    for (const mesh of mmdMesh.metadata.meshes) {
+    const meshes = mmdMesh!.metadata.meshes;
+    for (let i = 0; i < meshes.length; ++i) {
+      const mesh = meshes[i];
       mesh.receiveShadows = true;
       addShadowCaster(mesh, sceneRef.current);
+      mesh.alphaIndex = i;
     }
 
     const mmdModel = mmdRuntime.createMmdModel(mmdMesh);

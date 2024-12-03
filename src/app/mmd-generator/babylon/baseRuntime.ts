@@ -44,7 +44,7 @@ export class BaseRuntime {
     window.removeEventListener("resize", this._onResize);
     this.engine.dispose();
   }
-  
+
   private readonly _onResize = (): void => {
     this.engine.resize();
   };

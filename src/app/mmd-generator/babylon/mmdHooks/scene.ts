@@ -14,6 +14,8 @@ export async function createScene(engine: Engine): Promise<Scene> {
     new HavokPlugin(true, await HavokPhysics()),
   );
 
+  // scene.enablePhysics(new Vector3(0, -9.8 * 10, 0), new MmdAmmoJSPlugin(true, await Mm));
+
   scene.ambientColor = new Color3(1, 1, 1);
 
   console.log("Scene created");

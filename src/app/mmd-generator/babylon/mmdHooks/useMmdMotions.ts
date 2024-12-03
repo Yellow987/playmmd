@@ -27,7 +27,12 @@ const useMmdMotions = (
 
   useEffect(() => {
     const index = 0;
-    if (!mmdMotions[index] || !mmdCharacterModelsRef.current[index]) return;
+    if (
+      !mmdMotions[index] ||
+      !mmdCharacterModelsRef.current[index] ||
+      !mmdModelsLoaded
+    )
+      return;
     setMmdMotionOnModel(index, mmdMotions[index]);
   }, [mmdMotions, mmdModelsLoaded]);
 

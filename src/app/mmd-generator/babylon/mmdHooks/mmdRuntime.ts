@@ -7,6 +7,7 @@ let mmdRuntime: MmdRuntime | null = null;
 export function createMmdRuntime(scene: Scene): MmdRuntime {
   if (!mmdRuntime) {
     mmdRuntime = new MmdRuntime(scene, new MmdPhysics(scene));
+    // mmdRuntime = new MmdRuntime(scene, new MmdAmmoPhysics(scene));
     mmdRuntime.register(scene);
   }
   return mmdRuntime;

@@ -10,9 +10,9 @@ import "@babylonjs/core/Materials/Textures/Loaders/tgaTextureLoader";
 // for load .bpmx file, we need to import following module.
 import "babylon-mmd/esm/Loader/Optimized/bpmxLoader";
 // if you want to use .pmx file, uncomment following line.
-// import "babylon-mmd/esm/Loader/pmxLoader";
+import "babylon-mmd/esm/Loader/pmxLoader";
 // if you want to use .pmd file, uncomment following line.
-// import "babylon-mmd/esm/Loader/pmdLoader";
+import "babylon-mmd/esm/Loader/pmdLoader";
 // for play `MmdAnimation` we need to import following two modules.
 import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeCameraAnimation";
 import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeModelAnimation";
@@ -58,30 +58,32 @@ export class SceneBuilder implements ISceneBuilder {
     SdefInjector.OverrideEngineCreateEffect(engine);
 
     const materialBuilder = new MmdStandardMaterialBuilder();
-    materialBuilder.loadOutlineRenderingProperties = (): void => { /* do nothing */ };
+    materialBuilder.loadOutlineRenderingProperties = (): void => {
+      /* do nothing */
+    };
 
     const scene = await createScene(engine);
 
     // const mmdCamera = new MmdCamera("MmdCamera", new Vector3(0, 10, 0), scene);
 
-  //   const mmdMesh = await loadAssetContainerAsync(
-  //     // "https://amplify-d2ww8jogafwege-ma-amplifystoragebucket7f87-3kftebnyakak.s3.us-east-1.amazonaws.com/models/Akabane.bpmx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAUS6VUMSFMGCRAQVC%2F20241127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241127T205647Z&X-Amz-Expires=300&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIQCW5%2B5WRtkDdFc7n%2B34m7YWIzI4oalulFvYGi7vflMHJgIgf%2BlWHm7iqbmX7mVvA34LNxyG6y07YhMIKKGjIpgQM1oq0QMIThAAGgwzMTU1OTEyNTUxNzgiDFaCLYn14Uogju%2BL1yquAyEn7KUX40ejvp5BN6X0o%2FamuT8C8NHlYpmftO%2BlVAcYteFN8mXI2DdYUcDhCYm2%2BvLvCe7Z2dH4eRTr83kJGlsLk8T3UOT7HmDXyZOEgcxxJ%2Bwjh4UTsinKniw33DVC8TBtsKdshNvX26JOFG2SNrX09E1o2NOHIyXV2ZhhBMtCr3XoVMwHt%2FsnLsuBZDvYueB0dheFOV19NnpLNCKiYoPKIEfiQH%2FIRxO86b4fHr9eyOAcauZl8Br1x3vvoWd90lnOqqjfuXxLU7yMF8VWZUZXujeSrpcet5v1hM2FP3tbAHitIE5iOL2d6NCswF6Vvehnz8Iss7dZO84374MFr1QN%2FLeF82d3y%2BJMIC3B8EfbLZENNuzovhMQWDTN9CzCXHKd67rlQKikq2%2Fc%2BbMHQ6rnPOGxFPFhD69rFt1cvXXQQNUytDoe7Ehw%2B%2BOu5bB%2BK%2BfW5lNHsc%2BMjcQ%2FYqzG5EDk31disy%2BXus3oktW9JQJtvuwnpymHbm0as95JI3vfWqUSqC7UxoSzZ2a%2BiJ2q8%2BJwhrrfUWETuHZxYuDJlxiAUgX6QZDb3e%2FpC2xOvDswle6dugY6lAIJx%2FKj6z54oQYXVA1EgRQm8VlGFfu2qrPGFLPRHx5iQGhEDxbUZcGjoX2vZiYuYmUhO1miIZBy8BD00B7Fn%2FRbgePIiW4UeuShn6LtGpuLN8UnSlq7os66dDDjp0tpiBmz4iFk5MOhOwtq7baF%2FSU%2FHpumuxld5%2BoN1Yb%2BjTyGt2pG15pxGxkFu1XThVhyaSyFqsHt7%2FyA3TvaTnruXqmSizDLZ%2BPbRNLxkSCmkkFXrJ3xjvfXP1Nn2o69aHJh715mjvMQSK9xw1axso0cfFzBbOvff4ftjLJB30adV1d%2BK7scNPn%2B6qlFx19f3jiVAxkymPoSCRgDvLQM2fllZlRo7NRzwGWMIPauVgesPUiYIxORGn8%3D&X-Amz-Signature=1ee56f5a72d9e7f9ae0d18f6033f941183f2aad49ad39a355800fc728e1de8fe&X-Amz-SignedHeaders=host&x-id=GetObject",
-  //     "Akabane.bpmx",
-  //     scene,
-  //     {
-  //         // onProgress: (event) => engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`,
-  //         pluginOptions: {
-  //             mmdmodel: {
-  //                 materialBuilder: materialBuilder,
-  //                 boundingBoxMargin: 60,
-  //                 loggingEnabled: true
-  //             }
-  //         }
-  //     }
-  // ).then((result) => {
-  //     result.addAllToScene();
-  //     return result.meshes[0] as MmdMesh;
-  // });
+    //   const mmdMesh = await loadAssetContainerAsync(
+    //     // "https://amplify-d2ww8jogafwege-ma-amplifystoragebucket7f87-3kftebnyakak.s3.us-east-1.amazonaws.com/models/Akabane.bpmx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAUS6VUMSFMGCRAQVC%2F20241127%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241127T205647Z&X-Amz-Expires=300&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIQCW5%2B5WRtkDdFc7n%2B34m7YWIzI4oalulFvYGi7vflMHJgIgf%2BlWHm7iqbmX7mVvA34LNxyG6y07YhMIKKGjIpgQM1oq0QMIThAAGgwzMTU1OTEyNTUxNzgiDFaCLYn14Uogju%2BL1yquAyEn7KUX40ejvp5BN6X0o%2FamuT8C8NHlYpmftO%2BlVAcYteFN8mXI2DdYUcDhCYm2%2BvLvCe7Z2dH4eRTr83kJGlsLk8T3UOT7HmDXyZOEgcxxJ%2Bwjh4UTsinKniw33DVC8TBtsKdshNvX26JOFG2SNrX09E1o2NOHIyXV2ZhhBMtCr3XoVMwHt%2FsnLsuBZDvYueB0dheFOV19NnpLNCKiYoPKIEfiQH%2FIRxO86b4fHr9eyOAcauZl8Br1x3vvoWd90lnOqqjfuXxLU7yMF8VWZUZXujeSrpcet5v1hM2FP3tbAHitIE5iOL2d6NCswF6Vvehnz8Iss7dZO84374MFr1QN%2FLeF82d3y%2BJMIC3B8EfbLZENNuzovhMQWDTN9CzCXHKd67rlQKikq2%2Fc%2BbMHQ6rnPOGxFPFhD69rFt1cvXXQQNUytDoe7Ehw%2B%2BOu5bB%2BK%2BfW5lNHsc%2BMjcQ%2FYqzG5EDk31disy%2BXus3oktW9JQJtvuwnpymHbm0as95JI3vfWqUSqC7UxoSzZ2a%2BiJ2q8%2BJwhrrfUWETuHZxYuDJlxiAUgX6QZDb3e%2FpC2xOvDswle6dugY6lAIJx%2FKj6z54oQYXVA1EgRQm8VlGFfu2qrPGFLPRHx5iQGhEDxbUZcGjoX2vZiYuYmUhO1miIZBy8BD00B7Fn%2FRbgePIiW4UeuShn6LtGpuLN8UnSlq7os66dDDjp0tpiBmz4iFk5MOhOwtq7baF%2FSU%2FHpumuxld5%2BoN1Yb%2BjTyGt2pG15pxGxkFu1XThVhyaSyFqsHt7%2FyA3TvaTnruXqmSizDLZ%2BPbRNLxkSCmkkFXrJ3xjvfXP1Nn2o69aHJh715mjvMQSK9xw1axso0cfFzBbOvff4ftjLJB30adV1d%2BK7scNPn%2B6qlFx19f3jiVAxkymPoSCRgDvLQM2fllZlRo7NRzwGWMIPauVgesPUiYIxORGn8%3D&X-Amz-Signature=1ee56f5a72d9e7f9ae0d18f6033f941183f2aad49ad39a355800fc728e1de8fe&X-Amz-SignedHeaders=host&x-id=GetObject",
+    //     "Akabane.bpmx",
+    //     scene,
+    //     {
+    //         // onProgress: (event) => engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`,
+    //         pluginOptions: {
+    //             mmdmodel: {
+    //                 materialBuilder: materialBuilder,
+    //                 boundingBoxMargin: 60,
+    //                 loggingEnabled: true
+    //             }
+    //         }
+    //     }
+    // ).then((result) => {
+    //     result.addAllToScene();
+    //     return result.meshes[0] as MmdMesh;
+    // });
 
     // const mmdCamera = createMmdCamera(scene);
 

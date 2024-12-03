@@ -16,6 +16,7 @@ interface Props {
   onMenuItemSelect: (item: any) => void;
   menuItems: { [key: string]: { name: string } };
   defaultItem: string;
+  uploadButton?: React.ReactElement;
 }
 
 function Dropdown(props: Props) {

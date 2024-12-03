@@ -1,13 +1,15 @@
 export enum CharacterModel {
   HATSUNE_MIKU_YYB_10TH = "HATSUNE_MIKU_YYB_10TH",
   SORA = "SORA",
+  Akabane = "Akabane",
 }
 
 export const defaultCharacterModel = CharacterModel.HATSUNE_MIKU_YYB_10TH;
 
 export type CharacterModelData = {
   name: string;
-  url: string;
+  path: string;
+  isLocalModel: boolean;
 };
 
 export const CHARACTER_MODELS_DATA: {
@@ -15,11 +17,18 @@ export const CHARACTER_MODELS_DATA: {
 } = {
   [CharacterModel.HATSUNE_MIKU_YYB_10TH]: {
     name: "Hatsune Miku YYB 10th",
-    url: "https://playmmd-model-assets.s3.amazonaws.com/YYB+Hatsune+Miku_10th_v1.02.bpmx",
+    path: "https://playmmd-model-assets.s3.amazonaws.com/YYB+Hatsune+Miku_10th_v1.02.bpmx",
+    isLocalModel: false,
   },
   [CharacterModel.SORA]: {
     name: "Sora",
-    url: "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
+    path: "https://playmmd-model-assets.s3.amazonaws.com/Sora.bpmx",
+    isLocalModel: false,
+  },
+  [CharacterModel.Akabane]: {
+    name: "Akabane",
+    path: "mmd/Akabane.bmpx",
+    isLocalModel: true,
   },
 };
 

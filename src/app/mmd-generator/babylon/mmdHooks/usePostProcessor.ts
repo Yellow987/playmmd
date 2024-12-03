@@ -15,7 +15,12 @@ import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { RootState } from "@/redux/store";
 import { ActiveCamera } from "@/redux/cameras";
-import { ColorCurves, SSRRenderingPipeline, TAARenderingPipeline, UniversalCamera } from "@babylonjs/core";
+import {
+  ColorCurves,
+  SSRRenderingPipeline,
+  TAARenderingPipeline,
+  UniversalCamera,
+} from "@babylonjs/core";
 
 const usePostProcessor = (
   sceneRef: MutableRefObject<Scene>,
@@ -32,13 +37,17 @@ const usePostProcessor = (
 
   useEffect(() => {
     if (postProcessorRef.current || !mmdModelsLoaded[0]) return;
-    console.log(mmdModelsLoaded)
-    console.log(mmdRuntimeModels.current)
+    console.log(mmdModelsLoaded);
+    console.log(mmdRuntimeModels.current);
     console.log("Creating post processor");
     postProcessorRef.current = createPostProcessor(
       sceneRef.current.getCameraById(ActiveCamera.MMD_CAMERA) as MmdCamera,
-      sceneRef.current.getCameraById(ActiveCamera.ARC_CAMERA) as ArcRotateCamera,
-      sceneRef.current.getCameraById(ActiveCamera.FREE_CAMERA) as UniversalCamera,
+      sceneRef.current.getCameraById(
+        ActiveCamera.ARC_CAMERA,
+      ) as ArcRotateCamera,
+      sceneRef.current.getCameraById(
+        ActiveCamera.FREE_CAMERA,
+      ) as UniversalCamera,
     );
     postProcessorRef.current.depthOfFieldEnabled = isDepthOfFieldEnabled;
     console.log("Post processor created");
@@ -92,35 +101,35 @@ const usePostProcessor = (
     // postProcessor.bloomThreshold = 0.9; // Focus on bright areas only.
     // postProcessor.bloomKernel = 64; // Larger kernel for softer glow.
 
-    for (const depthRenderer of Object.values(sceneRef.current._depthRenderer)) {
-      depthRenderer.forceDepthWriteTransparentMeshes = true;
-    }
+    // for (const depthRenderer of Object.values(sceneRef.current._depthRenderer)) {
+    //   depthRenderer.forceDepthWriteTransparentMeshes = true;
+    // }
 
-    const modelskeleton = mmdRuntimeModels.current[0].mesh.metadata.skeleton;
-    const headBone = modelskeleton!.bones.find((bone) => bone.name === "頭");
+    // const modelskeleton = mmdRuntimeModels.current[0].mesh.metadata.skeleton;
+    // const headBone = modelskeleton!.bones.find((bone) => bone.name === "頭");
 
-    const rotationMatrix = new Matrix();
-    const cameraNormal = new Vector3();
-    const cameraEyePosition = new Vector3();
-    const headRelativePosition = new Vector3();
+    // const rotationMatrix = new Matrix();
+    // const cameraNormal = new Vector3();
+    // const cameraEyePosition = new Vector3();
+    // const headRelativePosition = new Vector3();
 
-    sceneRef.current.onBeforeRenderObservable.add(() => {
-      const cameraRotation = mmdCamera.rotation;
-      Matrix.RotationYawPitchRollToRef(-cameraRotation.y, -cameraRotation.x, -cameraRotation.z, rotationMatrix);
+    // sceneRef.current.onBeforeRenderObservable.add(() => {
+    //   const cameraRotation = mmdCamera.rotation;
+    //   Matrix.RotationYawPitchRollToRef(-cameraRotation.y, -cameraRotation.x, -cameraRotation.z, rotationMatrix);
 
-      Vector3.TransformNormalFromFloatsToRef(0, 0, 1, rotationMatrix, cameraNormal);
+    //   Vector3.TransformNormalFromFloatsToRef(0, 0, 1, rotationMatrix, cameraNormal);
 
-      mmdCamera.position.addToRef(
-          Vector3.TransformCoordinatesFromFloatsToRef(0, 0, mmdCamera.distance, rotationMatrix, cameraEyePosition),
-          cameraEyePosition
-      );
+    //   mmdCamera.position.addToRef(
+    //       Vector3.TransformCoordinatesFromFloatsToRef(0, 0, mmdCamera.distance, rotationMatrix, cameraEyePosition),
+    //       cameraEyePosition
+    //   );
 
-      headBone!.getFinalMatrix().getTranslationToRef(headRelativePosition)
-          .subtractToRef(cameraEyePosition, headRelativePosition);
+    //   headBone!.getFinalMatrix().getTranslationToRef(headRelativePosition)
+    //       .subtractToRef(cameraEyePosition, headRelativePosition);
 
-      postProcessor.depthOfField.focusDistance = (Vector3.Dot(headRelativePosition, cameraNormal) / Vector3.Dot(cameraNormal, cameraNormal)) * 1000;
-    });
-    
+    //   postProcessor.depthOfField.focusDistance = (Vector3.Dot(headRelativePosition, cameraNormal) / Vector3.Dot(cameraNormal, cameraNormal)) * 1000;
+    // });
+
     return postProcessor;
   }
 
