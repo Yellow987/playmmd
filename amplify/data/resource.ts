@@ -1,4 +1,4 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -19,9 +19,9 @@ const schema = a.schema({
       numberOfDancers: a.integer().required(),
     })
     .authorization((allow) => [
-      allow.guest().to(['read']),
-      allow.authenticated().to(['read']),
-      allow.owner().to(['create', 'read', 'update', 'delete']),
+      allow.guest().to(["read"]),
+      allow.authenticated().to(["read"]),
+      allow.owner().to(["create", "read", "update", "delete"]),
     ]),
   Models: a
     .model({
@@ -33,9 +33,9 @@ const schema = a.schema({
       isR_18: a.boolean().required(),
     })
     .authorization((allow) => [
-      allow.guest().to(['read']),
-      allow.authenticated().to(['read']),
-      allow.owner().to(['create', 'read', 'update', 'delete']),
+      allow.guest().to(["read"]),
+      allow.authenticated().to(["read"]),
+      allow.owner().to(["create", "read", "update", "delete"]),
     ]),
   Stages: a
     .model({
@@ -47,9 +47,9 @@ const schema = a.schema({
       isR_18: a.boolean().required(),
     })
     .authorization((allow) => [
-      allow.guest().to(['read']),
-      allow.authenticated().to(['read']),
-      allow.owner().to(['create', 'read', 'update', 'delete']),
+      allow.guest().to(["read"]),
+      allow.authenticated().to(["read"]),
+      allow.owner().to(["create", "read", "update", "delete"]),
     ]),
 });
 
@@ -58,7 +58,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'iam',
+    defaultAuthorizationMode: "iam",
   },
 });
 

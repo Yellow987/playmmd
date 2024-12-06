@@ -1,6 +1,7 @@
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
 import { Scene } from "@babylonjs/core/scene";
 import { MmdPhysics } from "babylon-mmd/esm/Runtime/Physics/mmdPhysics";
+import { MmdAmmoPhysics } from "babylon-mmd/esm/Runtime/Physics/mmdAmmoPhysics";
 
 let mmdRuntime: MmdRuntime | null = null;
 

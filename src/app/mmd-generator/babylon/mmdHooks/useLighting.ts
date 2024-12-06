@@ -13,7 +13,7 @@ const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
   useEffect(() => {
     if (light.current) return;
     console.log("Creating light");
-    // createHemisphericLight(sceneRef.current);
+    createHemisphericLight(sceneRef.current);
     light.current = createDirectionalLight(sceneRef.current);
     createShadowGenerator(light.current);
   }, []);
@@ -35,7 +35,7 @@ const useLighting = (sceneRef: MutableRefObject<Scene>): void => {
       new Vector3(1, -2, 2),
       scene,
     );
-    directionalLight.intensity = 1;
+    directionalLight.intensity = 0.7;
     directionalLight.autoCalcShadowZBounds = false;
     directionalLight.autoUpdateExtends = false;
     directionalLight.shadowMaxZ = 50;

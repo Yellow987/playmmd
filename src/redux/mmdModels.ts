@@ -11,8 +11,8 @@ const MmdModels = createSlice({
   initialState: {
     models: [
       {
-        name: "Akabane",
-        path: "mmd/Akabane/Akabane.pmx",
+        name: "Miku",
+        path: "mmd/models/model.bpmx",
         isLocalModel: true,
       } as CharacterModelData,
     ],

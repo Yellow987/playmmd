@@ -4,7 +4,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 const controls = createSlice({
   name: "controls",
   initialState: {
-    isDepthOfFieldEnabled: true,
+    isDepthOfFieldEnabled: false,
     volume: 1,
     isMuted: true,
     isFullscreen: false,
@@ -25,6 +25,10 @@ const controls = createSlice({
   },
 });
 
-export const { setIsDepthOfFieldEnabled, setVolume, setIsMuted, setIsFullscreen } =
-  controls.actions;
+export const {
+  setIsDepthOfFieldEnabled,
+  setVolume,
+  setIsMuted,
+  setIsFullscreen,
+} = controls.actions;
 export default controls.reducer;

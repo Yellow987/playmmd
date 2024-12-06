@@ -21,10 +21,23 @@ import {
 } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import type { MmdMesh } from "babylon-mmd/esm/Runtime/mmdMesh";
 import { loadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
-import { getUrl, list } from "aws-amplify/storage";
+import { downloadData, getUrl, list } from "aws-amplify/storage";
 import { addShadowCaster } from "./useLighting";
 import { BaseRuntime } from "../baseRuntime";
 import { localAssets } from "../../MmdViewer";
+import { downloadFromAmplifyStorageAsFile } from "@/app/amplifyHandler/amplifyHandler";
+
+export function getMaterialBuilder(): MmdStandardMaterialBuilder {
+  const materialBuilder = new MmdStandardMaterialBuilder();
+  // materialBuilder.loadOutlineRenderingProperties = (): void => {
+  //   /* do nothing */
+  // };
+  materialBuilder.deleteTextureBufferAfterLoad = false;
+  materialBuilder.renderMethod =
+    MmdStandardMaterialRenderMethod.AlphaEvaluation;
+
+  return materialBuilder;
+}
 
 const useMmdModels = (
   sceneRef: MutableRefObject<Scene>,
@@ -83,13 +96,7 @@ const useMmdModels = (
     index: number,
     characterModelData: CharacterModelData,
   ): Promise<MmdModel> {
-    const materialBuilder = new MmdStandardMaterialBuilder();
-    // materialBuilder.loadOutlineRenderingProperties = (): void => {
-    //   /* do nothing */
-    // };
-    materialBuilder.deleteTextureBufferAfterLoad = false;
-    materialBuilder.renderMethod =
-      MmdStandardMaterialRenderMethod.AlphaEvaluation;
+    const materialBuilder = getMaterialBuilder();
 
     runtimeRef.current!.engine.displayLoadingUI();
     const mmdMesh = await loadAssetContainerAsync(
@@ -97,11 +104,12 @@ const useMmdModels = (
         ? localFilesRef.current[0]?.modelFile
           ? localFilesRef.current[0].modelFile
           : characterModelData.path
-        : await getUrl({
-            path: characterModelData.path,
-          }).then((result) => {
-            return result.url.toString();
-          }),
+        : await downloadFromAmplifyStorageAsFile(characterModelData.path),
+      // : await downloadData({
+      //   path: ({ identityId }) => `models/${identityId}/model.bmpx`,
+      // }).result.then((result) => {
+      //   return result as Blob;
+      // }),
       // "mmd/Akabane.bpmx",
       sceneRef.current,
       {
@@ -122,6 +130,7 @@ const useMmdModels = (
         pluginOptions: {
           mmdmodel: {
             materialBuilder: materialBuilder,
+            preserveSerializationData: true,
             boundingBoxMargin: 60,
             loggingEnabled: true,
             referenceFiles:
@@ -140,7 +149,6 @@ const useMmdModels = (
     const meshes = mmdMesh!.metadata.meshes;
     for (let i = 0; i < meshes.length; ++i) {
       const mesh = meshes[i];
-      mesh.receiveShadows = true;
       addShadowCaster(mesh, sceneRef.current);
       mesh.alphaIndex = i;
     }

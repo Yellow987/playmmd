@@ -23,15 +23,21 @@ interface Props {
   canvasRef: MutableRefObject<HTMLCanvasElement>;
   runtimeRef: MutableRefObject<BaseRuntime | null>;
   localFilesRef: MutableRefObject<localAssets[]>;
+  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
 }
 
 const UseMmd = (props: Props) => {
-  const { sceneRef, canvasRef, runtimeRef: runtimeRef, localFilesRef } = props;
+  const {
+    sceneRef,
+    canvasRef,
+    runtimeRef: runtimeRef,
+    localFilesRef,
+    mmdCharacterModelsRef,
+  } = props;
   if (!sceneRef.current || !canvasRef.current) {
     throw new Error("Scene or canvas is null");
   }
   const dispatch = useDispatch();
-  const mmdCharacterModelsRef = useRef<MmdModel[]>([]);
 
   const mmdRuntime = createMmdRuntime(sceneRef.current);
   useCameras(sceneRef, mmdRuntime, canvasRef);

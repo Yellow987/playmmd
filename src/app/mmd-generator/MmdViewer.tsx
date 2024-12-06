@@ -9,6 +9,7 @@ import UseMmd from "./babylon/mmdHooks/UseMmd";
 import { Scene } from "@babylonjs/core/scene";
 import VideoPlayerControls from "./components/VideoPlayer/VideoPlayerControls";
 import { FileUploader } from "@aws-amplify/ui-react-storage";
+import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 
 export type localAssets = {
   modelFile: File;
@@ -23,6 +24,7 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sceneRef = useRef<Scene | null>(null);
   const localFilesRef = useRef<localAssets[]>([]);
+  const mmdCharacterModelsRef = useRef<MmdModel[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -40,13 +42,17 @@ export default function Home() {
             canvasRef={canvasRef as MutableRefObject<HTMLCanvasElement>}
             runtimeRef={runtimeRef}
             localFilesRef={localFilesRef}
+            mmdCharacterModelsRef={mmdCharacterModelsRef}
           />
           <VideoPlayerControls />
         </>
       )}
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
-          <Presets localFilesRef={localFilesRef} />
+          <Presets
+            localFilesRef={localFilesRef}
+            mmdCharacterModelsRef={mmdCharacterModelsRef}
+          />
         </Box>
         <Box flex="2" p={4} maxWidth={flexDir === "row" ? "67%" : "100%"}>
           <Controls />

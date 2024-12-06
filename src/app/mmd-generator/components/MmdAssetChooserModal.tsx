@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useRef, useState } from "react";
+import React, { MutableRefObject, useEffect, useRef, useState } from "react";
 import {
   Button,
   Modal,
@@ -11,16 +11,23 @@ import {
   useDisclosure,
   Box,
   Flex,
+  Grid,
 } from "@chakra-ui/react";
 import { BiUpload } from "react-icons/bi"; // BoxIcons
 import { FaCloudUploadAlt } from "react-icons/fa"; // Font Awesome
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setModels } from "@/redux/mmdModels";
 import { CharacterModelData } from "../constants";
-import { BpmxConverter } from "babylon-mmd";
+import { BpmxConverter, MmdMesh, MmdModel } from "babylon-mmd";
 import PmxConverterScene from "./PmxConverterScene";
 import PmxUploader from "./PmxUploader";
 import { localAssets } from "../MmdViewer";
+import ModelPublisher from "./ModelPublisher";
+import { RootState } from "@/redux/store";
+import AssetGrid from "./AssetGrid";
+import { generateClient } from "aws-amplify/api";
+import { type Schema } from "../../../../amplify/data/resource";
+import { getCurrentUser } from "aws-amplify/auth";
 
 // Extend the type definition to include non-standard attributes
 declare module "react" {
@@ -32,54 +39,52 @@ declare module "react" {
 
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
+  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
 }
 
 const MmdAssetChooserModal = (props: Props) => {
-  const { localFilesRef } = props;
+  const { localFilesRef, mmdCharacterModelsRef } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: uploaderIsOpen,
     onOpen: uploaderOnOpen,
     onClose: uploaderOnClose,
   } = useDisclosure();
+  const {
+    isOpen: publisherIsOpen,
+    onOpen: publisherOnOpen,
+    onClose: publisherOnClose,
+  } = useDisclosure();
+  const mmdModels = useSelector((state: RootState) => state.mmdModels.models);
+  const client = generateClient<Schema>();
+  const [assets, setAssets] = useState<Schema["Models"]["type"][]>([]);
+  const mmdMeshRef = useRef<MmdMesh>(null);
 
-  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const files = event.target.files;
-  //   console.log("Selected files:", files);
-  //   if (!files) return;
+  useEffect(() => {
+    async function getAssets() {
+      let isUserSignedIn = false;
+      try {
+        await getCurrentUser();
+        isUserSignedIn = true;
+      } catch (error) {
+        console.log(error);
+      }
 
-  //   // Convert FileList to an array for easier manipulation
-  //   const fileArray = Array.from(files);
-
-  //   // Look for the main PMX file
-  //   const pmxFile = fileArray.find((file) => file.name.endsWith(".pmx"));
-  //   if (!pmxFile) {
-  //     console.error("No .pmx file found.");
-  //     return;
-  //   }
-
-  //   // Generate object URLs for the files
-  //   const objectURLs: Record<string, string> = {};
-  //   fileArray.forEach((file) => {
-  //     objectURLs[file.name] = URL.createObjectURL(file);
-  //   });
-
-  //   console.log(pmxFile.name);
-
-  //   const converter = new BpmxConverter();
-
-  //   dispatch(
-  //     setModels([
-  //       {
-  //         name: pmxFile.name,
-  //         path: objectURLs[pmxFile.name],
-  //         isLocalModel: true,
-  //       } as CharacterModelData,
-  //     ]),
-  //   );
-
-  //TODO: release files after next upload
-  // };
+      const {
+        data: assets,
+        nextToken, // Repeat this API call with the nextToken until the returned nextToken is `null`
+        errors,
+      } = await client.models.Models.list({
+        limit: 100, // default value is 100
+        nextToken: "",
+        authMode: isUserSignedIn ? "userPool" : undefined,
+      });
+      setAssets(assets);
+      console.log(assets);
+      console.log(errors);
+    }
+    getAssets();
+  }, []);
 
   return (
     <>
@@ -116,14 +121,6 @@ const MmdAssetChooserModal = (props: Props) => {
                   />{" "}
                   Upload
                 </Button>
-                {/* <input
-                  type="file"
-                  ref={inputRef}
-                  style={{ display: "none" }} // Hide the input element
-                  onChange={handleFileChange}
-                  webkitdirectory="true" // Enables folder selection
-                  directory="true" // Redundant, but for compatibility
-                /> */}
                 <Modal isOpen={uploaderIsOpen} onClose={uploaderOnClose}>
                   <ModalOverlay />
                   <ModalContent
@@ -134,7 +131,10 @@ const MmdAssetChooserModal = (props: Props) => {
                   >
                     <ModalHeader>
                       <ModalBody>
-                        <PmxUploader localFilesRef={localFilesRef} />
+                        <PmxUploader
+                          localFilesRef={localFilesRef}
+                          mmdMeshRef={mmdMeshRef}
+                        />
                       </ModalBody>
                     </ModalHeader>
                     <ModalCloseButton />
@@ -143,8 +143,8 @@ const MmdAssetChooserModal = (props: Props) => {
                 <Button
                   size="sm"
                   colorScheme="orange"
-                  isDisabled={true}
-                  onClick={() => alert("Action 2 triggered!")}
+                  isDisabled={!mmdModels[0].isLocalModel}
+                  onClick={publisherOnOpen}
                 >
                   <FaCloudUploadAlt
                     size={24}
@@ -153,23 +153,33 @@ const MmdAssetChooserModal = (props: Props) => {
                   />{" "}
                   Publish
                 </Button>
+                <Modal isOpen={publisherIsOpen} onClose={publisherOnClose}>
+                  <ModalOverlay />
+                  <ModalContent
+                    maxW="90%" // Set maximum width to 90% of the screen
+                    height="82vh"
+                    borderRadius="lg" // Rounded corners
+                    overflow="auto"
+                  >
+                    <ModalHeader>
+                      <ModalBody>
+                        <ModelPublisher
+                          mmdCharacterModelsRef={mmdCharacterModelsRef}
+                          localFilesRef={localFilesRef}
+                          mmdMeshRef={mmdMeshRef}
+                        />
+                      </ModalBody>
+                    </ModalHeader>
+                    <ModalCloseButton />
+                  </ModalContent>
+                </Modal>
               </Flex>
             </Flex>
           </ModalHeader>
           <ModalCloseButton />
 
           <ModalBody>
-            <Box
-              h="full"
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Button m={4} onClick={() => alert("Option 1 chosen!")}>
-                Option 1
-              </Button>
-            </Box>
+            <AssetGrid assets={assets} />
           </ModalBody>
 
           <ModalFooter>

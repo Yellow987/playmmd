@@ -25,13 +25,15 @@ import { setModels } from "@/redux/mmdModels";
 import MmdModelUpload from "./MmdAssetChooserModal";
 import MmdAssetChooserModal from "./MmdAssetChooserModal";
 import { localAssets } from "../MmdViewer";
+import { MmdModel } from "babylon-mmd";
 
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
+  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
 }
 
 const Presets = (props: Props) => {
-  const { localFilesRef } = props;
+  const { localFilesRef, mmdCharacterModelsRef } = props;
   const [selectedStage, setSelectedStage] = useState("Select Stage");
   const dispatch = useDispatch();
   const characterModels = useSelector(
@@ -54,7 +56,10 @@ const Presets = (props: Props) => {
         <Box as="label" display="block" mb={1}>
           Character Model
         </Box>
-        <MmdAssetChooserModal localFilesRef={localFilesRef} />
+        <MmdAssetChooserModal
+          localFilesRef={localFilesRef}
+          mmdCharacterModelsRef={mmdCharacterModelsRef}
+        />
       </Box>
 
       {/* 

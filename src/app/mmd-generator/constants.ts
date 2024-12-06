@@ -27,7 +27,7 @@ export const CHARACTER_MODELS_DATA: {
   },
   [CharacterModel.Akabane]: {
     name: "Akabane",
-    path: "mmd/Akabane.bmpx",
+    path: "mmd/Akabane.bpmx",
     isLocalModel: true,
   },
 };

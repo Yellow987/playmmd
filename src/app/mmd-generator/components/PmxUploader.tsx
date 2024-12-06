@@ -170,10 +170,11 @@ class PmxConverterSceneBuilder implements ISceneBuilder {
 
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
+  mmdMeshRef: MutableRefObject<MmdMesh | null>;
 }
 
 const PmxUploader = (props: Props) => {
-  const { localFilesRef } = props;
+  const { localFilesRef, mmdMeshRef } = props;
   const canvasRef: React.MutableRefObject<HTMLCanvasElement | null> =
     useRef<HTMLCanvasElement>(null);
   const runtimeRef: React.MutableRefObject<BaseRuntime | null> =
@@ -236,7 +237,6 @@ const PmxUploader = (props: Props) => {
   const dispath = useDispatch();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const meshRef = useRef<Nullable<MmdMesh>>(null);
 
   const handleMmdUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -247,26 +247,23 @@ const PmxUploader = (props: Props) => {
   };
 
   const loadModelAsync = async (file: File): Promise<void> => {
-    if (meshRef.current !== null) {
-      for (const subMesh of meshRef.current.metadata.meshes) {
+    if (mmdMeshRef.current !== null) {
+      for (const subMesh of mmdMeshRef.current.metadata.meshes) {
         //TODO enable shadowGenerator.removeShadowCaster(subMesh);
       }
-      meshRef.current.dispose(false, true);
-      meshRef.current = null;
+      mmdMeshRef.current.dispose(false, true);
+      mmdMeshRef.current = null;
     }
     const materialBuilder = new MmdStandardMaterialBuilder();
     materialBuilder.deleteTextureBufferAfterLoad = false;
     materialBuilder.renderMethod =
       MmdStandardMaterialRenderMethod.AlphaEvaluation;
 
-    runtimeRef.current!.engine.displayLoadingUI();
     const fileRelativePath = file.webkitRelativePath as string;
-    meshRef.current = await loadAssetContainerAsync(
+    mmdMeshRef.current = await loadAssetContainerAsync(
       file,
       runtimeRef.current!.scene,
       {
-        onProgress: (event) =>
-          (runtimeRef.current!.engine.loadingUIText = `<br/><br/><br/>Loading (${file.name})... ${event.loaded}/${event.total} (${Math.floor((event.loaded * 100) / event.total)}%)`),
         rootUrl: fileRelativePath.substring(
           0,
           fileRelativePath.lastIndexOf("/") + 1,
@@ -287,7 +284,6 @@ const PmxUploader = (props: Props) => {
       result.addAllToScene();
       const mmdMesh = result.meshes[0] as MmdMesh;
       localFilesRef.current = [{ modelFile: file, referenceFiles: files }];
-      runtimeRef.current!.engine.hideLoadingUI();
       return mmdMesh;
     });
   };
