@@ -49,10 +49,7 @@ export default function Home() {
       )}
       <Flex direction={flexDir}>
         <Box flex="1" p={4} maxWidth={flexDir === "row" ? "33%" : "100%"}>
-          <Presets
-            localFilesRef={localFilesRef}
-            mmdCharacterModelsRef={mmdCharacterModelsRef}
-          />
+          <Presets localFilesRef={localFilesRef} sceneRef={sceneRef} />
         </Box>
         <Box flex="2" p={4} maxWidth={flexDir === "row" ? "67%" : "100%"}>
           <Controls />

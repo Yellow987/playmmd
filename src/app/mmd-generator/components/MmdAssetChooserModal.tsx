@@ -28,6 +28,7 @@ import AssetGrid from "./AssetGrid";
 import { generateClient } from "aws-amplify/api";
 import { type Schema } from "../../../../amplify/data/resource";
 import { getCurrentUser } from "aws-amplify/auth";
+import { Scene } from "@babylonjs/core/scene";
 
 // Extend the type definition to include non-standard attributes
 declare module "react" {
@@ -39,11 +40,11 @@ declare module "react" {
 
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
-  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
+  sceneRef: MutableRefObject<Scene | null>;
 }
 
 const MmdAssetChooserModal = (props: Props) => {
-  const { localFilesRef, mmdCharacterModelsRef } = props;
+  const { localFilesRef, sceneRef } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: uploaderIsOpen,
@@ -164,9 +165,8 @@ const MmdAssetChooserModal = (props: Props) => {
                     <ModalHeader>
                       <ModalBody>
                         <ModelPublisher
-                          mmdCharacterModelsRef={mmdCharacterModelsRef}
-                          localFilesRef={localFilesRef}
                           mmdMeshRef={mmdMeshRef}
+                          sceneRef={sceneRef}
                         />
                       </ModalBody>
                     </ModalHeader>

@@ -1,16 +1,15 @@
-import { downloadData } from "aws-amplify/storage";
+import { downloadData, getUrl } from "aws-amplify/storage";
 
 export async function downloadFromAmplifyStorageAsFile(
   filePath: string,
 ): Promise<string> {
+  return getUrlFromPath(filePath);
   let blob;
   try {
     const downloadResult = await downloadData({
       path: filePath,
     }).result;
     blob = await downloadResult.body.blob();
-    // Alternatively, you can use `downloadResult.body.blob()`
-    // or `downloadResult.body.json()` get read body in Blob or JSON format.
     console.log("Succeed: ", blob);
   } catch (error) {
     console.log("Error : ", error);
@@ -20,9 +19,18 @@ export async function downloadFromAmplifyStorageAsFile(
     throw new Error("Failed to download blob");
   }
 
-  triggerDownloadFromBlob(blob, "model.bmpx");
+  // triggerDownloadFromBlob(blob, "model.bpmx");
 
-  return URL.createObjectURL(blob);
+  // return new File([blob], "model", { type: "application/octet-stream" });
+}
+
+async function getUrlFromPath(path: string): Promise<string> {
+  const url = await getUrl({
+    path: path,
+  }).then((result) => {
+    return result.url.toString();
+  });
+  return url;
 }
 
 export function triggerDownloadFromBlob(blob: Blob, fileName: string): void {
@@ -44,21 +52,3 @@ export function triggerDownloadFromBlob(blob: Blob, fileName: string): void {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 }
-
-// export async function downloadFromAmplifyStorageAsFile(
-//   filePath: string,
-// ): Promise<File> {
-//   let blob;
-//   try {
-//     const downloadResult = await downloadData({
-//       path: ({ identityId }) => `models/${identityId}/model.bmpx`,
-//     }).result;
-//     blob = await downloadResult.body.blob();
-//     // Alternatively, you can use `downloadResult.body.blob()`
-//     // or `downloadResult.body.json()` get read body in Blob or JSON format.
-//     console.log("Succeed: ", blob);
-//   } catch (error) {
-//     console.log("Error : ", error);
-//   }
-//   return new File([blob!], "awsmodelfile", { type: blob!.type });
-// }

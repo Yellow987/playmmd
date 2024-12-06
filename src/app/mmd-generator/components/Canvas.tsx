@@ -37,7 +37,7 @@ function Canvas(props: Props) {
             alpha: false,
             premultipliedAlpha: false,
             powerPreference: "high-performance",
-            doNotHandleTouchAction: true,
+            doNotHandleTouchAction: false,
             doNotHandleContextLost: true,
             audioEngine: false,
           },

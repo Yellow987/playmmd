@@ -26,14 +26,15 @@ import MmdModelUpload from "./MmdAssetChooserModal";
 import MmdAssetChooserModal from "./MmdAssetChooserModal";
 import { localAssets } from "../MmdViewer";
 import { MmdModel } from "babylon-mmd";
+import { Scene } from "@babylonjs/core/scene";
 
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
-  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
+  sceneRef: MutableRefObject<Scene | null>;
 }
 
 const Presets = (props: Props) => {
-  const { localFilesRef, mmdCharacterModelsRef } = props;
+  const { localFilesRef, sceneRef } = props;
   const [selectedStage, setSelectedStage] = useState("Select Stage");
   const dispatch = useDispatch();
   const characterModels = useSelector(
@@ -58,7 +59,7 @@ const Presets = (props: Props) => {
         </Box>
         <MmdAssetChooserModal
           localFilesRef={localFilesRef}
-          mmdCharacterModelsRef={mmdCharacterModelsRef}
+          sceneRef={sceneRef}
         />
       </Box>
 

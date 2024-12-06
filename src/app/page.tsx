@@ -9,11 +9,6 @@ export default function Home() {
   return (
     <>
       <MmdViewer />
-      <FileUploader
-        path={({ identityId }) => `models/${identityId}/`}
-        maxFileCount={1}
-        isResumable
-      />
     </>
   );
 }

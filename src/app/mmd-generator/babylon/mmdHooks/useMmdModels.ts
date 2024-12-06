@@ -98,19 +98,13 @@ const useMmdModels = (
   ): Promise<MmdModel> {
     const materialBuilder = getMaterialBuilder();
 
-    runtimeRef.current!.engine.displayLoadingUI();
+    // runtimeRef.current!.engine.displayLoadingUI();
     const mmdMesh = await loadAssetContainerAsync(
       characterModelData.isLocalModel
         ? localFilesRef.current[0]?.modelFile
           ? localFilesRef.current[0].modelFile
           : characterModelData.path
         : await downloadFromAmplifyStorageAsFile(characterModelData.path),
-      // : await downloadData({
-      //   path: ({ identityId }) => `models/${identityId}/model.bmpx`,
-      // }).result.then((result) => {
-      //   return result as Blob;
-      // }),
-      // "mmd/Akabane.bpmx",
       sceneRef.current,
       {
         onProgress: (event) =>
@@ -142,7 +136,7 @@ const useMmdModels = (
       },
     ).then((result) => {
       result.addAllToScene();
-      runtimeRef.current!.engine.hideLoadingUI();
+      // runtimeRef.current!.engine.hideLoadingUI();
       return result.meshes[0] as MmdMesh;
     });
 

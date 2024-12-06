@@ -17,18 +17,18 @@ import { BpmxConverter } from "babylon-mmd/esm/Loader/Optimized/bpmxConverter";
 import { localAssets } from "../MmdViewer";
 import { getCurrentUser } from "aws-amplify/auth";
 import { Engine, loadAssetContainerAsync, Scene } from "@babylonjs/core";
-import { MmdMesh } from "babylon-mmd";
+import { MmdMesh, MmdStandardMaterial } from "babylon-mmd";
 import { getMaterialBuilder } from "../babylon/mmdHooks/useMmdModels";
 import { triggerDownloadFromBlob } from "@/app/amplifyHandler/amplifyHandler";
+import { TextureAlphaChecker } from "babylon-mmd/esm/Loader/textureAlphaChecker";
 
 interface Props {
-  mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
-  localFilesRef: MutableRefObject<localAssets[]>;
   mmdMeshRef: MutableRefObject<MmdMesh | null>;
+  sceneRef: MutableRefObject<Scene | null>;
 }
 
 const ModelPublisher = (props: Props) => {
-  const { mmdMeshRef, localFilesRef } = props;
+  const { mmdMeshRef, sceneRef } = props;
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -55,18 +55,56 @@ const ModelPublisher = (props: Props) => {
   };
 
   async function convertPmxToBmpx(): Promise<ArrayBuffer> {
+    const mesh = mmdMeshRef.current!;
+    const meshes = mesh!.metadata.meshes;
+    const translucentMaterials: boolean[] = [];
+    const alphaEvaluateResults: number[] = [];
+    const textureAlphaChecker = new TextureAlphaChecker(sceneRef.current!);
+
+    const materials = mesh!.metadata.materials;
+    translucentMaterials.length = materials.length;
+    alphaEvaluateResults.length = materials.length;
+    for (let i = 0; i < materials.length; ++i) {
+      const material = materials[i] as MmdStandardMaterial;
+      const diffuseTexture = material.diffuseTexture;
+      if (diffuseTexture) {
+        diffuseTexture.hasAlpha = true;
+        material.useAlphaFromDiffuseTexture = true;
+      }
+
+      if (material.alpha < 1) {
+        translucentMaterials[i] = true;
+      } else if (!diffuseTexture) {
+        translucentMaterials[i] = false;
+      } else {
+        translucentMaterials[i] = true;
+        const referencedMeshes = meshes.filter(
+          (m: { material: any }) => m.material === material,
+        );
+        for (const referencedMesh of referencedMeshes) {
+          const isOpaque =
+            await textureAlphaChecker.hasFragmentsOnlyOpaqueOnGeometry(
+              diffuseTexture,
+              referencedMesh,
+              null,
+            );
+          if (isOpaque) {
+            translucentMaterials[i] = false;
+            break;
+          }
+        }
+      }
+
+      alphaEvaluateResults[i] = material.transparencyMode ?? -1;
+    }
+
     const converter = new BpmxConverter();
-    const bmpxArrayBuffer = converter.convert(mmdMeshRef.current!, {
+    const bmpxArrayBuffer = converter.convert(mesh, {
       includeSkinningData: true,
       includeMorphData: true,
-      translucentMaterials: [],
-      alphaEvaluateResults: [],
+      translucentMaterials: translucentMaterials,
+      alphaEvaluateResults: alphaEvaluateResults,
     });
-    triggerDownloadFromBlob(
-      new Blob([bmpxArrayBuffer], { type: "application/octet-stream" }),
-
-      "model.bpmx",
-    );
     return bmpxArrayBuffer;
   }
 
