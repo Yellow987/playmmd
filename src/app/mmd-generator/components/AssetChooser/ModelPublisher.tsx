@@ -9,16 +9,16 @@ import {
   Textarea,
   useToast,
 } from "@chakra-ui/react";
-import { Schema } from "../../../../amplify/data/resource";
+import { Schema } from "../../../../../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 import { getUrl, uploadData } from "aws-amplify/storage";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 import { BpmxConverter } from "babylon-mmd/esm/Loader/Optimized/bpmxConverter";
-import { localAssets } from "../MmdViewer";
+import { localAssets } from "../../MmdViewer";
 import { getCurrentUser } from "aws-amplify/auth";
 import { Engine, loadAssetContainerAsync, Scene } from "@babylonjs/core";
 import { MmdMesh, MmdStandardMaterial } from "babylon-mmd";
-import { getMaterialBuilder } from "../babylon/mmdHooks/useMmdModels";
+import { getMaterialBuilder } from "../../babylon/mmdHooks/useMmdModels";
 import { triggerDownloadFromBlob } from "@/app/amplifyHandler/amplifyHandler";
 import { TextureAlphaChecker } from "babylon-mmd/esm/Loader/textureAlphaChecker";
 

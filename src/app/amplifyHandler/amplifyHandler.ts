@@ -1,9 +1,17 @@
-import { downloadData, getUrl } from "aws-amplify/storage";
+import { downloadData, getUrl, uploadData } from "aws-amplify/storage";
+import { ASSET_TYPE } from "../mmd-generator/components/AssetChooser/MmdAssetChooserModal";
+import { v4 as uuidv4 } from "uuid";
 
-export async function downloadFromAmplifyStorageAsFile(
+export async function downloadFromAmplifyStorageAsUrl(
   filePath: string,
 ): Promise<string> {
   return getUrlFromPath(filePath);
+}
+
+export async function downloadFromAmplifyStorageAsFile(
+  filePath: string,
+  fileName: string,
+): Promise<File> {
   let blob;
   try {
     const downloadResult = await downloadData({
@@ -19,9 +27,9 @@ export async function downloadFromAmplifyStorageAsFile(
     throw new Error("Failed to download blob");
   }
 
-  // triggerDownloadFromBlob(blob, "model.bpmx");
+  triggerDownloadFromBlob(blob, fileName);
 
-  // return new File([blob], "model", { type: "application/octet-stream" });
+  return new File([blob], fileName, { type: "application/octet-stream" });
 }
 
 async function getUrlFromPath(path: string): Promise<string> {
@@ -51,4 +59,34 @@ export function triggerDownloadFromBlob(blob: Blob, fileName: string): void {
   // Clean up by removing the anchor and revoking the object URL
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
+}
+
+export async function uploadFileToAmplifyStorage(
+  fileName: string,
+  assetType: ASSET_TYPE,
+  file: File,
+  folderPath?: string,
+): Promise<string> {
+  let uuid: string;
+  if (!folderPath) uuid = uuidv4();
+
+  const result = await uploadData({
+    path: ({ identityId }) => {
+      const path = folderPath
+        ? `${folderPath}/${fileName}`
+        : `${assetType.toLocaleLowerCase()}/${identityId}/${uuid}/${fileName}`;
+      console.log("path: ", path);
+      return path;
+    },
+    data: file,
+  }).result;
+
+  if (folderPath) {
+    return folderPath;
+  } else {
+    return (folderPath = result.path.substring(
+      0,
+      result.path.lastIndexOf("/"),
+    ));
+  }
 }

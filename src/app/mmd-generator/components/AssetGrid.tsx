@@ -4,26 +4,49 @@ import { Schema } from "../../../../amplify/data/resource";
 import { useDispatch } from "react-redux";
 import { setModels } from "@/redux/mmdModels";
 import { CharacterModelData } from "../constants";
+import { ASSET_TYPE } from "./AssetChooser/MmdAssetChooserModal";
+import { setAudioPath } from "@/redux/audio";
+import { setMmdMotions, MotionData } from "@/redux/mmdMotions";
 
 interface Props {
   assets: Schema["Models"]["type"][];
+  assetType: ASSET_TYPE;
 }
 
 const AssetGrid = (props: Props) => {
-  const { assets } = props;
-  const dispath = useDispatch();
+  const { assets, assetType } = props;
+  const dispatch = useDispatch();
 
   function handleAssetClick(asset: Schema["Models"]["type"]) {
-    console.log(asset);
-    dispath(
-      setModels([
-        {
-          name: asset.title,
-          path: asset.pathToFiles + "/model.bpmx",
-          isLocalModel: false,
-        } as CharacterModelData,
-      ]),
-    );
+    switch (assetType) {
+      case "Models":
+        dispatch(
+          setModels([
+            {
+              name: asset.title,
+              path: asset.pathToFiles + "/model.bpmx",
+              isLocalModel: false,
+            } as CharacterModelData,
+          ]),
+        );
+        break;
+      case "Motions":
+        dispatch(
+          setAudioPath({
+            audioPath: asset.pathToFiles + "/song.wav",
+            isLocalAudio: false,
+          }),
+        );
+        dispatch(
+          setMmdMotions([
+            {
+              motions: [asset.pathToFiles + "/motion1.vmd"],
+              isLocalMotion: false,
+            } as MotionData,
+          ]),
+        );
+        break;
+    }
   }
 
   return (

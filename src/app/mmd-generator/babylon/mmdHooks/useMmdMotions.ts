@@ -12,13 +12,18 @@ import "babylon-mmd/esm/Runtime/Animation/mmdRuntimeModelAnimation";
 import { Scene } from "@babylonjs/core/scene";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 import { RootState } from "@/redux/store";
+import { MotionData } from "@/redux/mmdMotions";
+import {
+  downloadFromAmplifyStorageAsFile,
+  downloadFromAmplifyStorageAsUrl,
+} from "@/app/amplifyHandler/amplifyHandler";
 
 const useMmdMotions = (
   sceneRef: MutableRefObject<Scene>,
   mmdCharacterModelsRef: MutableRefObject<MmdModel[]>,
 ): void => {
   const dispatch = useDispatch();
-  const mmdMotions: AnimationPreset[] = useSelector(
+  const mmdMotions: MotionData[] = useSelector(
     (state: RootState) => state.mmdMotions.motions,
   );
   const mmdModelsLoaded = useSelector(
@@ -38,31 +43,30 @@ const useMmdMotions = (
 
   async function setMmdMotionOnModel(
     index: number,
-    animationPreset: AnimationPreset,
+    motionData: MotionData,
   ): Promise<void> {
-    const orderedKeys: (keyof ModelAniamtionPaths)[] = [
-      "skeletonPath",
-      "facialPath",
-      "lipsPath",
-    ];
-    console.log(ANIMATION_PRESETS_DATA[animationPreset].modelAnimationPaths[0]);
-    const animationPaths: ModelAniamtionPaths =
-      ANIMATION_PRESETS_DATA[animationPreset].modelAnimationPaths[0];
-    const OrderedModelAnimationArray: string[] = orderedKeys
-      .map((key) => animationPaths[key])
-      .filter((path): path is string => path !== undefined);
-
     const vmdLoader = new VmdLoader(sceneRef.current);
-    console.log("Loading motion", OrderedModelAnimationArray);
-    const modelMotion = await vmdLoader.loadAsync(
-      "Model_Animation",
-      OrderedModelAnimationArray, //Refactor to ? : ""
-    );
+    console.log("Loading motion");
+    let motions: any[] = [];
+    if (!motionData.isLocalMotion) {
+      motions = await Promise.all(
+        motionData.motions.map(async (motionPath) => {
+          return await downloadFromAmplifyStorageAsUrl(motionPath);
+        }),
+      );
+    } else {
+      motions = motionData.motions;
+    }
+    const mmdModel = mmdCharacterModelsRef.current[index];
+    // mmdModel.removeAnimation(0);
+    const motion = motions[0];
+    console.log("Motions", motions);
+
+    const modelMotion = await vmdLoader.loadAsync(motion, motion);
     console.log("Motion loaded", modelMotion);
 
-    const mmdModel = mmdCharacterModelsRef.current[index];
     mmdModel.addAnimation(modelMotion);
-    mmdModel.setAnimation("Model_Animation");
+    mmdModel.setAnimation(motion);
   }
 };
 

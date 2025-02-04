@@ -22,8 +22,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setModels } from "@/redux/mmdModels";
-import MmdModelUpload from "./MmdAssetChooserModal";
-import MmdAssetChooserModal from "./MmdAssetChooserModal";
+import MmdAssetChooserModal from "./AssetChooser/MmdAssetChooserModal";
 import { localAssets } from "../MmdViewer";
 import { MmdModel } from "babylon-mmd";
 import { Scene } from "@babylonjs/core/scene";
@@ -60,6 +59,7 @@ const Presets = (props: Props) => {
         <MmdAssetChooserModal
           localFilesRef={localFilesRef}
           sceneRef={sceneRef}
+          assetType="Models"
         />
       </Box>
 
@@ -83,12 +83,16 @@ const Presets = (props: Props) => {
         </Menu>
       </Box>
 
-      <Dropdown
-        menuLabel="Animation Name"
-        onMenuItemSelect={onAnimationSelect}
-        menuItems={ANIMATION_PRESETS_DATA}
-        defaultItem={AnimationPreset.LAST_CHRISTMAS}
-      />
+      <Box mb={4}>
+        <Box as="label" display="block" mb={1}>
+          Motions
+        </Box>
+        <MmdAssetChooserModal
+          localFilesRef={localFilesRef}
+          sceneRef={sceneRef}
+          assetType="Motions"
+        />
+      </Box>
     </>
   );
 };

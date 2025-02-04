@@ -2,13 +2,23 @@
 import { AnimationPreset } from "@/app/mmd-generator/constants";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
+export type MotionData = {
+  motions: string[];
+  isLocalMotion: boolean;
+};
+
 const mmdMotions = createSlice({
   name: "mmdMotions",
   initialState: {
-    motions: [AnimationPreset.TAME_LIE_ONE_STEP],
+    motions: [
+      {
+        motions: ["/mmd/Animations/FightingMyWay/Motion.vmd"],
+        isLocalMotion: true,
+      } as MotionData,
+    ],
   },
   reducers: {
-    setMmdMotions: (state, action: PayloadAction<AnimationPreset[]>) => {
+    setMmdMotions: (state, action: PayloadAction<MotionData[]>) => {
       state.motions = action.payload;
     },
   },

@@ -7,6 +7,7 @@ const mmd = createSlice({
     second: 0,
     animationDuration: 0,
     isPlaying: true,
+    fps: 30,
   },
   reducers: {
     setSecond: (state, action: PayloadAction<number>) => {
@@ -18,8 +19,12 @@ const mmd = createSlice({
     setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload;
     },
+    setFps: (state, action: PayloadAction<number>) => {
+      state.fps = action.payload;
+    },
   },
 });
 
-export const { setSecond, setAnimationDuration, setIsPlaying } = mmd.actions;
+export const { setSecond, setAnimationDuration, setIsPlaying, setFps } =
+  mmd.actions;
 export default mmd.reducer;

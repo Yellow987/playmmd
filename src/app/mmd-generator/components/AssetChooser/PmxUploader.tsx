@@ -17,8 +17,8 @@ import {
 } from "@babylonjs/core";
 import { useRef, useEffect, useState, MutableRefObject } from "react";
 import { useDispatch } from "react-redux";
-import { BaseRuntime } from "../babylon/baseRuntime";
-import { CharacterModelData } from "../constants";
+import { BaseRuntime } from "../../babylon/baseRuntime";
+import { CharacterModelData } from "../../constants";
 import {
   SdefInjector,
   MmdStandardMaterialBuilder,
@@ -31,7 +31,7 @@ import {
 } from "babylon-mmd";
 import { Button, Flex } from "@aws-amplify/ui-react";
 import { Box, List, ListItem, VStack } from "@chakra-ui/react";
-import { localAssets } from "../MmdViewer";
+import { localAssets } from "../../MmdViewer";
 
 async function readDirectories(
   entries: FileSystemEntry[],

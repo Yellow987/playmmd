@@ -25,7 +25,7 @@ import { downloadData, getUrl, list } from "aws-amplify/storage";
 import { addShadowCaster } from "./useLighting";
 import { BaseRuntime } from "../baseRuntime";
 import { localAssets } from "../../MmdViewer";
-import { downloadFromAmplifyStorageAsFile } from "@/app/amplifyHandler/amplifyHandler";
+import { downloadFromAmplifyStorageAsUrl } from "@/app/amplifyHandler/amplifyHandler";
 
 export function getMaterialBuilder(): MmdStandardMaterialBuilder {
   const materialBuilder = new MmdStandardMaterialBuilder();
@@ -104,7 +104,7 @@ const useMmdModels = (
         ? localFilesRef.current[0]?.modelFile
           ? localFilesRef.current[0].modelFile
           : characterModelData.path
-        : await downloadFromAmplifyStorageAsFile(characterModelData.path),
+        : await downloadFromAmplifyStorageAsUrl(characterModelData.path),
       sceneRef.current,
       {
         onProgress: (event) =>

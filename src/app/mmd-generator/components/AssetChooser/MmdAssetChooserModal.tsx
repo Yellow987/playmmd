@@ -16,19 +16,18 @@ import {
 import { BiUpload } from "react-icons/bi"; // BoxIcons
 import { FaCloudUploadAlt } from "react-icons/fa"; // Font Awesome
 import { useDispatch, useSelector } from "react-redux";
-import { setModels } from "@/redux/mmdModels";
-import { CharacterModelData } from "../constants";
 import { BpmxConverter, MmdMesh, MmdModel } from "babylon-mmd";
-import PmxConverterScene from "./PmxConverterScene";
-import PmxUploader from "./PmxUploader";
-import { localAssets } from "../MmdViewer";
+import { localAssets } from "../../MmdViewer";
 import ModelPublisher from "./ModelPublisher";
 import { RootState } from "@/redux/store";
-import AssetGrid from "./AssetGrid";
+import AssetGrid from "../AssetGrid";
 import { generateClient } from "aws-amplify/api";
-import { type Schema } from "../../../../amplify/data/resource";
+import { type Schema } from "../../../../../amplify/data/resource";
 import { getCurrentUser } from "aws-amplify/auth";
 import { Scene } from "@babylonjs/core/scene";
+import PmxUploader from "./PmxUploader";
+import MotionUploader from "./MotionUploader";
+import MotionPublisher from "./MotionPublisher";
 
 // Extend the type definition to include non-standard attributes
 declare module "react" {
@@ -38,13 +37,27 @@ declare module "react" {
   }
 }
 
+export type ASSET_TYPE = "Models" | "Motions";
+
+export type MotionFiles = {
+  songFile: File | undefined;
+  motionsFiles: File[];
+  cameraFile?: File;
+};
+
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
   sceneRef: MutableRefObject<Scene | null>;
+  assetType: ASSET_TYPE;
 }
 
 const MmdAssetChooserModal = (props: Props) => {
-  const { localFilesRef, sceneRef } = props;
+  const { localFilesRef, sceneRef, assetType } = props;
+  const [motionData, setMotionData] = useState<MotionFiles>({
+    songFile: undefined,
+    motionsFiles: [],
+    cameraFile: undefined,
+  });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: uploaderIsOpen,
@@ -58,7 +71,8 @@ const MmdAssetChooserModal = (props: Props) => {
   } = useDisclosure();
   const mmdModels = useSelector((state: RootState) => state.mmdModels.models);
   const client = generateClient<Schema>();
-  const [assets, setAssets] = useState<Schema["Models"]["type"][]>([]);
+
+  const [assets, setAssets] = useState<Schema[typeof assetType]["type"][]>([]);
   const mmdMeshRef = useRef<MmdMesh>(null);
 
   useEffect(() => {
@@ -75,7 +89,7 @@ const MmdAssetChooserModal = (props: Props) => {
         data: assets,
         nextToken, // Repeat this API call with the nextToken until the returned nextToken is `null`
         errors,
-      } = await client.models.Models.list({
+      } = await (client.models[assetType].list as any)({
         limit: 100, // default value is 100
         nextToken: "",
         authMode: isUserSignedIn ? "userPool" : undefined,
@@ -132,10 +146,26 @@ const MmdAssetChooserModal = (props: Props) => {
                   >
                     <ModalHeader>
                       <ModalBody>
-                        <PmxUploader
-                          localFilesRef={localFilesRef}
-                          mmdMeshRef={mmdMeshRef}
-                        />
+                        {(() => {
+                          switch (assetType) {
+                            case "Models":
+                              return (
+                                <PmxUploader
+                                  localFilesRef={localFilesRef}
+                                  mmdMeshRef={mmdMeshRef}
+                                />
+                              );
+                            case "Motions":
+                              return (
+                                <MotionUploader
+                                  motionData={motionData}
+                                  setMotionData={setMotionData}
+                                />
+                              );
+                            default:
+                              return null; // Return null if no match is found
+                          }
+                        })()}
                       </ModalBody>
                     </ModalHeader>
                     <ModalCloseButton />
@@ -164,10 +194,23 @@ const MmdAssetChooserModal = (props: Props) => {
                   >
                     <ModalHeader>
                       <ModalBody>
-                        <ModelPublisher
-                          mmdMeshRef={mmdMeshRef}
-                          sceneRef={sceneRef}
-                        />
+                        {(() => {
+                          switch (assetType) {
+                            case "Models":
+                              return (
+                                <ModelPublisher
+                                  mmdMeshRef={mmdMeshRef}
+                                  sceneRef={sceneRef}
+                                />
+                              );
+                            case "Motions":
+                              return (
+                                <MotionPublisher motionData={motionData} />
+                              );
+                            default:
+                              return null; // Return null if no match is found
+                          }
+                        })()}
                       </ModalBody>
                     </ModalHeader>
                     <ModalCloseButton />
@@ -179,7 +222,7 @@ const MmdAssetChooserModal = (props: Props) => {
           <ModalCloseButton />
 
           <ModalBody>
-            <AssetGrid assets={assets} />
+            <AssetGrid assets={assets} assetType={assetType} />
           </ModalBody>
 
           <ModalFooter>
