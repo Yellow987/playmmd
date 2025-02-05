@@ -10,6 +10,7 @@ import { RootState } from "@/redux/store";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { UniversalCamera } from "@babylonjs/core";
 import { ActiveCamera } from "@/redux/cameras";
+import { downloadFromAmplifyStorageAsUrl } from "@/app/amplifyHandler/amplifyHandler";
 
 export type Cameras = {
   mmdCamera: MmdCamera;
@@ -26,23 +27,28 @@ const useCameras = (
   const activeCamera = useSelector(
     (state: RootState) => state.cameras.activeCamera,
   );
+  const mmdCameraData = useSelector(
+    (state: RootState) => state.cameras.mmdCameraData,
+  );
 
   useEffect(() => {
-    if (camerasRef.current) return;
-    const cameras = {
-      mmdCamera: createMmdCamera(sceneRef.current),
-      arcCamera: createArcCamera(sceneRef.current, canvasRef.current),
-      freeCamera: createFreeCamera(sceneRef.current, canvasRef.current),
-    };
-    camerasRef.current = cameras;
+    // Initializes the cameras
+    if (!camerasRef.current) {
+      const cameras = {
+        mmdCamera: createMmdCamera(sceneRef.current),
+        arcCamera: createArcCamera(sceneRef.current, canvasRef.current),
+        freeCamera: createFreeCamera(sceneRef.current, canvasRef.current),
+      };
+      camerasRef.current = cameras;
+      mmdRuntime.setCamera(camerasRef.current.mmdCamera);
+    }
 
     async function loadCameraMotion(cameras: Cameras) {
       loadMmdCameraMotion(cameras);
     }
 
-    mmdRuntime.setCamera(camerasRef.current.mmdCamera);
     loadCameraMotion(camerasRef.current);
-  }, []);
+  }, [mmdCameraData]);
 
   useEffect(() => {
     if (!camerasRef.current) return;
@@ -50,20 +56,29 @@ const useCameras = (
       sceneRef.current.activeCamera = camerasRef.current.mmdCamera;
     } else if (activeCamera === ActiveCamera.ARC_CAMERA) {
       sceneRef.current.activeCamera = camerasRef.current.arcCamera;
-    }
-    else if (activeCamera === ActiveCamera.FREE_CAMERA) {
+    } else if (activeCamera === ActiveCamera.FREE_CAMERA) {
       sceneRef.current.activeCamera = camerasRef.current.freeCamera;
     }
   }, [activeCamera]);
 
   async function loadMmdCameraMotion(cameras: Cameras) {
     const vmdLoader = new VmdLoader(sceneRef.current);
-    console.log("Loading camera Motion")
+    console.log("Loading camera Motion");
+
+    let cameraDataPath: string = "";
+    if (!mmdCameraData.isLocalMotion) {
+      cameraDataPath = await downloadFromAmplifyStorageAsUrl(
+        mmdCameraData.cameraPath,
+      );
+    } else {
+      cameraDataPath = mmdCameraData.cameraPath;
+    }
+
     const cameraMotion = await vmdLoader.loadAsync(
       "camera_motion_1",
-      "/mmd/Animations/TameLieOneStep/Camera.vmd",
+      cameraDataPath,
     );
-    console.log("Loaded camera Motion")
+    console.log("Loaded camera Motion");
     cameras.mmdCamera.addAnimation(cameraMotion);
     cameras.mmdCamera.setAnimation("camera_motion_1");
   }
@@ -89,14 +104,25 @@ const useCameras = (
     return arcRotateCamera;
   }
 
-  function createFreeCamera(scene: Scene, canvas: HTMLCanvasElement): UniversalCamera {
-    const freeCamera = new UniversalCamera(ActiveCamera.FREE_CAMERA, new Vector3(0, 10, 0), scene);
+  function createFreeCamera(
+    scene: Scene,
+    canvas: HTMLCanvasElement,
+  ): UniversalCamera {
+    const freeCamera = new UniversalCamera(
+      ActiveCamera.FREE_CAMERA,
+      new Vector3(0, 10, 0),
+      scene,
+    );
     freeCamera.attachControl(canvas, true);
     return freeCamera;
   }
 
   function createMmdCamera(scene: Scene): MmdCamera {
-    const mmdCamera = new MmdCamera(ActiveCamera.MMD_CAMERA, new Vector3(0, 10, 0), scene);
+    const mmdCamera = new MmdCamera(
+      ActiveCamera.MMD_CAMERA,
+      new Vector3(0, 10, 0),
+      scene,
+    );
     return mmdCamera;
   }
 

@@ -8,6 +8,7 @@ import { CharacterModelData } from "../constants";
 import { ASSET_TYPE } from "./AssetChooser/MmdAssetChooserModal";
 import { setAudioPath } from "@/redux/audio";
 import { setMmdMotions, MotionData } from "@/redux/mmdMotions";
+import { CameraData, setMmdCameraData } from "@/redux/cameras";
 
 interface Props {
   assets: Schema["Models"]["type"][];
@@ -69,6 +70,12 @@ const AssetGrid = (props: Props) => {
               isLocalMotion: false,
             } as MotionData,
           ]),
+          dispatch(
+            setMmdCameraData({
+              cameraPath: asset.pathToFiles + "/camera1.vmd",
+              isLocalMotion: false,
+            } as CameraData),
+          ),
         );
         break;
     }

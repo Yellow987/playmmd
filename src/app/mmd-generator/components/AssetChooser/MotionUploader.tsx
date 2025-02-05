@@ -16,14 +16,16 @@ import { setAudioPath } from "@/redux/audio";
 import { setMmdMotions, MotionData } from "@/redux/mmdMotions";
 import { MotionFiles } from "./MmdAssetChooserModal";
 import { setFps } from "@/redux/mmd";
+import { setMmdCameraData, CameraData } from "@/redux/cameras";
 
 interface Props {
   motionData: MotionFiles;
   setMotionData: React.Dispatch<React.SetStateAction<MotionFiles>>;
+  onComplete: () => void;
 }
 
 const MotionUploader = (props: Props) => {
-  const { motionData, setMotionData } = props;
+  const { motionData, setMotionData, onComplete } = props;
   const dispatch = useDispatch();
   const fpsRef = useRef<HTMLInputElement>(null);
 
@@ -45,6 +47,15 @@ const MotionUploader = (props: Props) => {
     }));
   };
 
+  const handleCameraUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    setMotionData((prev) => ({
+      ...prev,
+      cameraFile: e.target.files![0],
+    }));
+  };
+
   const handleUseClick = () => {
     const audioPath = URL.createObjectURL(motionData.songFile!);
     dispatch(setAudioPath({ audioPath, isLocalAudio: true }));
@@ -58,7 +69,16 @@ const MotionUploader = (props: Props) => {
           isLocalMotion: true,
         } as MotionData,
       ]),
+
+      dispatch(
+        setMmdCameraData({
+          cameraPath: URL.createObjectURL(motionData.cameraFile!),
+          isLocalMotion: true,
+        } as CameraData),
+      ),
     );
+
+    onComplete();
   };
 
   return (
@@ -83,6 +103,18 @@ const MotionUploader = (props: Props) => {
         {motionData.motionsFiles[0] && (
           <Text mt={2} fontSize="sm">
             Uploaded: {motionData.motionsFiles[0].name}
+          </Text>
+        )}
+      </Box>
+
+      <Box w="full">
+        <Heading size="md" mb={2}>
+          Camera
+        </Heading>
+        <Input type="file" accept=".vmd" onChange={handleCameraUpload} />
+        {motionData.cameraFile && (
+          <Text mt={2} fontSize="sm">
+            Uploaded: {motionData.cameraFile.name}
           </Text>
         )}
       </Box>

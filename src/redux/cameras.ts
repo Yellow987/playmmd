@@ -7,21 +7,30 @@ export enum ActiveCamera {
   ARC_CAMERA = "arcCamera",
   FREE_CAMERA = "freeCamera",
 }
+
+export type CameraData = {
+  cameraPath: string;
+  isLocalMotion: boolean;
+};
+
 const cameras = createSlice({
   name: "cameras",
   initialState: {
     activeCamera: ActiveCamera.MMD_CAMERA,
-    mmdCameraMotion: "",
+    mmdCameraData: {
+      cameraPath: "/mmd/Animations/TameLieOneStep/Camera.vmd",
+      isLocalMotion: true,
+    } as CameraData,
   },
   reducers: {
     setActiveCamera: (state, action: PayloadAction<ActiveCamera>) => {
       state.activeCamera = action.payload;
     },
-    setMmdCameraMotion: (state, action: PayloadAction<AnimationPreset>) => {
-      state.mmdCameraMotion = action.payload;
+    setMmdCameraData: (state, action: PayloadAction<CameraData>) => {
+      state.mmdCameraData = action.payload;
     },
   },
 });
 
-export const { setActiveCamera, setMmdCameraMotion } = cameras.actions;
+export const { setActiveCamera, setMmdCameraData } = cameras.actions;
 export default cameras.reducer;

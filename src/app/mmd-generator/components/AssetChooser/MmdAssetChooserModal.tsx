@@ -101,6 +101,12 @@ const MmdAssetChooserModal = (props: Props) => {
     getAssets();
   }, []);
 
+  const closeAllModals = () => {
+    uploaderOnClose();
+    publisherOnClose();
+    onClose();
+  };
+
   return (
     <>
       {/* Button to open the chooser */}
@@ -160,6 +166,7 @@ const MmdAssetChooserModal = (props: Props) => {
                                 <MotionUploader
                                   motionData={motionData}
                                   setMotionData={setMotionData}
+                                  onComplete={closeAllModals}
                                 />
                               );
                             default:

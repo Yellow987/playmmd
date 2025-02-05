@@ -73,6 +73,14 @@ const MotionPublisher = (props: Props) => {
         motionData.songFile!,
       );
       console.log("uploaded song");
+      if (motionData.cameraFile) {
+        await uploadFileToAmplifyStorage(
+          "camera1.vmd",
+          "Motions",
+          motionData.cameraFile,
+          folderPath,
+        );
+      }
       await uploadFileToAmplifyStorage(
         "motion1.vmd",
         "Motions",
