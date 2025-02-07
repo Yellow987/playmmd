@@ -212,7 +212,10 @@ const MmdAssetChooserModal = (props: Props) => {
                               );
                             case "Motions":
                               return (
-                                <MotionPublisher motionData={motionData} />
+                                <MotionPublisher
+                                  motionData={motionData}
+                                  onComplete={closeAllModals}
+                                />
                               );
                             default:
                               return null; // Return null if no match is found

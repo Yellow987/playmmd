@@ -15,8 +15,9 @@ import { useDispatch } from "react-redux";
 import { setAudioPath } from "@/redux/audio";
 import { setMmdMotions, MotionData } from "@/redux/mmdMotions";
 import { MotionFiles } from "./MmdAssetChooserModal";
-import { setFps } from "@/redux/mmd";
+import { setFps, setSecond } from "@/redux/mmd";
 import { setMmdCameraData, CameraData } from "@/redux/cameras";
+import { getMmdRuntime } from "../../babylon/mmdHooks/mmdRuntime";
 
 interface Props {
   motionData: MotionFiles;
@@ -60,6 +61,8 @@ const MotionUploader = (props: Props) => {
     const audioPath = URL.createObjectURL(motionData.songFile!);
     dispatch(setAudioPath({ audioPath, isLocalAudio: true }));
     dispatch(setFps(Number(fpsRef.current?.value)));
+    getMmdRuntime().seekAnimation(0, true);
+    dispatch(setSecond(0));
 
     const mmdMotionPath = URL.createObjectURL(motionData.motionsFiles[0]);
     dispatch(
@@ -69,13 +72,13 @@ const MotionUploader = (props: Props) => {
           isLocalMotion: true,
         } as MotionData,
       ]),
-
-      dispatch(
-        setMmdCameraData({
-          cameraPath: URL.createObjectURL(motionData.cameraFile!),
-          isLocalMotion: true,
-        } as CameraData),
-      ),
+      motionData.cameraFile &&
+        dispatch(
+          setMmdCameraData({
+            cameraPath: URL.createObjectURL(motionData.cameraFile!),
+            isLocalMotion: true,
+          } as CameraData),
+        ),
     );
 
     onComplete();

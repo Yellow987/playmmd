@@ -19,10 +19,12 @@ import { ASSET_TYPE } from "./MmdAssetChooserModal";
 
 interface Props {
   motionData: MotionFiles;
+  onComplete: () => void;
 }
 
 const MotionPublisher = (props: Props) => {
-  const { motionData } = props;
+  const { motionData, onComplete } = props;
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -32,6 +34,16 @@ const MotionPublisher = (props: Props) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const toast = useToast();
+
+  const showErrorToast = (description: string) => {
+    toast({
+      title: "Error",
+      description,
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -51,74 +63,78 @@ const MotionPublisher = (props: Props) => {
   const client = generateClient<Schema>();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    function showErrorToast(description: string) {
+    setIsSubmitting(true);
+
+    try {
+      if (!formData.title || !formData.credits) {
+        showErrorToast("Title and credits are required.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      let folderPath: string;
+      try {
+        folderPath = await uploadFileToAmplifyStorage(
+          "song.wav",
+          "Motions",
+          motionData.songFile!,
+        );
+        console.log("uploaded song");
+        if (motionData.cameraFile) {
+          await uploadFileToAmplifyStorage(
+            "camera1.vmd",
+            "Motions",
+            motionData.cameraFile,
+            folderPath,
+          );
+        }
+        await uploadFileToAmplifyStorage(
+          "motion1.vmd",
+          "Motions",
+          motionData.motionsFiles[0]!,
+          folderPath,
+        );
+        console.log("Succeeded: ", folderPath);
+      } catch (error) {
+        showErrorToast("Failed to upload file.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { username } = await getCurrentUser();
+      const { errors, data: newTodo } = await client.models.Motions.create(
+        {
+          uploaderUsername: username,
+          title: formData.title,
+          description: formData.description,
+          credits: formData.credits,
+          pathToFiles: folderPath,
+          isR_18: formData.isR_18,
+          numberOfDancers: 1,
+        },
+        {
+          authMode: "userPool",
+        },
+      );
+
+      if (errors) {
+        showErrorToast("Failed to submit model.");
+        setIsSubmitting(false);
+        return;
+      }
+
       toast({
-        title: "Error",
-        description,
-        status: "error",
+        title: "Success",
+        description: "Model submitted successfully!",
+        status: "success",
         duration: 3000,
         isClosable: true,
       });
-    }
-    if (!formData.title || !formData.credits) {
-      showErrorToast("Title and credits are required.");
-      return;
-    }
 
-    let folderPath: string;
-    try {
-      folderPath = await uploadFileToAmplifyStorage(
-        "song.wav",
-        "Motions",
-        motionData.songFile!,
-      );
-      console.log("uploaded song");
-      if (motionData.cameraFile) {
-        await uploadFileToAmplifyStorage(
-          "camera1.vmd",
-          "Motions",
-          motionData.cameraFile,
-          folderPath,
-        );
-      }
-      await uploadFileToAmplifyStorage(
-        "motion1.vmd",
-        "Motions",
-        motionData.motionsFiles[0]!,
-        folderPath,
-      );
-      console.log("Succeeded: ", folderPath);
-    } catch (error) {
-      showErrorToast("Failed to upload file.");
-      return;
+      onComplete();
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const { username } = await getCurrentUser();
-    const { errors, data: newTodo } = await client.models.Motions.create(
-      {
-        uploaderUsername: username,
-        title: formData.title,
-        description: formData.description,
-        credits: formData.credits,
-        pathToFiles: folderPath,
-        isR_18: formData.isR_18,
-        numberOfDancers: 1,
-      },
-      {
-        authMode: "userPool",
-      },
-    );
-    if (errors) {
-      showErrorToast("Failed to submit model.");
-      return;
-    }
-    toast({
-      title: "Success",
-      description: "Model submitted successfully!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
   };
 
   return (
@@ -164,7 +180,14 @@ const MotionPublisher = (props: Props) => {
           </Checkbox>
         </FormControl>
 
-        <Button type="submit" colorScheme="teal" width="full">
+        <Button
+          type="submit"
+          colorScheme="teal"
+          width="full"
+          isLoading={isSubmitting}
+          loadingText="Submitting"
+          disabled={isSubmitting}
+        >
           Submit
         </Button>
       </form>
