@@ -34,7 +34,9 @@ const ModelPublisher = (props: Props) => {
     description: "",
     credits: "",
     isR_18: false,
+    thumbnail: null as File | null,
   });
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const toast = useToast();
@@ -42,6 +44,18 @@ const ModelPublisher = (props: Props) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
+    if (e.target instanceof HTMLInputElement && e.target.type === "file") {
+      const file = e.target.files?.[0];
+      if (file) {
+        optimizeImage(file).then((optimizedFile) => {
+          setFormData((prev) => ({ ...prev, thumbnail: optimizedFile }));
+          // Create preview URL
+          const url = URL.createObjectURL(optimizedFile);
+          setPreviewUrl(url);
+        });
+      }
+      return;
+    }
     const { name, value, type } = e.target;
 
     // Type guard for checkbox input
@@ -117,6 +131,51 @@ const ModelPublisher = (props: Props) => {
   };
 
   const client = generateClient<Schema>();
+  const optimizeImage = async (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+
+        // Target dimensions (max 800x800 while maintaining aspect ratio)
+        const maxSize = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = height * (maxSize / width);
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = width * (maxSize / height);
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress image
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            const optimizedFile = new File([blob!], "thumbnail.jpg", {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(optimizedFile);
+          },
+          "image/jpeg",
+          0.8,
+        ); // 80% quality JPEG
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     function showErrorToast(description: string) {
@@ -136,19 +195,34 @@ const ModelPublisher = (props: Props) => {
     const bpmx = await convertPmxToBmpx();
     const file = arrayBufferToFile(bpmx, "model.bpmx");
 
-    let result = null;
+    let modelResult = null;
     try {
-      result = await uploadData({
+      // Upload model file
+      modelResult = await uploadData({
         path: ({ identityId }) =>
           `models/${identityId}/${formData.title}/model.bpmx`,
         data: file,
       }).result;
-      console.log("Succeeded: ", result);
+      console.log("Model upload succeeded: ", modelResult);
+
+      // Upload thumbnail if exists
+      if (formData.thumbnail) {
+        await uploadData({
+          path: ({ identityId }) =>
+            `models/${identityId}/${formData.title}/thumbnail.jpg`,
+          data: formData.thumbnail,
+        }).result;
+        console.log("Thumbnail upload succeeded");
+      }
     } catch (error) {
-      showErrorToast("Failed to upload file.");
+      showErrorToast("Failed to upload files.");
+      return;
     }
-    if (!result) return;
-    const folderPath = result.path.substring(0, result.path.lastIndexOf("/"));
+    if (!modelResult) return;
+    const folderPath = modelResult.path.substring(
+      0,
+      modelResult.path.lastIndexOf("/"),
+    );
 
     const { username } = await getCurrentUser();
     const { errors, data: newTodo } = await client.models.Models.create(
@@ -180,6 +254,25 @@ const ModelPublisher = (props: Props) => {
   return (
     <Box w="400px" p="4" borderWidth="1px" borderRadius="md" boxShadow="sm">
       <form onSubmit={handleSubmit}>
+        {previewUrl && (
+          <Box mb="4">
+            <img
+              src={previewUrl}
+              alt="Thumbnail preview"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "200px",
+                objectFit: "contain",
+                borderRadius: "4px",
+              }}
+            />
+          </Box>
+        )}
+
+        <FormControl mb="4">
+          <FormLabel>Thumbnail Image</FormLabel>
+          <Input type="file" accept="image/*" onChange={handleChange} p={1} />
+        </FormControl>
         <FormControl isRequired mb="4">
           <FormLabel>Title</FormLabel>
           <Input

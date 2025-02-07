@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Grid, Image as ChakraImage, Text } from "@chakra-ui/react";
 import { Schema } from "../../../../amplify/data/resource";
+import { getUrl } from "aws-amplify/storage";
 import { useDispatch } from "react-redux";
 import { setModels } from "@/redux/mmdModels";
 import { CharacterModelData } from "../constants";
@@ -16,6 +17,30 @@ interface Props {
 const AssetGrid = (props: Props) => {
   const { assets, assetType } = props;
   const dispatch = useDispatch();
+  const [thumbnailUrls, setThumbnailUrls] = useState<{ [key: string]: string }>(
+    {},
+  );
+
+  useEffect(() => {
+    const loadThumbnails = async () => {
+      const urls: { [key: string]: string } = {};
+      for (const asset of assets) {
+        try {
+          const result = await getUrl({
+            path: `${asset.pathToFiles}/thumbnail.jpg`,
+          });
+          urls[asset.title] = result.url.toString();
+        } catch (error) {
+          // If thumbnail doesn't exist, use a default placeholder
+          urls[asset.title] =
+            "https://via.placeholder.com/120x120?text=No+Image";
+        }
+      }
+      setThumbnailUrls(urls);
+    };
+
+    loadThumbnails();
+  }, [assets]);
 
   function handleAssetClick(asset: Schema["Models"]["type"]) {
     switch (assetType) {
@@ -68,7 +93,8 @@ const AssetGrid = (props: Props) => {
           <Box width="120px" height="120px" mx="auto" position="relative">
             <ChakraImage
               src={
-                "https://plus.unsplash.com/premium_photo-1694819488591-a43907d1c5cc?q=80&w=1314&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                thumbnailUrls[asset.title] ||
+                "https://via.placeholder.com/120x120?text=Loading..."
               }
               width="100%"
               height="100%"
