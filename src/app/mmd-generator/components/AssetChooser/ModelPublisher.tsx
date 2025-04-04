@@ -24,11 +24,12 @@ import { TextureAlphaChecker } from "babylon-mmd/esm/Loader/textureAlphaChecker"
 
 interface Props {
   mmdMeshRef: MutableRefObject<MmdMesh | null>;
+  persistentMmdMesh: MmdMesh | null;
   sceneRef: MutableRefObject<Scene | null>;
 }
 
 const ModelPublisher = (props: Props) => {
-  const { mmdMeshRef, sceneRef } = props;
+  const { mmdMeshRef, persistentMmdMesh, sceneRef } = props;
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -67,15 +68,40 @@ const ModelPublisher = (props: Props) => {
       [name]: fieldValue,
     }));
   };
-
   async function convertPmxToBmpx(): Promise<ArrayBuffer> {
-    const mesh = mmdMeshRef.current!;
-    const meshes = mesh!.metadata.meshes;
+    // Log the state of the model meshes for debugging
+    console.log("Model state before conversion:", {
+      mmdMeshRefExists: !!mmdMeshRef.current,
+      persistentMmdMeshExists: !!persistentMmdMesh,
+      metadataFromRef: mmdMeshRef.current
+        ? !!mmdMeshRef.current.metadata
+        : false,
+      metadataFromPersistent: persistentMmdMesh
+        ? !!persistentMmdMesh.metadata
+        : false,
+    });
+
+    // Use persistentMmdMesh as a fallback if mmdMeshRef.current is null
+    const mesh = mmdMeshRef.current || persistentMmdMesh;
+
+    if (!mesh) {
+      throw new Error(
+        "Model mesh is not available. Please ensure the model is loaded before publishing.",
+      );
+    }
+
+    if (!mesh.metadata || !mesh.metadata.meshes) {
+      throw new Error(
+        "Model metadata is not available. The model may not be fully loaded.",
+      );
+    }
+
+    const meshes = mesh.metadata.meshes;
     const translucentMaterials: boolean[] = [];
     const alphaEvaluateResults: number[] = [];
     const textureAlphaChecker = new TextureAlphaChecker(sceneRef.current!);
 
-    const materials = mesh!.metadata.materials;
+    const materials = mesh.metadata.materials;
     translucentMaterials.length = materials.length;
     alphaEvaluateResults.length = materials.length;
     for (let i = 0; i < materials.length; ++i) {
@@ -192,63 +218,69 @@ const ModelPublisher = (props: Props) => {
       return;
     }
 
-    const bpmx = await convertPmxToBmpx();
-    const file = arrayBufferToFile(bpmx, "model.bpmx");
-
-    let modelResult = null;
     try {
-      // Upload model file
-      modelResult = await uploadData({
-        path: ({ identityId }) =>
-          `models/${identityId}/${formData.title}/model.bpmx`,
-        data: file,
-      }).result;
-      console.log("Model upload succeeded: ", modelResult);
+      const bpmx = await convertPmxToBmpx();
+      const file = arrayBufferToFile(bpmx, "model.bpmx");
 
-      // Upload thumbnail if exists
-      if (formData.thumbnail) {
-        await uploadData({
+      let modelResult = null;
+      try {
+        // Upload model file
+        modelResult = await uploadData({
           path: ({ identityId }) =>
-            `models/${identityId}/${formData.title}/thumbnail.jpg`,
-          data: formData.thumbnail,
+            `models/${identityId}/${formData.title}/model.bpmx`,
+          data: file,
         }).result;
-        console.log("Thumbnail upload succeeded");
-      }
-    } catch (error) {
-      showErrorToast("Failed to upload files.");
-      return;
-    }
-    if (!modelResult) return;
-    const folderPath = modelResult.path.substring(
-      0,
-      modelResult.path.lastIndexOf("/"),
-    );
+        console.log("Model upload succeeded: ", modelResult);
 
-    const { username } = await getCurrentUser();
-    const { errors, data: newTodo } = await client.models.Models.create(
-      {
-        uploaderUsername: username,
-        title: formData.title,
-        description: formData.description,
-        credits: formData.credits,
-        pathToFiles: folderPath,
-        isR_18: formData.isR_18,
-      },
-      {
-        authMode: "userPool",
-      },
-    );
-    if (errors) {
-      showErrorToast("Failed to submit model.");
-      return;
+        // Upload thumbnail if exists
+        if (formData.thumbnail) {
+          await uploadData({
+            path: ({ identityId }) =>
+              `models/${identityId}/${formData.title}/thumbnail.jpg`,
+            data: formData.thumbnail,
+          }).result;
+          console.log("Thumbnail upload succeeded");
+        }
+      } catch (error: any) {
+        console.error("Error during model publishing:", error);
+        showErrorToast(error.message || "Failed to upload files.");
+        return;
+      }
+      if (!modelResult) return;
+      const folderPath = modelResult.path.substring(
+        0,
+        modelResult.path.lastIndexOf("/"),
+      );
+
+      const { username } = await getCurrentUser();
+      const { errors, data: newTodo } = await client.models.Models.create(
+        {
+          uploaderUsername: username,
+          title: formData.title,
+          description: formData.description,
+          credits: formData.credits,
+          pathToFiles: folderPath,
+          isR_18: formData.isR_18,
+        },
+        {
+          authMode: "userPool",
+        },
+      );
+      if (errors) {
+        showErrorToast("Failed to submit model.");
+        return;
+      }
+      toast({
+        title: "Success",
+        description: "Model submitted successfully!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error: any) {
+      console.error("Error during model publishing:", error);
+      showErrorToast(error.message || "An unexpected error occurred.");
     }
-    toast({
-      title: "Success",
-      description: "Model submitted successfully!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
   };
 
   return (

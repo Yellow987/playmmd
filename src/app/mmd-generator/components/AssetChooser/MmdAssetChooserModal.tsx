@@ -74,6 +74,10 @@ const MmdAssetChooserModal = (props: Props) => {
 
   const [assets, setAssets] = useState<Schema[typeof assetType]["type"][]>([]);
   const mmdMeshRef = useRef<MmdMesh>(null);
+  // Add persistent state to store the model mesh
+  const [persistentMmdMesh, setPersistentMmdMesh] = useState<MmdMesh | null>(
+    null,
+  );
 
   useEffect(() => {
     async function getAssets() {
@@ -159,6 +163,7 @@ const MmdAssetChooserModal = (props: Props) => {
                                 <PmxUploader
                                   localFilesRef={localFilesRef}
                                   mmdMeshRef={mmdMeshRef}
+                                  setPersistentMmdMesh={setPersistentMmdMesh}
                                 />
                               );
                             case "Motions":
@@ -181,7 +186,10 @@ const MmdAssetChooserModal = (props: Props) => {
                 <Button
                   size="sm"
                   colorScheme="orange"
-                  isDisabled={!mmdModels[0].isLocalModel}
+                  isDisabled={
+                    !mmdModels[0].isLocalModel ||
+                    (!mmdMeshRef.current && !persistentMmdMesh)
+                  }
                   onClick={publisherOnOpen}
                 >
                   <FaCloudUploadAlt
@@ -207,6 +215,7 @@ const MmdAssetChooserModal = (props: Props) => {
                               return (
                                 <ModelPublisher
                                   mmdMeshRef={mmdMeshRef}
+                                  persistentMmdMesh={persistentMmdMesh}
                                   sceneRef={sceneRef}
                                 />
                               );

@@ -171,10 +171,11 @@ class PmxConverterSceneBuilder implements ISceneBuilder {
 interface Props {
   localFilesRef: MutableRefObject<localAssets[]>;
   mmdMeshRef: MutableRefObject<MmdMesh | null>;
+  setPersistentMmdMesh: (mesh: MmdMesh | null) => void;
 }
 
 const PmxUploader = (props: Props) => {
-  const { localFilesRef, mmdMeshRef } = props;
+  const { localFilesRef, mmdMeshRef, setPersistentMmdMesh } = props;
   const canvasRef: React.MutableRefObject<HTMLCanvasElement | null> =
     useRef<HTMLCanvasElement>(null);
   const runtimeRef: React.MutableRefObject<BaseRuntime | null> =
@@ -253,6 +254,7 @@ const PmxUploader = (props: Props) => {
       }
       mmdMeshRef.current.dispose(false, true);
       mmdMeshRef.current = null;
+      setPersistentMmdMesh(null);
     }
     const materialBuilder = new MmdStandardMaterialBuilder();
     materialBuilder.deleteTextureBufferAfterLoad = false;
@@ -284,6 +286,9 @@ const PmxUploader = (props: Props) => {
       result.addAllToScene();
       const mmdMesh = result.meshes[0] as MmdMesh;
       localFilesRef.current = [{ modelFile: file, referenceFiles: files }];
+      // Store the mesh in the persistent state
+      setPersistentMmdMesh(mmdMesh);
+      console.log("Model loaded and stored in persistent state", mmdMesh);
       return mmdMesh;
     });
   };
