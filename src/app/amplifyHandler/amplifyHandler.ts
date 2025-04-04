@@ -1,6 +1,7 @@
 import { downloadData, getUrl, uploadData } from "aws-amplify/storage";
 import { ASSET_TYPE } from "../mmd-generator/components/AssetChooser/MmdAssetChooserModal";
 import { v4 as uuidv4 } from "uuid";
+import JSZip from "jszip";
 
 export async function downloadFromAmplifyStorageAsUrl(
   filePath: string,
@@ -88,5 +89,88 @@ export async function uploadFileToAmplifyStorage(
       0,
       result.path.lastIndexOf("/"),
     ));
+  }
+}
+
+/**
+ * Downloads a zip file from Amplify Storage, extracts it, and returns the extracted files
+ * @param zipFilePath Path to the zip file in Amplify Storage
+ * @returns Promise resolving to an array of extracted files
+ */
+export async function downloadAndExtractZip(
+  zipFilePath: string,
+): Promise<File[]> {
+  try {
+    // Download the zip file
+    const downloadResult = await downloadData({
+      path: zipFilePath,
+    }).result;
+
+    const zipBlob = await downloadResult.body.blob();
+
+    // Load the zip file
+    const zip = await JSZip.loadAsync(zipBlob);
+
+    // Extract all files
+    const extractedFiles: File[] = [];
+    const filePromises: Promise<void>[] = [];
+
+    zip.forEach((relativePath, zipEntry) => {
+      if (!zipEntry.dir) {
+        const promise = zipEntry.async("blob").then((blob) => {
+          const file = new File([blob], zipEntry.name, {
+            type: getMimeType(zipEntry.name),
+            lastModified: zipEntry.date.getTime(),
+          });
+
+          // Add webkitRelativePath property to maintain folder structure
+          Object.defineProperty(file, "webkitRelativePath", {
+            writable: true,
+            value: relativePath,
+          });
+
+          extractedFiles.push(file);
+        });
+
+        filePromises.push(promise);
+      }
+    });
+
+    // Wait for all files to be extracted
+    await Promise.all(filePromises);
+
+    return extractedFiles;
+  } catch (error) {
+    console.error("Error downloading and extracting zip:", error);
+    throw new Error("Failed to download and extract zip file");
+  }
+}
+
+/**
+ * Gets the MIME type based on file extension
+ * @param filename The filename to check
+ * @returns The MIME type string
+ */
+function getMimeType(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase();
+
+  switch (ext) {
+    case "pmx":
+    case "pmd":
+      return "application/octet-stream";
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "tga":
+      return "image/x-tga";
+    case "bmp":
+      return "image/bmp";
+    case "spa":
+    case "sph":
+      return "application/octet-stream";
+    default:
+      return "application/octet-stream";
   }
 }

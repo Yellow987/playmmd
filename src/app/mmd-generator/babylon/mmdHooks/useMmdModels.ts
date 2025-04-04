@@ -25,7 +25,10 @@ import { downloadData, getUrl, list } from "aws-amplify/storage";
 import { addShadowCaster } from "./useLighting";
 import { BaseRuntime } from "../baseRuntime";
 import { localAssets } from "../../MmdViewer";
-import { downloadFromAmplifyStorageAsUrl } from "@/app/amplifyHandler/amplifyHandler";
+import {
+  downloadFromAmplifyStorageAsUrl,
+  downloadAndExtractZip,
+} from "@/app/amplifyHandler/amplifyHandler";
 
 export function getMaterialBuilder(): MmdStandardMaterialBuilder {
   const materialBuilder = new MmdStandardMaterialBuilder();
@@ -96,21 +99,61 @@ const useMmdModels = (
     index: number,
     characterModelData: CharacterModelData,
   ): Promise<MmdModel> {
+    // Create a local copy of characterModelData that we can modify
+    let modelData = { ...characterModelData };
     const materialBuilder = getMaterialBuilder();
 
     // runtimeRef.current!.engine.displayLoadingUI();
+
+    // Handle zip models
+    if (characterModelData.isZipModel && !characterModelData.isLocalModel) {
+      try {
+        console.log("Loading zip model:", characterModelData.path);
+        // Download and extract the zip file
+        const extractedFiles = await downloadAndExtractZip(
+          characterModelData.path,
+        );
+
+        // Find the PMX file in the extracted files
+        const pmxFile = extractedFiles.find(
+          (file) =>
+            file.name.toLowerCase().endsWith(".pmx") ||
+            file.name.toLowerCase().endsWith(".pmd"),
+        );
+
+        if (!pmxFile) {
+          throw new Error("No PMX/PMD file found in the zip archive");
+        }
+
+        // Store the extracted files in localFilesRef for reference
+        localFilesRef.current = [
+          {
+            modelFile: pmxFile,
+            referenceFiles: extractedFiles,
+          },
+        ];
+
+        // Set isLocalModel to true since we now have local files
+        // Use the copy instead of modifying the original
+        modelData.isLocalModel = true;
+      } catch (error) {
+        console.error("Error extracting zip model:", error);
+        throw error;
+      }
+    }
+
     const mmdMesh = await loadAssetContainerAsync(
-      characterModelData.isLocalModel
+      modelData.isLocalModel
         ? localFilesRef.current[0]?.modelFile
           ? localFilesRef.current[0].modelFile
-          : characterModelData.path
-        : await downloadFromAmplifyStorageAsUrl(characterModelData.path),
+          : modelData.path
+        : await downloadFromAmplifyStorageAsUrl(modelData.path),
       sceneRef.current,
       {
         onProgress: (event) =>
           (runtimeRef.current!.engine.loadingUIText = `Loading model... ${event.loaded}/${event.total} (${Math.floor((event.loaded * 100) / event.total)}%)`),
         rootUrl:
-          characterModelData.isLocalModel && localFilesRef.current[0]
+          modelData.isLocalModel && localFilesRef.current[0]
             ? (
                 localFilesRef.current[0].modelFile.webkitRelativePath as string
               ).substring(
@@ -128,7 +171,7 @@ const useMmdModels = (
             boundingBoxMargin: 60,
             loggingEnabled: true,
             referenceFiles:
-              characterModelData.isLocalModel && localFilesRef.current[0]
+              modelData.isLocalModel && localFilesRef.current[0]
                 ? localFilesRef.current[0].referenceFiles
                 : undefined,
           },

@@ -13,7 +13,6 @@ import { Schema } from "../../../../../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 import { getUrl, uploadData } from "aws-amplify/storage";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
-import { BpmxConverter } from "babylon-mmd/esm/Loader/Optimized/bpmxConverter";
 import { localAssets } from "../../MmdViewer";
 import { getCurrentUser } from "aws-amplify/auth";
 import { Engine, loadAssetContainerAsync, Scene } from "@babylonjs/core";
@@ -21,14 +20,16 @@ import { MmdMesh, MmdStandardMaterial } from "babylon-mmd";
 import { getMaterialBuilder } from "../../babylon/mmdHooks/useMmdModels";
 import { triggerDownloadFromBlob } from "@/app/amplifyHandler/amplifyHandler";
 import { TextureAlphaChecker } from "babylon-mmd/esm/Loader/textureAlphaChecker";
+import JSZip from "jszip";
 
 interface Props {
   mmdMeshRef: MutableRefObject<MmdMesh | null>;
   sceneRef: MutableRefObject<Scene | null>;
+  localFilesRef: MutableRefObject<localAssets[]>;
 }
 
 const ModelPublisher = (props: Props) => {
-  const { mmdMeshRef, sceneRef } = props;
+  const { mmdMeshRef, sceneRef, localFilesRef } = props;
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -68,58 +69,19 @@ const ModelPublisher = (props: Props) => {
     }));
   };
 
-  async function convertPmxToBmpx(): Promise<ArrayBuffer> {
-    const mesh = mmdMeshRef.current!;
-    const meshes = mesh!.metadata.meshes;
-    const translucentMaterials: boolean[] = [];
-    const alphaEvaluateResults: number[] = [];
-    const textureAlphaChecker = new TextureAlphaChecker(sceneRef.current!);
+  async function createModelZip(files: File[]): Promise<Blob> {
+    const zip = new JSZip();
 
-    const materials = mesh!.metadata.materials;
-    translucentMaterials.length = materials.length;
-    alphaEvaluateResults.length = materials.length;
-    for (let i = 0; i < materials.length; ++i) {
-      const material = materials[i] as MmdStandardMaterial;
-      const diffuseTexture = material.diffuseTexture;
-      if (diffuseTexture) {
-        diffuseTexture.hasAlpha = true;
-        material.useAlphaFromDiffuseTexture = true;
-      }
-
-      if (material.alpha < 1) {
-        translucentMaterials[i] = true;
-      } else if (!diffuseTexture) {
-        translucentMaterials[i] = false;
-      } else {
-        translucentMaterials[i] = true;
-        const referencedMeshes = meshes.filter(
-          (m: { material: any }) => m.material === material,
-        );
-        for (const referencedMesh of referencedMeshes) {
-          const isOpaque =
-            await textureAlphaChecker.hasFragmentsOnlyOpaqueOnGeometry(
-              diffuseTexture,
-              referencedMesh,
-              null,
-            );
-          if (isOpaque) {
-            translucentMaterials[i] = false;
-            break;
-          }
-        }
-      }
-
-      alphaEvaluateResults[i] = material.transparencyMode ?? -1;
+    // Add all files to the zip, preserving directory structure
+    for (const file of files) {
+      // Use the webkitRelativePath to maintain folder structure
+      const relativePath = file.webkitRelativePath || file.name;
+      // Add file to zip
+      zip.file(relativePath, file);
     }
 
-    const converter = new BpmxConverter();
-    const bmpxArrayBuffer = converter.convert(mesh, {
-      includeSkinningData: true,
-      includeMorphData: true,
-      translucentMaterials: translucentMaterials,
-      alphaEvaluateResults: alphaEvaluateResults,
-    });
-    return bmpxArrayBuffer;
+    // Generate the zip file
+    return await zip.generateAsync({ type: "blob" });
   }
 
   const arrayBufferToFile = (
@@ -187,21 +149,32 @@ const ModelPublisher = (props: Props) => {
         isClosable: true,
       });
     }
+
     if (!formData.title || !formData.credits) {
       showErrorToast("Title and credits are required.");
       return;
     }
 
-    const bpmx = await convertPmxToBmpx();
-    const file = arrayBufferToFile(bpmx, "model.bpmx");
+    // Get all files from localFilesRef
+    if (!localFilesRef.current || localFilesRef.current.length === 0) {
+      showErrorToast("No model files found. Please upload a model first.");
+      return;
+    }
 
-    let modelResult = null;
+    const { referenceFiles } = localFilesRef.current[0];
+
     try {
-      // Upload model file
-      modelResult = await uploadData({
+      // Create zip file
+      const zipBlob = await createModelZip(referenceFiles);
+      const zipFile = new File([zipBlob], `${formData.title}.zip`, {
+        type: "application/zip",
+      });
+
+      // Upload zip file
+      const modelResult = await uploadData({
         path: ({ identityId }) =>
-          `models/${identityId}/${formData.title}/model.bpmx`,
-        data: file,
+          `models/${identityId}/${formData.title}/${formData.title}.zip`,
+        data: zipFile,
       }).result;
       console.log("Model upload succeeded: ", modelResult);
 
@@ -214,41 +187,49 @@ const ModelPublisher = (props: Props) => {
         }).result;
         console.log("Thumbnail upload succeeded");
       }
-    } catch (error) {
-      showErrorToast("Failed to upload files.");
-      return;
-    }
-    if (!modelResult) return;
-    const folderPath = modelResult.path.substring(
-      0,
-      modelResult.path.lastIndexOf("/"),
-    );
 
-    const { username } = await getCurrentUser();
-    const { errors, data: newTodo } = await client.models.Models.create(
-      {
-        uploaderUsername: username,
-        title: formData.title,
-        description: formData.description,
-        credits: formData.credits,
-        pathToFiles: folderPath,
-        isR_18: formData.isR_18,
-      },
-      {
-        authMode: "userPool",
-      },
-    );
-    if (errors) {
-      showErrorToast("Failed to submit model.");
-      return;
+      // Get the folder path from the model result
+      if (!modelResult) {
+        showErrorToast("Failed to get upload result.");
+        return;
+      }
+
+      const folderPath = modelResult.path.substring(
+        0,
+        modelResult.path.lastIndexOf("/"),
+      );
+
+      const { username } = await getCurrentUser();
+      const { errors, data: newTodo } = await client.models.Models.create(
+        {
+          uploaderUsername: username,
+          title: formData.title,
+          description: formData.description,
+          credits: formData.credits,
+          pathToFiles: folderPath,
+          isR_18: formData.isR_18,
+        },
+        {
+          authMode: "userPool",
+        },
+      );
+
+      if (errors) {
+        showErrorToast("Failed to submit model.");
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Model submitted successfully!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error during operation:", error);
+      showErrorToast("Failed to upload files or create database entry.");
     }
-    toast({
-      title: "Success",
-      description: "Model submitted successfully!",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
   };
 
   return (

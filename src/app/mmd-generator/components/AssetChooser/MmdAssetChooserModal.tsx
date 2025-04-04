@@ -208,6 +208,7 @@ const MmdAssetChooserModal = (props: Props) => {
                                 <ModelPublisher
                                   mmdMeshRef={mmdMeshRef}
                                   sceneRef={sceneRef}
+                                  localFilesRef={localFilesRef}
                                 />
                               );
                             case "Motions":

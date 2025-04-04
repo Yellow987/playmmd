@@ -43,15 +43,17 @@ const AssetGrid = (props: Props) => {
     loadThumbnails();
   }, [assets]);
 
-  function handleAssetClick(asset: Schema["Models"]["type"]) {
+  async function handleAssetClick(asset: Schema["Models"]["type"]) {
     switch (assetType) {
       case "Models":
+        // For models, we now use the zip file instead of BPMX
         dispatch(
           setModels([
             {
               name: asset.title,
-              path: asset.pathToFiles + "/model.bpmx",
+              path: asset.pathToFiles + `/${asset.title}.zip`,
               isLocalModel: false,
+              isZipModel: true, // Add a flag to indicate this is a zip model
             } as CharacterModelData,
           ]),
         );

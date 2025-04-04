@@ -10,6 +10,7 @@ export type CharacterModelData = {
   name: string;
   path: string;
   isLocalModel: boolean;
+  isZipModel?: boolean;
 };
 
 export const CHARACTER_MODELS_DATA: {
