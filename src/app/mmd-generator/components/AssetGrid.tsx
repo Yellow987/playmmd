@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Box, Grid, Image as ChakraImage, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Grid,
+  Image as ChakraImage,
+  Text,
+  IconButton,
+  Flex,
+} from "@chakra-ui/react";
 import { Schema } from "../../../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import { useDispatch } from "react-redux";
 import { setModels } from "@/redux/mmdModels";
 import { CharacterModelData } from "../constants";
 import { ASSET_TYPE } from "./AssetChooser/MmdAssetChooserModal";
+import { FiEdit } from "react-icons/fi";
 import { setAudioPath } from "@/redux/audio";
 import { setMmdMotions, MotionData } from "@/redux/mmdMotions";
 import { CameraData, setMmdCameraData } from "@/redux/cameras";
@@ -13,10 +21,13 @@ import { CameraData, setMmdCameraData } from "@/redux/cameras";
 interface Props {
   assets: Schema["Models"]["type"][];
   assetType: ASSET_TYPE;
+  onEditAsset?: (
+    asset: Schema["Models"]["type"] | Schema["Motions"]["type"],
+  ) => void;
 }
 
 const AssetGrid = (props: Props) => {
-  const { assets, assetType } = props;
+  const { assets, assetType, onEditAsset } = props;
   const dispatch = useDispatch();
   const [thumbnailUrls, setThumbnailUrls] = useState<{ [key: string]: string }>(
     {},
@@ -111,9 +122,23 @@ const AssetGrid = (props: Props) => {
             />
           </Box>
           <Box p={2} bg="gray.50" borderTop="1px solid" borderColor="gray.200">
-            <Text fontSize="sm" fontWeight="medium" color="gray.800">
-              {asset.title}
-            </Text>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Text fontSize="sm" fontWeight="medium" color="gray.800">
+                {asset.title}
+              </Text>
+              {onEditAsset && (
+                <IconButton
+                  aria-label="Edit asset"
+                  icon={<FiEdit />}
+                  size="xs"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering the parent click
+                    onEditAsset(asset);
+                  }}
+                />
+              )}
+            </Flex>
           </Box>
         </Box>
       ))}
