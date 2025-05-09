@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Flex,
   FormControl,
   FormLabel,
   Input,
@@ -19,7 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { Schema } from "../../../../amplify/data/resource";
 import { generateClient } from "aws-amplify/api";
-import { getUrl, uploadData } from "aws-amplify/storage";
+import { getUrl, uploadData, remove } from "aws-amplify/storage";
 import { ASSET_TYPE } from "./AssetChooser/MmdAssetChooserModal";
 
 interface Props {
@@ -28,11 +29,13 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onDelete?: () => void;
 }
 
 const AssetEditor: FC<Props> = (props) => {
-  const { asset, assetType, isOpen, onClose, onSuccess } = props;
+  const { asset, assetType, isOpen, onClose, onSuccess, onDelete } = props;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -257,6 +260,92 @@ const AssetEditor: FC<Props> = (props) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${asset.title}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      // 1. Delete all files in S3
+      // We'll use a recursive delete approach to clean up all files in the asset's directory
+      try {
+        // Delete the thumbnail
+        await remove({ path: `${asset.pathToFiles}/thumbnail.jpg` });
+
+        // Delete other files based on asset type
+        if (assetType === "Models") {
+          // Delete the model zip file
+          await remove({ path: `${asset.pathToFiles}/${asset.title}.zip` });
+        } else if (assetType === "Motions") {
+          // Delete motion files
+          await remove({ path: `${asset.pathToFiles}/motion1.vmd` });
+          await remove({ path: `${asset.pathToFiles}/camera1.vmd` });
+          await remove({ path: `${asset.pathToFiles}/song.wav` });
+        }
+      } catch (error) {
+        console.error("Error deleting files from S3:", error);
+        // Continue with database deletion even if S3 deletion fails
+      }
+
+      // 2. Delete from database
+      let errors;
+      if (assetType === "Models") {
+        const result = await client.models.Models.delete(
+          {
+            id: asset.id,
+          },
+          {
+            authMode: "userPool",
+          },
+        );
+        errors = result.errors;
+      } else {
+        const result = await client.models.Motions.delete(
+          {
+            id: asset.id,
+          },
+          {
+            authMode: "userPool",
+          },
+        );
+        errors = result.errors;
+      }
+
+      if (errors) {
+        showErrorToast("Failed to delete asset.");
+        console.error("Delete errors:", errors);
+        setIsDeleting(false);
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Asset deleted successfully!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      // Call onDelete callback if provided
+      if (onDelete) {
+        onDelete();
+      }
+
+      handleClose();
+    } catch (error) {
+      console.error("Error during deletion:", error);
+      showErrorToast("Failed to delete asset.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="md">
       <ModalOverlay />
@@ -333,18 +422,32 @@ const AssetEditor: FC<Props> = (props) => {
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="edit-asset-form"
-            colorScheme="blue"
-            isLoading={isSubmitting}
-            loadingText="Saving"
-          >
-            Save Changes
-          </Button>
+          <Flex width="100%" justifyContent="space-between">
+            <Button
+              colorScheme="red"
+              variant="outline"
+              onClick={handleDelete}
+              isLoading={isDeleting}
+              loadingText="Deleting"
+            >
+              Delete Asset
+            </Button>
+
+            <Flex>
+              <Button variant="ghost" mr={3} onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="edit-asset-form"
+                colorScheme="blue"
+                isLoading={isSubmitting}
+                loadingText="Saving"
+              >
+                Save Changes
+              </Button>
+            </Flex>
+          </Flex>
         </ModalFooter>
       </ModalContent>
     </Modal>

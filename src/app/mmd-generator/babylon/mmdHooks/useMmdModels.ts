@@ -15,10 +15,7 @@ import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 import { RootState } from "@/redux/store";
 import { setModelsLoaded } from "@/redux/mmdModels";
-import {
-  MmdStandardMaterialBuilder,
-  MmdStandardMaterialRenderMethod,
-} from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
+import { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import type { MmdMesh } from "babylon-mmd/esm/Runtime/mmdMesh";
 import { loadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import { downloadData, getUrl, list } from "aws-amplify/storage";
@@ -36,8 +33,6 @@ export function getMaterialBuilder(): MmdStandardMaterialBuilder {
   //   /* do nothing */
   // };
   materialBuilder.deleteTextureBufferAfterLoad = false;
-  materialBuilder.renderMethod =
-    MmdStandardMaterialRenderMethod.AlphaEvaluation;
 
   return materialBuilder;
 }

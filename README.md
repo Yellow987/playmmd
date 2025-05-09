@@ -1,7 +1,7 @@
 ## Run
 
 npm install
-yarn run dev
+npm run dev
 
 ## Local aws sandbox testing
 

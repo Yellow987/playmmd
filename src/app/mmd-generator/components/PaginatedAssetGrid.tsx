@@ -134,6 +134,14 @@ const PaginatedAssetGrid = (props: Props) => {
     fetchAssets();
   };
 
+  // Handle successful asset deletion
+  const handleDeleteSuccess = () => {
+    // Refresh the assets list
+    fetchAssets();
+    // Close the editor
+    handleCloseEditor();
+  };
+
   return (
     <Box>
       <Flex justifyContent="space-between" alignItems="center" mb={4}>
@@ -175,6 +183,7 @@ const PaginatedAssetGrid = (props: Props) => {
           isOpen={isEditorOpen}
           onClose={handleCloseEditor}
           onSuccess={handleUpdateSuccess}
+          onDelete={handleDeleteSuccess}
         />
       )}
 

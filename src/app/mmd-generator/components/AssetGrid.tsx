@@ -107,8 +107,23 @@ const AssetGrid = (props: Props) => {
           bg="white"
           boxShadow="sm"
           display="inline-block"
-          as="button"
-          onClick={() => handleAssetClick(asset)}
+          position="relative"
+          cursor="pointer"
+          transition="transform 0.2s, box-shadow 0.2s"
+          _hover={{
+            transform: "translateY(-2px)",
+            boxShadow: "md",
+          }}
+          onClick={(e) => {
+            // If onEditAsset is provided, clicking the asset opens the editor
+            if (onEditAsset) {
+              e.stopPropagation();
+              onEditAsset(asset);
+            } else {
+              // Otherwise, use the default behavior (select the asset)
+              handleAssetClick(asset);
+            }
+          }}
         >
           <Box width="120px" height="120px" mx="auto" position="relative">
             <ChakraImage
@@ -122,23 +137,9 @@ const AssetGrid = (props: Props) => {
             />
           </Box>
           <Box p={2} bg="gray.50" borderTop="1px solid" borderColor="gray.200">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="sm" fontWeight="medium" color="gray.800">
-                {asset.title}
-              </Text>
-              {onEditAsset && (
-                <IconButton
-                  aria-label="Edit asset"
-                  icon={<FiEdit />}
-                  size="xs"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the parent click
-                    onEditAsset(asset);
-                  }}
-                />
-              )}
-            </Flex>
+            <Text fontSize="sm" fontWeight="medium" color="gray.800">
+              {asset.title}
+            </Text>
           </Box>
         </Box>
       ))}
