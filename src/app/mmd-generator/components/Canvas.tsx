@@ -79,8 +79,25 @@ function Canvas(props: Props) {
   }, [setIsLoaded]);
 
   return (
-    <div>
-      <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
+    <div
+      style={{
+        width: "100%",
+        height: "min(70vh, 100vw * 9/16)",
+        maxHeight: "70vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: "100%",
+          height: "100%",
+          maxHeight: "70vh",
+          objectFit: "contain",
+        }}
+      />
     </div>
   );
 }

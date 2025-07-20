@@ -18,7 +18,7 @@ const cameras = createSlice({
   initialState: {
     activeCamera: ActiveCamera.MMD_CAMERA,
     mmdCameraData: {
-      cameraPath: "/mmd/Animations/TameLieOneStep/Camera.vmd",
+      cameraPath: "/mmd/Animations/FightingMyWay/Camera.vmd",
       isLocalMotion: true,
     } as CameraData,
   },
