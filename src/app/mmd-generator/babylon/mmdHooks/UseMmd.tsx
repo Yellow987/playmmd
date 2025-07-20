@@ -16,7 +16,7 @@ import { setAnimationDuration, setIsPlaying, setSecond } from "@/redux/mmd";
 import { useDispatch } from "react-redux";
 import useControls from "./useControls";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
-import { localAssets } from "../../MmdViewer";
+import { localAssets, MmdViewerMode } from "../../MmdViewer";
 
 interface Props {
   sceneRef: MutableRefObject<Scene>;
@@ -24,6 +24,7 @@ interface Props {
   runtimeRef: MutableRefObject<BaseRuntime | null>;
   localFilesRef: MutableRefObject<localAssets[]>;
   mmdCharacterModelsRef: MutableRefObject<MmdModel[]>;
+  mode?: MmdViewerMode;
 }
 
 const UseMmd = (props: Props) => {
@@ -33,6 +34,7 @@ const UseMmd = (props: Props) => {
     runtimeRef: runtimeRef,
     localFilesRef,
     mmdCharacterModelsRef,
+    mode = "editor",
   } = props;
   if (!sceneRef.current || !canvasRef.current) {
     throw new Error("Scene or canvas is null");
@@ -40,7 +42,7 @@ const UseMmd = (props: Props) => {
   const dispatch = useDispatch();
 
   const mmdRuntime = createMmdRuntime(sceneRef.current);
-  useCameras(sceneRef, mmdRuntime, canvasRef);
+  useCameras(sceneRef, mmdRuntime, canvasRef, mode);
   runtimeRef.current!.run();
   useLighting(sceneRef);
   useStage(sceneRef);
@@ -52,7 +54,7 @@ const UseMmd = (props: Props) => {
     mmdCharacterModelsRef,
     runtimeRef,
   );
-  useMmdMotions(sceneRef, mmdCharacterModelsRef);
+  useMmdMotions(sceneRef, mmdCharacterModelsRef, mode);
   usePostProcessor(sceneRef, mmdCharacterModelsRef);
   useControls(runtimeRef, canvasRef);
 

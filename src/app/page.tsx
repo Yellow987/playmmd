@@ -8,7 +8,7 @@ import { FileUploader } from "@aws-amplify/ui-react-storage";
 export default function Home() {
   return (
     <>
-      <MmdViewer />
+      <MmdViewer mode="viewer" />
     </>
   );
 }

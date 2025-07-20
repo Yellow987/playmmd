@@ -11,6 +11,7 @@ import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { UniversalCamera } from "@babylonjs/core";
 import { ActiveCamera } from "@/redux/cameras";
 import { downloadFromAmplifyStorageAsUrl } from "@/app/amplifyHandler/amplifyHandler";
+import { MmdViewerMode } from "../../MmdViewer";
 
 export type Cameras = {
   mmdCamera: MmdCamera;
@@ -22,6 +23,7 @@ const useCameras = (
   sceneRef: MutableRefObject<Scene>,
   mmdRuntime: MmdRuntime,
   canvasRef: MutableRefObject<HTMLCanvasElement>,
+  mode: MmdViewerMode = "editor",
 ): MutableRefObject<Cameras | null> => {
   const camerasRef = useRef<Cameras | null>(null);
   const activeCamera = useSelector(
@@ -40,15 +42,23 @@ const useCameras = (
         freeCamera: createFreeCamera(sceneRef.current, canvasRef.current),
       };
       camerasRef.current = cameras;
+
+      // Always set mmdCamera for runtime, but change active camera based on mode
       mmdRuntime.setCamera(camerasRef.current.mmdCamera);
+
+      if (mode === "viewer") {
+        sceneRef.current.activeCamera = camerasRef.current.arcCamera;
+      }
     }
 
-    async function loadCameraMotion(cameras: Cameras) {
-      loadMmdCameraMotion(cameras);
+    // Load camera motion in viewer and editor modes, but not in builder mode
+    if (mode !== "builder") {
+      const loadCameraMotion = async (cameras: Cameras) => {
+        loadMmdCameraMotion(cameras);
+      };
+      loadCameraMotion(camerasRef.current);
     }
-
-    loadCameraMotion(camerasRef.current);
-  }, [mmdCameraData]);
+  }, [mmdCameraData, mode]);
 
   useEffect(() => {
     if (!camerasRef.current) return;

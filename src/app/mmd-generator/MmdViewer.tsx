@@ -16,7 +16,13 @@ export type localAssets = {
   referenceFiles: File[];
 };
 
-export default function Home() {
+export type MmdViewerMode = "viewer" | "editor" | "builder";
+
+interface MmdViewerProps {
+  mode?: MmdViewerMode;
+}
+
+export default function Home({ mode = "editor" }: MmdViewerProps) {
   // TODO fix ssr
   const flexDir: "column" | "row" =
     useBreakpointValue({ base: "column", md: "row" }) || "column";
@@ -43,6 +49,7 @@ export default function Home() {
             runtimeRef={runtimeRef}
             localFilesRef={localFilesRef}
             mmdCharacterModelsRef={mmdCharacterModelsRef}
+            mode={mode}
           />
           <VideoPlayerControls />
         </>

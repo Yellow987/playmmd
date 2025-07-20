@@ -17,10 +17,12 @@ import {
   downloadFromAmplifyStorageAsFile,
   downloadFromAmplifyStorageAsUrl,
 } from "@/app/amplifyHandler/amplifyHandler";
+import { MmdViewerMode } from "../../MmdViewer";
 
 const useMmdMotions = (
   sceneRef: MutableRefObject<Scene>,
   mmdCharacterModelsRef: MutableRefObject<MmdModel[]>,
+  mode: MmdViewerMode = "editor",
 ): void => {
   const dispatch = useDispatch();
   const mmdMotions: MotionData[] = useSelector(
@@ -31,6 +33,9 @@ const useMmdMotions = (
   );
 
   useEffect(() => {
+    // Don't load motions in builder mode, but allow in viewer and editor modes
+    if (mode === "builder") return;
+
     const index = 0;
     if (
       !mmdMotions[index] ||
@@ -39,7 +44,7 @@ const useMmdMotions = (
     )
       return;
     setMmdMotionOnModel(index, mmdMotions[index]);
-  }, [mmdMotions, mmdModelsLoaded]);
+  }, [mmdMotions, mmdModelsLoaded, mode]);
 
   async function setMmdMotionOnModel(
     index: number,
