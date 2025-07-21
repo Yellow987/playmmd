@@ -21,10 +21,7 @@ import { Scene } from "@babylonjs/core/scene";
 import type { Nullable } from "@babylonjs/core/types";
 
 import { SdefInjector } from "babylon-mmd/esm/Loader/sdefInjector";
-import {
-  MmdStandardMaterialBuilder,
-  MmdStandardMaterialRenderMethod,
-} from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
+import { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import { MmdStandardMaterial } from "babylon-mmd/esm/Loader/mmdStandardMaterial";
 import { TextureAlphaChecker } from "babylon-mmd/esm/Loader/textureAlphaChecker";
 import {
@@ -95,9 +92,6 @@ class PmxConverterSceneBuilder implements ISceneBuilder {
 
     const materialBuilder = new MmdStandardMaterialBuilder();
     materialBuilder.deleteTextureBufferAfterLoad = false;
-    materialBuilder.renderMethod =
-      MmdStandardMaterialRenderMethod.AlphaEvaluation;
-
     const scene = new Scene(engine);
     scene.ambientColor = new Color3(0.5, 0.5, 0.5);
 
@@ -244,7 +238,7 @@ class PmxConverterSceneBuilder implements ISceneBuilder {
             );
             for (const referencedMesh of referencedMeshes) {
               const isOpaque =
-                await textureAlphaChecker.hasFragmentsOnlyOpaqueOnGeometry(
+                await textureAlphaChecker.hasFragmentsOnlyOpaqueOnGeometryAsync(
                   diffuseTexture,
                   referencedMesh,
                   null,
