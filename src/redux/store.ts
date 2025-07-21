@@ -6,6 +6,7 @@ import cameras from "./cameras";
 import controls from "./controls";
 import audio from "./audio";
 import mmd from "./mmd";
+import screenshot from "./screenshot";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     controls: controls,
     audio: audio,
     mmd: mmd,
+    screenshot: screenshot,
   },
 });
 

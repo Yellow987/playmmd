@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useRef, useState } from "react";
+import React, { MutableRefObject, useRef, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -8,6 +8,9 @@ import {
   Input,
   Textarea,
   useToast,
+  Flex,
+  Text,
+  Image,
 } from "@chakra-ui/react";
 import { Schema } from "../../../../../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
@@ -21,6 +24,8 @@ import { getMaterialBuilder } from "../../babylon/mmdHooks/useMmdModels";
 import { triggerDownloadFromBlob } from "@/app/amplifyHandler/amplifyHandler";
 import { TextureAlphaChecker } from "babylon-mmd/esm/Loader/textureAlphaChecker";
 import JSZip from "jszip";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface Props {
   mmdMeshRef: MutableRefObject<MmdMesh | null>;
@@ -38,9 +43,34 @@ const ModelPublisher = (props: Props) => {
     thumbnail: null as File | null,
   });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [capturedPreviewUrl, setCapturedPreviewUrl] = useState<string | null>(
+    null,
+  );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const toast = useToast();
+
+  // Get captured screenshot from Redux store
+  const { capturedScreenshotFile, capturedScreenshotDataUrl, capturedAt } =
+    useSelector((state: RootState) => state.screenshot);
+
+  // Set captured screenshot as default thumbnail when component mounts or screenshot updates
+  useEffect(() => {
+    if (capturedScreenshotFile && capturedScreenshotDataUrl) {
+      // Use the data URL directly for display
+      setCapturedPreviewUrl(capturedScreenshotDataUrl);
+
+      // Only set as form thumbnail if user hasn't manually selected one
+      if (
+        !formData.thumbnail ||
+        formData.thumbnail === capturedScreenshotFile
+      ) {
+        setFormData((prev) => ({ ...prev, thumbnail: capturedScreenshotFile }));
+      }
+    } else {
+      setCapturedPreviewUrl(null);
+    }
+  }, [capturedScreenshotFile, capturedScreenshotDataUrl]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -95,7 +125,7 @@ const ModelPublisher = (props: Props) => {
   const client = generateClient<Schema>();
   const optimizeImage = async (file: File): Promise<File> => {
     return new Promise((resolve) => {
-      const img = new Image();
+      const img = document.createElement("img") as HTMLImageElement;
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d")!;
@@ -233,73 +263,140 @@ const ModelPublisher = (props: Props) => {
   };
 
   return (
-    <Box w="400px" p="4" borderWidth="1px" borderRadius="md" boxShadow="sm">
-      <form onSubmit={handleSubmit}>
-        {previewUrl && (
-          <Box mb="4">
-            <img
-              src={previewUrl}
-              alt="Thumbnail preview"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "200px",
-                objectFit: "contain",
-                borderRadius: "4px",
-              }}
+    <Flex w="full" h="full" gap={6}>
+      {/* Left side - Form */}
+      <Box w="50%" p="4" borderWidth="1px" borderRadius="md" boxShadow="sm">
+        <form onSubmit={handleSubmit}>
+          {(previewUrl || capturedPreviewUrl) && (
+            <Box mb="4">
+              <Text fontSize="sm" mb="2" color="gray.600">
+                Current Thumbnail Preview:
+              </Text>
+              <Image
+                src={previewUrl || capturedPreviewUrl || ""}
+                alt="Thumbnail preview"
+                maxW="100%"
+                maxH="200px"
+                objectFit="contain"
+                borderRadius="4px"
+                border="1px solid"
+                borderColor="gray.200"
+              />
+            </Box>
+          )}
+
+          <FormControl mb="4">
+            <FormLabel>Thumbnail Image</FormLabel>
+            <Input type="file" accept="image/*" onChange={handleChange} p={1} />
+            {capturedScreenshotFile && (
+              <Text fontSize="xs" color="green.600" mt="1">
+                Using captured screenshot as default (you can override by
+                selecting a file)
+              </Text>
+            )}
+          </FormControl>
+
+          <FormControl isRequired mb="4">
+            <FormLabel>Title</FormLabel>
+            <Input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Enter title"
             />
+          </FormControl>
+
+          <FormControl mb="4">
+            <FormLabel>Description</FormLabel>
+            <Textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Enter description"
+            />
+          </FormControl>
+
+          <FormControl isRequired mb="4">
+            <FormLabel>Credits</FormLabel>
+            <Input
+              name="credits"
+              value={formData.credits}
+              onChange={handleChange}
+              placeholder="Enter credits"
+            />
+          </FormControl>
+
+          <FormControl display="flex" alignItems="center" mb="4">
+            <Checkbox
+              name="isR_18"
+              isChecked={formData.isR_18}
+              onChange={handleChange}
+            >
+              R-18 Content
+            </Checkbox>
+          </FormControl>
+
+          <Button type="submit" colorScheme="teal" width="full">
+            Submit
+          </Button>
+        </form>
+        <canvas ref={canvasRef} style={{ width: "0px", height: "0px" }} />
+      </Box>
+
+      {/* Right side - Captured Screenshot Display */}
+      <Box w="50%" p="4" borderWidth="1px" borderRadius="md" boxShadow="sm">
+        <Text fontSize="lg" fontWeight="bold" mb="4">
+          Captured Screenshot
+        </Text>
+
+        {capturedScreenshotFile && capturedPreviewUrl ? (
+          <Box>
+            <Image
+              src={capturedPreviewUrl}
+              alt="Captured screenshot"
+              w="100%"
+              maxH="400px"
+              objectFit="contain"
+              borderRadius="4px"
+              border="1px solid"
+              borderColor="gray.200"
+            />
+            <Text fontSize="sm" color="gray.600" mt="2">
+              Captured:{" "}
+              {capturedAt
+                ? new Date(capturedAt).toLocaleString()
+                : "Unknown time"}
+            </Text>
+            <Text fontSize="sm" color="blue.600" mt="1">
+              This screenshot will be used as the default thumbnail for your
+              model.
+            </Text>
+          </Box>
+        ) : (
+          <Box
+            w="100%"
+            h="400px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bg="gray.50"
+            borderRadius="4px"
+            border="2px dashed"
+            borderColor="gray.300"
+          >
+            <Box textAlign="center">
+              <Text color="gray.500" fontSize="lg" mb="2">
+                📸 No Screenshot Captured
+              </Text>
+              <Text color="gray.400" fontSize="sm">
+                Pause the animation at your desired frame and click the camera
+                button to capture a screenshot
+              </Text>
+            </Box>
           </Box>
         )}
-
-        <FormControl mb="4">
-          <FormLabel>Thumbnail Image</FormLabel>
-          <Input type="file" accept="image/*" onChange={handleChange} p={1} />
-        </FormControl>
-        <FormControl isRequired mb="4">
-          <FormLabel>Title</FormLabel>
-          <Input
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Enter title"
-          />
-        </FormControl>
-
-        <FormControl mb="4">
-          <FormLabel>Description</FormLabel>
-          <Textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Enter description"
-          />
-        </FormControl>
-
-        <FormControl isRequired mb="4">
-          <FormLabel>Credits</FormLabel>
-          <Input
-            name="credits"
-            value={formData.credits}
-            onChange={handleChange}
-            placeholder="Enter credits"
-          />
-        </FormControl>
-
-        <FormControl display="flex" alignItems="center" mb="4">
-          <Checkbox
-            name="isR_18"
-            isChecked={formData.isR_18}
-            onChange={handleChange}
-          >
-            R-18 Content
-          </Checkbox>
-        </FormControl>
-
-        <Button type="submit" colorScheme="teal" width="full">
-          Submit
-        </Button>
-      </form>
-      <canvas ref={canvasRef} style={{ width: "0px", height: "0px" }} />
-    </Box>
+      </Box>
+    </Flex>
   );
 };
 

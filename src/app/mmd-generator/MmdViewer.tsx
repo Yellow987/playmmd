@@ -51,7 +51,7 @@ export default function Home({ mode = "editor" }: MmdViewerProps) {
             mmdCharacterModelsRef={mmdCharacterModelsRef}
             mode={mode}
           />
-          <VideoPlayerControls />
+          <VideoPlayerControls canvasRef={canvasRef} sceneRef={sceneRef} />
         </>
       )}
       <Flex direction={flexDir}>

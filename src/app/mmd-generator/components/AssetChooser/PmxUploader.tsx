@@ -22,7 +22,6 @@ import { CharacterModelData } from "../../constants";
 import {
   SdefInjector,
   MmdStandardMaterialBuilder,
-  MmdStandardMaterialRenderMethod,
   TextureAlphaChecker,
   MmdMesh,
   OiComputeTransformInjector,
@@ -89,8 +88,6 @@ class PmxConverterSceneBuilder implements ISceneBuilder {
 
     const materialBuilder = new MmdStandardMaterialBuilder();
     materialBuilder.deleteTextureBufferAfterLoad = false;
-    materialBuilder.renderMethod =
-      MmdStandardMaterialRenderMethod.AlphaEvaluation;
 
     const scene = new Scene(engine);
     scene.ambientColor = new Color3(0.5, 0.5, 0.5);
@@ -256,8 +253,6 @@ const PmxUploader = (props: Props) => {
     }
     const materialBuilder = new MmdStandardMaterialBuilder();
     materialBuilder.deleteTextureBufferAfterLoad = false;
-    materialBuilder.renderMethod =
-      MmdStandardMaterialRenderMethod.AlphaEvaluation;
 
     const fileRelativePath = file.webkitRelativePath as string;
     mmdMeshRef.current = await loadAssetContainerAsync(
