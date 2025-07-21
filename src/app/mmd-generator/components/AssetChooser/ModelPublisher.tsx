@@ -46,6 +46,7 @@ const ModelPublisher = (props: Props) => {
   const [capturedPreviewUrl, setCapturedPreviewUrl] = useState<string | null>(
     null,
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const toast = useToast();
@@ -170,6 +171,8 @@ const ModelPublisher = (props: Props) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     function showErrorToast(description: string) {
       toast({
         title: "Error",
@@ -178,6 +181,7 @@ const ModelPublisher = (props: Props) => {
         duration: 3000,
         isClosable: true,
       });
+      setIsSubmitting(false);
     }
 
     if (!formData.title || !formData.credits) {
@@ -259,6 +263,8 @@ const ModelPublisher = (props: Props) => {
     } catch (error) {
       console.error("Error during operation:", error);
       showErrorToast("Failed to upload files or create database entry.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -336,7 +342,14 @@ const ModelPublisher = (props: Props) => {
             </Checkbox>
           </FormControl>
 
-          <Button type="submit" colorScheme="teal" width="full">
+          <Button
+            type="submit"
+            colorScheme="teal"
+            width="full"
+            isLoading={isSubmitting}
+            loadingText="Uploading..."
+            disabled={isSubmitting}
+          >
             Submit
           </Button>
         </form>

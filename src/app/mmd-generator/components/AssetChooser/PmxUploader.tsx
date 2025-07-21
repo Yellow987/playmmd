@@ -234,6 +234,8 @@ const PmxUploader = (props: Props) => {
   const dispath = useDispatch();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const [isLoadingModel, setIsLoadingModel] = useState(false);
+  const [isUsingModel, setIsUsingModel] = useState(false);
 
   const handleMmdUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -244,43 +246,48 @@ const PmxUploader = (props: Props) => {
   };
 
   const loadModelAsync = async (file: File): Promise<void> => {
-    if (mmdMeshRef.current !== null) {
-      for (const subMesh of mmdMeshRef.current.metadata.meshes) {
-        //TODO enable shadowGenerator.removeShadowCaster(subMesh);
+    setIsLoadingModel(true);
+    try {
+      if (mmdMeshRef.current !== null) {
+        for (const subMesh of mmdMeshRef.current.metadata.meshes) {
+          //TODO enable shadowGenerator.removeShadowCaster(subMesh);
+        }
+        mmdMeshRef.current.dispose(false, true);
+        mmdMeshRef.current = null;
       }
-      mmdMeshRef.current.dispose(false, true);
-      mmdMeshRef.current = null;
-    }
-    const materialBuilder = new MmdStandardMaterialBuilder();
-    materialBuilder.deleteTextureBufferAfterLoad = false;
+      const materialBuilder = new MmdStandardMaterialBuilder();
+      materialBuilder.deleteTextureBufferAfterLoad = false;
 
-    const fileRelativePath = file.webkitRelativePath as string;
-    mmdMeshRef.current = await loadAssetContainerAsync(
-      file,
-      runtimeRef.current!.scene,
-      {
-        rootUrl: fileRelativePath.substring(
-          0,
-          fileRelativePath.lastIndexOf("/") + 1,
-        ),
-        pluginOptions: {
-          mmdmodel: {
-            materialBuilder: materialBuilder,
-            buildSkeleton: true,
-            buildMorph: true,
-            boundingBoxMargin: 0,
-            preserveSerializationData: true,
-            loggingEnabled: true,
-            referenceFiles: files,
+      const fileRelativePath = file.webkitRelativePath as string;
+      mmdMeshRef.current = await loadAssetContainerAsync(
+        file,
+        runtimeRef.current!.scene,
+        {
+          rootUrl: fileRelativePath.substring(
+            0,
+            fileRelativePath.lastIndexOf("/") + 1,
+          ),
+          pluginOptions: {
+            mmdmodel: {
+              materialBuilder: materialBuilder,
+              buildSkeleton: true,
+              buildMorph: true,
+              boundingBoxMargin: 0,
+              preserveSerializationData: true,
+              loggingEnabled: true,
+              referenceFiles: files,
+            },
           },
         },
-      },
-    ).then((result) => {
-      result.addAllToScene();
-      const mmdMesh = result.meshes[0] as MmdMesh;
-      localFilesRef.current = [{ modelFile: file, referenceFiles: files }];
-      return mmdMesh;
-    });
+      ).then((result) => {
+        result.addAllToScene();
+        const mmdMesh = result.meshes[0] as MmdMesh;
+        localFilesRef.current = [{ modelFile: file, referenceFiles: files }];
+        return mmdMesh;
+      });
+    } finally {
+      setIsLoadingModel(false);
+    }
   };
 
   const handleFileClick = async (file: File) => {
@@ -292,13 +299,18 @@ const PmxUploader = (props: Props) => {
     return fileExtension === "pmx" || fileExtension === "pmd";
   }
 
-  const useModel = () => {
-    const newModel = {
-      name: "LocalModel",
-      path: "",
-      isLocalModel: true,
-    } as CharacterModelData;
-    dispath(setNewModel({ model: newModel, i: 0 }));
+  const useModel = async () => {
+    setIsUsingModel(true);
+    try {
+      const newModel = {
+        name: "LocalModel",
+        path: "",
+        isLocalModel: true,
+      } as CharacterModelData;
+      dispath(setNewModel({ model: newModel, i: 0 }));
+    } finally {
+      setIsUsingModel(false);
+    }
   };
 
   return (
@@ -306,7 +318,10 @@ const PmxUploader = (props: Props) => {
       <Box width="20%">
         <VStack spacing={4} align="stretch" height="100%">
           {/* File Upload Button */}
-          <Button onClick={() => fileInputRef.current?.click()}>
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoadingModel || isUsingModel}
+          >
             Upload File
           </Button>
           <input
@@ -336,22 +351,39 @@ const PmxUploader = (props: Props) => {
                   fontSize="sm"
                   bg="gray.50"
                   borderRadius="md"
-                  cursor={isFileMmd(file) ? "pointer" : ""}
-                  _hover={{ bg: "gray.100" }} // Optional: Add hover effect
+                  cursor={
+                    isFileMmd(file) && !isLoadingModel && !isUsingModel
+                      ? "pointer"
+                      : ""
+                  }
+                  _hover={{
+                    bg:
+                      isFileMmd(file) && !isLoadingModel && !isUsingModel
+                        ? "gray.100"
+                        : "gray.50",
+                  }}
                   onClick={() => {
-                    if (isFileMmd(file)) {
-                      handleFileClick(file); // Call the conditional callback
+                    if (isFileMmd(file) && !isLoadingModel && !isUsingModel) {
+                      handleFileClick(file);
                     }
                   }}
                 >
-                  {file.name}
+                  {file.name}{" "}
+                  {isLoadingModel && isFileMmd(file) && " (Loading...)"}
                 </ListItem>
               ))}
             </List>
           </Box>
 
           {/* Bottom Button */}
-          <Button onClick={useModel}>Use Model</Button>
+          <Button
+            onClick={useModel}
+            isLoading={isUsingModel}
+            loadingText="Using..."
+            disabled={isLoadingModel || isUsingModel}
+          >
+            Use Model
+          </Button>
         </VStack>
       </Box>
       <Box flex="1">

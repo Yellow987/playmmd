@@ -29,6 +29,7 @@ const MotionUploader = (props: Props) => {
   const { motionData, setMotionData, onComplete } = props;
   const dispatch = useDispatch();
   const fpsRef = useRef<HTMLInputElement>(null);
+  const [isUsingMotion, setIsUsingMotion] = useState(false);
 
   const handleSongUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -57,31 +58,36 @@ const MotionUploader = (props: Props) => {
     }));
   };
 
-  const handleUseClick = () => {
-    const audioPath = URL.createObjectURL(motionData.songFile!);
-    dispatch(setAudioPath({ audioPath, isLocalAudio: true }));
-    dispatch(setFps(Number(fpsRef.current?.value)));
-    getMmdRuntime().seekAnimation(0, true);
-    dispatch(setSecond(0));
+  const handleUseClick = async () => {
+    setIsUsingMotion(true);
+    try {
+      const audioPath = URL.createObjectURL(motionData.songFile!);
+      dispatch(setAudioPath({ audioPath, isLocalAudio: true }));
+      dispatch(setFps(Number(fpsRef.current?.value)));
+      getMmdRuntime().seekAnimation(0, true);
+      dispatch(setSecond(0));
 
-    const mmdMotionPath = URL.createObjectURL(motionData.motionsFiles[0]);
-    dispatch(
-      setMmdMotions([
-        {
-          motions: [mmdMotionPath],
-          isLocalMotion: true,
-        } as MotionData,
-      ]),
-      motionData.cameraFile &&
-        dispatch(
-          setMmdCameraData({
-            cameraPath: URL.createObjectURL(motionData.cameraFile!),
+      const mmdMotionPath = URL.createObjectURL(motionData.motionsFiles[0]);
+      dispatch(
+        setMmdMotions([
+          {
+            motions: [mmdMotionPath],
             isLocalMotion: true,
-          } as CameraData),
-        ),
-    );
+          } as MotionData,
+        ]),
+        motionData.cameraFile &&
+          dispatch(
+            setMmdCameraData({
+              cameraPath: URL.createObjectURL(motionData.cameraFile!),
+              isLocalMotion: true,
+            } as CameraData),
+          ),
+      );
 
-    onComplete();
+      onComplete();
+    } finally {
+      setIsUsingMotion(false);
+    }
   };
 
   return (
@@ -139,6 +145,8 @@ const MotionUploader = (props: Props) => {
           colorScheme="blue"
           onClick={handleUseClick}
           isDisabled={!motionData.songFile || !motionData.motionsFiles[0]}
+          isLoading={isUsingMotion}
+          loadingText="Loading..."
         >
           Use
         </Button>
