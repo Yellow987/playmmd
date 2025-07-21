@@ -6,6 +6,8 @@ import {
   Text,
   IconButton,
   Flex,
+  Button,
+  useToast,
 } from "@chakra-ui/react";
 import { Schema } from "../../../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
@@ -13,7 +15,7 @@ import { useDispatch } from "react-redux";
 import { setModels } from "@/redux/mmdModels";
 import { CharacterModelData } from "../constants";
 import { ASSET_TYPE } from "./AssetChooser/MmdAssetChooserModal";
-import { FiEdit } from "react-icons/fi";
+import { FiEdit, FiDownload } from "react-icons/fi";
 import { setAudioPath } from "@/redux/audio";
 import { setMmdMotions, MotionData } from "@/redux/mmdMotions";
 import { CameraData, setMmdCameraData } from "@/redux/cameras";
@@ -29,8 +31,12 @@ interface Props {
 const AssetGrid = (props: Props) => {
   const { assets, assetType, onEditAsset } = props;
   const dispatch = useDispatch();
+  const toast = useToast();
   const [thumbnailUrls, setThumbnailUrls] = useState<{ [key: string]: string }>(
     {},
+  );
+  const [downloadingAssets, setDownloadingAssets] = useState<Set<string>>(
+    new Set(),
   );
 
   useEffect(() => {
@@ -94,6 +100,90 @@ const AssetGrid = (props: Props) => {
     }
   }
 
+  const handleDownload = async (
+    asset: Schema["Models"]["type"],
+    e: React.MouseEvent,
+  ) => {
+    e.stopPropagation(); // Prevent asset selection when clicking download
+
+    const assetId = asset.title;
+    setDownloadingAssets((prev) => new Set(prev).add(assetId));
+
+    try {
+      switch (assetType) {
+        case "Models":
+          await downloadModel(asset);
+          break;
+        case "Motions":
+          await downloadMotion(asset);
+          break;
+      }
+
+      toast({
+        title: "Download Started",
+        description: `${asset.title} download initiated successfully.`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Download Failed",
+        description: `Failed to download ${asset.title}. Please try again.`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setDownloadingAssets((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(assetId);
+        return newSet;
+      });
+    }
+  };
+
+  const downloadModel = async (asset: Schema["Models"]["type"]) => {
+    const zipPath = `${asset.pathToFiles}/${asset.title}.zip`;
+    const result = await getUrl({ path: zipPath });
+
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement("a");
+    link.href = result.url.toString();
+    link.download = `${asset.title}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadMotion = async (asset: Schema["Models"]["type"]) => {
+    const files = [
+      { name: "song.wav", path: `${asset.pathToFiles}/song.wav` },
+      { name: "motion1.vmd", path: `${asset.pathToFiles}/motion1.vmd` },
+      { name: "camera1.vmd", path: `${asset.pathToFiles}/camera1.vmd` },
+    ];
+
+    // Download all files sequentially
+    for (const file of files) {
+      try {
+        const result = await getUrl({ path: file.path });
+        const link = document.createElement("a");
+        link.href = result.url.toString();
+        link.download = `${asset.title}_${file.name}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Small delay between downloads to prevent overwhelming the browser
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.warn(`Failed to download ${file.name}:`, error);
+        // Continue with other files even if one fails
+      }
+    }
+  };
+
   return (
     <Grid templateColumns="repeat(auto-fit, minmax(120px, 1fr))" gap={4} p={4}>
       {assets.map((asset, i) => (
@@ -136,11 +226,37 @@ const AssetGrid = (props: Props) => {
               objectFit="cover"
             />
           </Box>
-          <Box p={2} bg="gray.50" borderTop="1px solid" borderColor="gray.200">
-            <Text fontSize="sm" fontWeight="medium" color="gray.800">
+          <Flex
+            p={2}
+            bg="gray.50"
+            borderTop="1px solid"
+            borderColor="gray.200"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text
+              fontSize="sm"
+              fontWeight="medium"
+              color="gray.800"
+              flex="1"
+              textAlign="left"
+            >
               {asset.title}
             </Text>
-          </Box>
+            <Button
+              size="xs"
+              colorScheme="green"
+              variant="solid"
+              leftIcon={<FiDownload />}
+              onClick={(e) => handleDownload(asset, e)}
+              isLoading={downloadingAssets.has(asset.title)}
+              loadingText="..."
+              ml={2}
+              minW="60px"
+            >
+              {downloadingAssets.has(asset.title) ? "" : "Get"}
+            </Button>
+          </Flex>
         </Box>
       ))}
     </Grid>
