@@ -54,15 +54,7 @@ export default function MmdBuilder() {
             mmdCharacterModelsRef={mmdCharacterModelsRef}
             mode="builder"
           />
-          <Box
-            position="absolute"
-            bottom="20px"
-            left="50%"
-            transform="translateX(-50%)"
-            zIndex={10}
-          >
-            <VideoPlayerControls />
-          </Box>
+          <VideoPlayerControls canvasRef={canvasRef} sceneRef={sceneRef} />
         </>
       )}
     </Box>
