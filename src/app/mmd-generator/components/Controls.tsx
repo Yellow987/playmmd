@@ -1,22 +1,24 @@
 "use client";
 import Dropdown from "@/components/Dropdown";
 import { ActiveCamera, setActiveCamera } from "@/redux/cameras";
-import { setIsDepthOfFieldEnabled, setIsFullscreen } from "@/redux/controls";
+import { setIsDepthOfFieldEnabled } from "@/redux/controls";
 import { RootState } from "@/redux/store";
 import { SimpleGrid, Box, VStack, Checkbox } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 
 function Controls() {
   const dispatch = useDispatch();
-  const isDepthOfFieldEnabled = useSelector((state: RootState) => state.controls.isDepthOfFieldEnabled);
-  const isFullscreen = useSelector((state: RootState) => state.controls.isFullscreen);
+  const isDepthOfFieldEnabled = useSelector(
+    (state: RootState) => state.controls.isDepthOfFieldEnabled,
+  );
 
   const cameraControlMenuItems: Record<
-  ActiveCamera,
-  {
-    name: string;
-    function: () => void;
-  }> = {
+    ActiveCamera,
+    {
+      name: string;
+      function: () => void;
+    }
+  > = {
     ["mmdCamera"]: {
       name: "MMD Camera",
       function: () => {
@@ -47,31 +49,27 @@ function Controls() {
 
   return (
     <>
-    <SimpleGrid
-      columns={{ base: 1, md: 2 }} // 1 column on small screens, 2 columns on medium and larger screens
-      spacing="4" // Space between items
-    >
-      <Dropdown
-        menuLabel="Camera Control"
-        onMenuItemSelect={onCameraControlSelect}
-        menuItems={cameraControlMenuItems}
-        defaultItem={ActiveCamera.MMD_CAMERA}
-      />
-      <VStack spacing={4} align="stretch">
-        <Checkbox
-          isChecked={isDepthOfFieldEnabled}
-          onChange={(e) => dispatch(setIsDepthOfFieldEnabled(e.target.checked))}
-        >
-          Depth of Field
-        </Checkbox>
-        <Checkbox
-          isChecked={isFullscreen}
-          onChange={(e) => dispatch(setIsFullscreen(e.target.checked))}
-        >
-          Fullscreen
-        </Checkbox>
-      </VStack>
-    </SimpleGrid>
+      <SimpleGrid
+        columns={{ base: 1, md: 2 }} // 1 column on small screens, 2 columns on medium and larger screens
+        spacing="4" // Space between items
+      >
+        <Dropdown
+          menuLabel="Camera Control"
+          onMenuItemSelect={onCameraControlSelect}
+          menuItems={cameraControlMenuItems}
+          defaultItem={ActiveCamera.MMD_CAMERA}
+        />
+        <VStack spacing={4} align="stretch">
+          <Checkbox
+            isChecked={isDepthOfFieldEnabled}
+            onChange={(e) =>
+              dispatch(setIsDepthOfFieldEnabled(e.target.checked))
+            }
+          >
+            Depth of Field
+          </Checkbox>
+        </VStack>
+      </SimpleGrid>
     </>
   );
 }

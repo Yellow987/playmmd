@@ -5,6 +5,7 @@ import Volume from "./Volume";
 import PlayPauseButton from "./PlayPauseButton";
 import Duration from "./Duration";
 import ScreenshotButton from "./ScreenshotButton";
+import FullscreenButton from "./FullscreenButton";
 import React from "react";
 
 interface Props {
@@ -26,6 +27,7 @@ const VideoPlayerControls: React.FC<Props> = ({ canvasRef, sceneRef }) => {
         <Flex align="center" position="absolute" right={0}>
           <Duration />
           <Volume />
+          <FullscreenButton />
         </Flex>
       </Flex>
     </VStack>
