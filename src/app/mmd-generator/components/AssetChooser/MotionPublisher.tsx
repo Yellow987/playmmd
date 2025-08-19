@@ -88,6 +88,22 @@ const MotionPublisher = (props: Props) => {
             folderPath,
           );
         }
+        if (motionData.lipsyncFile) {
+          await uploadFileToAmplifyStorage(
+            "lipsync1.vmd",
+            "Motions",
+            motionData.lipsyncFile,
+            folderPath,
+          );
+        }
+        if (motionData.facialExpressionFile) {
+          await uploadFileToAmplifyStorage(
+            "facial1.vmd",
+            "Motions",
+            motionData.facialExpressionFile,
+            folderPath,
+          );
+        }
         await uploadFileToAmplifyStorage(
           "motion1.vmd",
           "Motions",

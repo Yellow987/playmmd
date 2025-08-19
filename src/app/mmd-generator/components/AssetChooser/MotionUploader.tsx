@@ -58,6 +58,26 @@ const MotionUploader = (props: Props) => {
     }));
   };
 
+  const handleLipsyncUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    setMotionData((prev) => ({
+      ...prev,
+      lipsyncFile: e.target.files![0],
+    }));
+  };
+
+  const handleFacialExpressionUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (!e.target.files) return;
+
+    setMotionData((prev) => ({
+      ...prev,
+      facialExpressionFile: e.target.files![0],
+    }));
+  };
+
   const handleUseClick = async () => {
     setIsUsingMotion(true);
     try {
@@ -68,10 +88,24 @@ const MotionUploader = (props: Props) => {
       dispatch(setSecond(0));
 
       const mmdMotionPath = URL.createObjectURL(motionData.motionsFiles[0]);
+      const motionPaths = [mmdMotionPath];
+
+      // Add facial expression file if available
+      if (motionData.facialExpressionFile) {
+        const facialPath = URL.createObjectURL(motionData.facialExpressionFile);
+        motionPaths.push(facialPath);
+      }
+
+      // Add lipsync file if available
+      if (motionData.lipsyncFile) {
+        const lipsyncPath = URL.createObjectURL(motionData.lipsyncFile);
+        motionPaths.push(lipsyncPath);
+      }
+
       dispatch(
         setMmdMotions([
           {
-            motions: [mmdMotionPath],
+            motions: motionPaths,
             isLocalMotion: true,
           } as MotionData,
         ]),
@@ -124,6 +158,34 @@ const MotionUploader = (props: Props) => {
         {motionData.cameraFile && (
           <Text mt={2} fontSize="sm">
             Uploaded: {motionData.cameraFile.name}
+          </Text>
+        )}
+      </Box>
+
+      <Box w="full">
+        <Heading size="md" mb={2}>
+          Lipsync (Optional)
+        </Heading>
+        <Input type="file" accept=".vmd" onChange={handleLipsyncUpload} />
+        {motionData.lipsyncFile && (
+          <Text mt={2} fontSize="sm">
+            Uploaded: {motionData.lipsyncFile.name}
+          </Text>
+        )}
+      </Box>
+
+      <Box w="full">
+        <Heading size="md" mb={2}>
+          Facial Expression (Optional)
+        </Heading>
+        <Input
+          type="file"
+          accept=".vmd"
+          onChange={handleFacialExpressionUpload}
+        />
+        {motionData.facialExpressionFile && (
+          <Text mt={2} fontSize="sm">
+            Uploaded: {motionData.facialExpressionFile.name}
           </Text>
         )}
       </Box>

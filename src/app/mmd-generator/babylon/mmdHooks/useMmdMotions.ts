@@ -54,24 +54,30 @@ const useMmdMotions = (
     console.log("Loading motion");
     let motions: any[] = [];
     if (!motionData.isLocalMotion) {
-      motions = await Promise.all(
-        motionData.motions.map(async (motionPath) => {
+      // For remote motions, try to load each file but filter out failed loads
+      const motionPromises = motionData.motions.map(async (motionPath) => {
+        try {
           return await downloadFromAmplifyStorageAsUrl(motionPath);
-        }),
-      );
+        } catch (error) {
+          console.log(`Failed to load motion file: ${motionPath}`, error);
+          return null;
+        }
+      });
+      const motionResults = await Promise.all(motionPromises);
+      motions = motionResults.filter((motion) => motion !== null);
     } else {
       motions = motionData.motions;
     }
     const mmdModel = mmdCharacterModelsRef.current[index];
     // mmdModel.removeAnimation(0);
-    const motion = motions[0];
     console.log("Motions", motions);
 
-    const modelMotion = await vmdLoader.loadAsync(motion, motion);
+    // Load all motion files (main motion, facial expression, lipsync) and merge them
+    const modelMotion = await vmdLoader.loadAsync("model_motion_1", motions);
     console.log("Motion loaded", modelMotion);
 
     mmdModel.addAnimation(modelMotion);
-    mmdModel.setAnimation(motion);
+    mmdModel.setAnimation("model_motion_1");
   }
 };
 

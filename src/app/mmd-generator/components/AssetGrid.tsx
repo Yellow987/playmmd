@@ -82,10 +82,20 @@ const AssetGrid = (props: Props) => {
             isLocalAudio: false,
           }),
         );
+
+        // Build motions array with main motion and optional lipsync/facial files
+        const motionPaths = [asset.pathToFiles + "/motion1.vmd"];
+
+        // Add facial expression file if it exists (we'll try to load it)
+        motionPaths.push(asset.pathToFiles + "/facial1.vmd");
+
+        // Add lipsync file if it exists (we'll try to load it)
+        motionPaths.push(asset.pathToFiles + "/lipsync1.vmd");
+
         dispatch(
           setMmdMotions([
             {
-              motions: [asset.pathToFiles + "/motion1.vmd"],
+              motions: motionPaths,
               isLocalMotion: false,
             } as MotionData,
           ]),

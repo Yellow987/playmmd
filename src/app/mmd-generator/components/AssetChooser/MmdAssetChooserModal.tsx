@@ -43,6 +43,8 @@ export type MotionFiles = {
   songFile: File | undefined;
   motionsFiles: File[];
   cameraFile?: File;
+  lipsyncFile?: File;
+  facialExpressionFile?: File;
 };
 
 interface Props {
@@ -57,6 +59,8 @@ const MmdAssetChooserModal = (props: Props) => {
     songFile: undefined,
     motionsFiles: [],
     cameraFile: undefined,
+    lipsyncFile: undefined,
+    facialExpressionFile: undefined,
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
