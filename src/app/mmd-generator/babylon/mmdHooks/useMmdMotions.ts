@@ -53,6 +53,7 @@ const useMmdMotions = (
     const vmdLoader = new VmdLoader(sceneRef.current);
     console.log("Loading motion");
     let motions: any[] = [];
+
     if (!motionData.isLocalMotion) {
       // For remote motions, try to load each file but filter out failed loads
       const motionPromises = motionData.motions.map(async (motionPath) => {
@@ -68,16 +69,54 @@ const useMmdMotions = (
     } else {
       motions = motionData.motions;
     }
+
+    // Validation: Ensure we have at least one valid motion file
+    if (!motions || motions.length === 0) {
+      console.error("No valid motion files to load");
+      return;
+    }
+
     const mmdModel = mmdCharacterModelsRef.current[index];
     // mmdModel.removeAnimation(0);
-    console.log("Motions", motions);
+    console.log("Motions to load:", motions);
 
-    // Load all motion files (main motion, facial expression, lipsync) and merge them
-    const modelMotion = await vmdLoader.loadAsync("model_motion_1", motions);
-    console.log("Motion loaded", modelMotion);
+    try {
+      let modelMotion;
 
-    mmdModel.addAnimation(modelMotion);
-    mmdModel.setAnimation("model_motion_1");
+      if (motions.length === 1) {
+        // Single motion file - load directly
+        console.log("Loading single motion file:", motions[0]);
+        modelMotion = await vmdLoader.loadAsync("model_motion_1", motions[0]);
+      } else {
+        // Multiple motion files with consistent positioning
+        // VmdLoader expects: [main, facial, lipsync] where missing files are null
+        console.log("Loading multiple motion files with positioning:", motions);
+        modelMotion = await vmdLoader.loadAsync("model_motion_1", motions);
+      }
+
+      console.log("Motion loaded successfully", modelMotion);
+      mmdModel.addAnimation(modelMotion);
+      mmdModel.setAnimation("model_motion_1");
+    } catch (error) {
+      console.error("Failed to load motion:", error);
+
+      // Fallback: Try loading just the first (main) motion file
+      if (motions.length > 0 && motions[0]) {
+        console.log("Attempting fallback to main motion only");
+        try {
+          const fallbackMotion = await vmdLoader.loadAsync(
+            "model_motion_1",
+            motions[0],
+          );
+          console.log("Fallback motion loaded", fallbackMotion);
+
+          mmdModel.addAnimation(fallbackMotion);
+          mmdModel.setAnimation("model_motion_1");
+        } catch (fallbackError) {
+          console.error("Fallback motion loading also failed:", fallbackError);
+        }
+      }
+    }
   }
 };
 

@@ -88,18 +88,27 @@ const MotionUploader = (props: Props) => {
       dispatch(setSecond(0));
 
       const mmdMotionPath = URL.createObjectURL(motionData.motionsFiles[0]);
-      const motionPaths = [mmdMotionPath];
 
-      // Add facial expression file if available
-      if (motionData.facialExpressionFile) {
-        const facialPath = URL.createObjectURL(motionData.facialExpressionFile);
-        motionPaths.push(facialPath);
-      }
+      // VmdLoader expects consistent positioning: [main, facial, lipsync]
+      // Use empty string for missing files to maintain positions
+      const motionPaths: (string | null)[] = [mmdMotionPath]; // Position 0: Main motion (always present)
 
-      // Add lipsync file if available
-      if (motionData.lipsyncFile) {
-        const lipsyncPath = URL.createObjectURL(motionData.lipsyncFile);
-        motionPaths.push(lipsyncPath);
+      // Position 1: Facial expression (optional)
+      const facialPath = motionData.facialExpressionFile
+        ? URL.createObjectURL(motionData.facialExpressionFile)
+        : null;
+
+      // Position 2: Lipsync (optional)
+      const lipsyncPath = motionData.lipsyncFile
+        ? URL.createObjectURL(motionData.lipsyncFile)
+        : null;
+
+      // Build consistent 3-position array: [main, facial, lipsync]
+      if (facialPath || lipsyncPath) {
+        motionPaths.push(facialPath); // Position 1: Facial (or null)
+        if (lipsyncPath) {
+          motionPaths.push(lipsyncPath); // Position 2: Lipsync
+        }
       }
 
       dispatch(
